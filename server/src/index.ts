@@ -1,11 +1,19 @@
 import express from "express";
 import { config } from "dotenv";
 import dbConnect from "./config/database";
+import cors from "cors";
 
 config();
 dbConnect();
 
 const app = express();
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  })
+);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
