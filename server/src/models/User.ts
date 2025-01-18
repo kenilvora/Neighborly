@@ -7,9 +7,9 @@ interface IUser extends mongoose.Document {
   password: string;
   contactNumber: string;
   address: mongoose.Schema.Types.ObjectId;
-  governmentId: string;
-  governmentIdType: "Aadhar" | "PAN" | "Driving License";
-  governmentIdVerified: boolean;
+  governmentId?: string;
+  governmentIdType?: "Aadhar" | "PAN" | "Driving License";
+  governmentIdVerified?: boolean;
   profileId: mongoose.Schema.Types.ObjectId;
   transactions: mongoose.Schema.Types.ObjectId[];
   ratingAndReviews: mongoose.Schema.Types.ObjectId[];
@@ -50,13 +50,11 @@ const userSchema = new mongoose.Schema(
     },
     governmentId: {
       type: String,
-      required: true,
       trim: true,
     },
     governmentIdType: {
       type: String,
       enum: ["Aadhar", "PAN", "Driving License"],
-      required: true,
       trim: true,
     },
     governmentIdVerified: {

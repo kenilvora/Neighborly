@@ -15,15 +15,16 @@ export const auth = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   try {
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Unauthorized Access",
       });
+      return;
     }
 
     const payload = jwt.verify(
@@ -32,19 +33,21 @@ export const auth = async (
     ) as UserPayload;
 
     if (!payload || !payload.id || !payload.email) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Unauthorized Access",
       });
+      return;
     }
 
     const user = await User.findById(payload.id);
 
     if (!user) {
-      return res.status(401).json({
+      res.status(401).json({
         success: false,
         message: "Unauthorized Access",
       });
+      return;
     }
 
     req.user = payload;

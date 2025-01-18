@@ -2,11 +2,14 @@ import express from "express";
 import { config } from "dotenv";
 import dbConnect from "./config/database";
 import cors from "cors";
+import userRoutes from "./routes/userRoutes";
 
 config();
-dbConnect();
+// dbConnect();
 
 const app = express();
+
+app.use(express.json());
 
 app.use(
   cors({
@@ -14,6 +17,8 @@ app.use(
     credentials: true,
   })
 );
+
+app.use("/api/v1/user", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World");
