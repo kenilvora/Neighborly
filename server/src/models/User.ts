@@ -16,6 +16,7 @@ interface IUser extends mongoose.Document {
   twoFactorAuth?: boolean;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  role: "User" | "Admin";
 }
 
 const userSchema = new mongoose.Schema(
@@ -90,6 +91,11 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordExpires: {
       type: Date,
+    },
+    role: {
+      type: String,
+      enum: ["User", "Admin"],
+      default: "User",
     },
   },
   {

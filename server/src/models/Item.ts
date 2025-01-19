@@ -6,7 +6,7 @@ interface IItem extends mongoose.Document {
   price: number;
   depositAmount: number;
   category: mongoose.Schema.Types.ObjectId;
-  tags: mongoose.Schema.Types.ObjectId[];
+  tags: string[];
   lenderId: mongoose.Schema.Types.ObjectId;
   borrowers: mongoose.Schema.Types.ObjectId[];
   ratingAndReviews: mongoose.Schema.Types.ObjectId[];
@@ -44,8 +44,8 @@ const itemSchema = new mongoose.Schema(
     },
     tags: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tag",
+        type: String,
+        trim: true,
       },
     ],
     lenderId: {

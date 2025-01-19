@@ -20,6 +20,7 @@ const signUpSchema = z.object({
   password: z.string().min(6),
   contactNumber: z.string().min(10),
   otp: z.number().min(100000).max(999999),
+  role: z.enum(["User", "Admin"]),
   addressLine1: z.string(),
   addressLine2: z.string().optional(),
   city: z.string(),
@@ -71,6 +72,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       lastName,
       email,
       password,
+      role,
       contactNumber,
       otp,
       addressLine1,
@@ -139,6 +141,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       firstName,
       lastName,
       email,
+      role,
       password: hashedPassword,
       contactNumber,
       address: address._id,
@@ -230,6 +233,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const payload = {
       id: user._id,
       email: user.email,
+      role: user.role,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET as string);
