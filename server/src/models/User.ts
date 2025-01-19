@@ -13,6 +13,9 @@ interface IUser extends mongoose.Document {
   profileId: mongoose.Schema.Types.ObjectId;
   transactions: mongoose.Schema.Types.ObjectId[];
   ratingAndReviews: mongoose.Schema.Types.ObjectId[];
+  twoFactorAuth?: boolean;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 const userSchema = new mongoose.Schema(
@@ -78,6 +81,16 @@ const userSchema = new mongoose.Schema(
         ref: "RatingAndReview",
       },
     ],
+    twoFactorAuth: {
+      type: Boolean,
+      default: false,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
+    },
   },
   {
     timestamps: true,

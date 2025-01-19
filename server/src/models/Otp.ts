@@ -5,6 +5,7 @@ import { otpTemplate } from "../mails/otpTemplate";
 interface IOtp extends mongoose.Document {
   email: string;
   otp: number;
+  type: "signup" | "login";
   expiry: Date;
 }
 
@@ -18,6 +19,11 @@ const otpSchema = new mongoose.Schema(
     otp: {
       type: Number,
       required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ["signup", "login"],
     },
     expiry: {
       type: Date,
