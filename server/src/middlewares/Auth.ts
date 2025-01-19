@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
+import { UploadedFile } from "express-fileupload";
 
 type UserPayload = {
   id: string;
@@ -9,6 +10,13 @@ type UserPayload = {
 };
 
 export interface AuthRequest extends Request {
+  user?: UserPayload;
+}
+
+export interface FileUploadRequest extends Request {
+  files?: {
+    images: UploadedFile | UploadedFile[];
+  };
   user?: UserPayload;
 }
 

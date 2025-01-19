@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import mailSender from "../utils/mailSender";
+import { itemAddedTemplate } from "../mails/itemAddedTemplate";
 
 interface IItem extends mongoose.Document {
   name: string;
@@ -11,10 +13,10 @@ interface IItem extends mongoose.Document {
   borrowers: mongoose.Schema.Types.ObjectId[];
   ratingAndReviews: mongoose.Schema.Types.ObjectId[];
   isAvailable: boolean;
-  image: string;
+  images: string[];
   condition: "New" | "Like New" | "Good" | "Average" | "Poor";
   currentBorrowerId?: mongoose.Schema.Types.ObjectId;
-  availableFrom?: Date;
+  availableFrom: Date;
 }
 
 const itemSchema = new mongoose.Schema(
@@ -68,12 +70,15 @@ const itemSchema = new mongoose.Schema(
     isAvailable: {
       type: Boolean,
       required: true,
+      default: true,
     },
-    image: {
-      type: String,
-      required: true,
-      trim: true,
-    },
+    images: [
+      {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    ],
     condition: {
       type: String,
       enum: ["New", "Like New", "Good", "Average", "Poor"],
@@ -86,9 +91,18 @@ const itemSchema = new mongoose.Schema(
     },
     availableFrom: {
       type: Date,
+      default: Date.now,
     },
   },
   { timestamps: true }
 );
+
+itemSchema.post("save", async function (doc: IItem) {
+  try {
+    await mailSender(doc.name, "New item added", itemAddedTemplate(doc.name));
+  } catch (error) {
+    throw new Error("Error sending mail");
+  }
+});
 
 export default mongoose.model<IItem>("Item", itemSchema);
