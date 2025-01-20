@@ -17,6 +17,10 @@ interface IItem extends mongoose.Document {
   condition: "New" | "Like New" | "Good" | "Average" | "Poor";
   currentBorrowerId?: mongoose.Schema.Types.ObjectId;
   availableFrom: Date;
+  deliveryCharges?: number;
+  deliveryType?: "Pickup" | "Delivery" | "Both (Pickup & Delivery)";
+  deliveryRadius?: number;
+  itemLocation: mongoose.Schema.Types.ObjectId;
 }
 
 const itemSchema = new mongoose.Schema(
@@ -92,6 +96,21 @@ const itemSchema = new mongoose.Schema(
     availableFrom: {
       type: Date,
       default: Date.now,
+    },
+    deliveryCharges: {
+      type: Number,
+    },
+    deliveryType: {
+      type: String,
+      enum: ["Pickup", "Delivery", "Both (Pickup & Delivery)"],
+    },
+    deliveryRadius: {
+      type: Number,
+    },
+    itemLocation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
+      required: true,
     },
   },
   { timestamps: true }

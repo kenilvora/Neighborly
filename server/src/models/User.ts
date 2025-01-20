@@ -21,6 +21,7 @@ interface IUser extends mongoose.Document {
   accountBalance: number;
   notofications: mongoose.Schema.Types.ObjectId[];
   twoFactorAuth?: boolean;
+  statisticalData?: mongoose.Schema.Types.ObjectId[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 }
@@ -128,6 +129,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    statisticalData: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ItemStat",
+      },
+    ],
     resetPasswordToken: {
       type: String,
     },

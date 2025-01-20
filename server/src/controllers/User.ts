@@ -148,6 +148,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       accountBalance: 0,
       notifications: [],
       twoFactorAuth: false,
+      statisticalData: [],
     });
 
     res.status(201).json({
@@ -376,7 +377,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 
     const user = await User.findById(id)
       .select(
-        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires"
+        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData"
       )
       .populate("address")
       .exec();
