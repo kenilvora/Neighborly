@@ -11,6 +11,8 @@ import crypto from "crypto";
 import { AuthRequest } from "../middlewares/Auth";
 import mailSender from "../utils/mailSender";
 import { resetPasswordTokenTemplate } from "../mails/resetPasswordTokenTemplate";
+import mongoose from "mongoose";
+import { populate } from "dotenv";
 
 const signUpSchema = z.object({
   firstName: z.string().min(2),
@@ -37,7 +39,7 @@ const loginSchema = z.object({
 
 const sendOtpSchema = z.object({
   email: z.string().email(),
-  type: z.enum(["signup", "login"]),
+  type: z.enum(["signup", "login", "twoFactorAuth"]),
 });
 
 const changePasswordSchema = z.object({
@@ -53,6 +55,44 @@ const resetPasswordSchema = z.object({
   password: z.string().min(6),
   confirmPassword: z.string().min(6),
 });
+
+const enableTwoFactorAuthSchema = z.object({
+  otp: z.number().min(100000).max(999999),
+  twoFactorAuth: z.boolean(),
+});
+
+const updateUserDetailsSchema = z.object({
+  firstName: z.string().min(2).optional(),
+  lastName: z.string().min(2).optional(),
+  contactNumber: z.string().min(10).optional(),
+  addressLine1: z.string().optional(),
+  addressLine2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
+  pincode: z.string().optional(),
+  isPrimary: z.boolean().optional(),
+});
+
+interface IRatingAndReview {
+  rating: number;
+}
+
+interface IStatisticalData {
+  itemId: {
+    name: string;
+    description: string;
+    price: number;
+    category: {
+      name: string;
+    };
+    images: string[];
+    ratingAndReviews: IRatingAndReview[];
+  };
+  borrowedCount: number;
+  totalProfit: number;
+  avgRating?: number;
+}
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -149,6 +189,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       notifications: [],
       twoFactorAuth: false,
       statisticalData: [],
+      disputes: [],
     });
 
     res.status(201).json({
@@ -290,7 +331,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
         message: "User already exists with this email",
       });
       return;
-    } else if (type === "login" && !user) {
+    } else if ((type === "login" || type === "twoFactorAuth") && !user) {
       res.status(400).json({
         success: false,
         message: "User does not exist with this email",
@@ -377,14 +418,33 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 
     const user = await User.findById(id)
       .select(
-        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData"
+        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData -disputes"
       )
-      .populate("address")
-      .exec();
+      .populate({
+        path: "address",
+        select: "-userId",
+      })
+      .populate<{ ratingAndReviews: IRatingAndReview[] }>({
+        path: "ratingAndReviews",
+        select: "rating",
+      });
+
+    let totalRating = 0,
+      avgRating = 0;
+
+    if (user?.ratingAndReviews.length === 0) {
+      user?.ratingAndReviews.forEach((ratingAndReview) => {
+        totalRating += ratingAndReview.rating;
+      });
+
+      avgRating = totalRating / user?.ratingAndReviews.length;
+    }
+
+    const updatedUser = { ...user, avgRating };
 
     res.status(200).json({
       success: true,
-      user,
+      user: updatedUser,
     });
   } catch (error) {
     res.status(500).json({
@@ -583,6 +643,284 @@ export const resetPassword = async (
     res.status(200).json({
       success: true,
       message: "Password reset successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const enableTwoFactorAuth = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const parsedData = enableTwoFactorAuthSchema.safeParse(req.body);
+    const id = req.user?.id;
+
+    if (!parsedData.success || !id) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const { otp, twoFactorAuth } = parsedData.data;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "User does not exist",
+      });
+      return;
+    }
+
+    const recentOtp = await Otp.findOne({
+      email: user.email,
+      type: "twoFactorAuth",
+    })
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    if (!recentOtp || recentOtp.otp !== otp || recentOtp.expiry <= new Date()) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+      return;
+    }
+
+    user.twoFactorAuth = twoFactorAuth;
+
+    await user.save();
+
+    if (twoFactorAuth) {
+      res.status(200).json({
+        success: true,
+        message: "Two Factor Authentication enabled successfully",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        message: "Two Factor Authentication disabled successfully",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const updateUserDetails = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+    const parsedData = updateUserDetailsSchema.safeParse(req.body);
+
+    if (!parsedData.success || !id) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    const address = await Address.findById(user?.address);
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "User does not exist",
+      });
+      return;
+    }
+
+    if (!address) {
+      res.status(400).json({
+        success: false,
+        message: "Previous address not found",
+      });
+      return;
+    }
+
+    const {
+      firstName = user.firstName,
+      lastName = user.lastName,
+      contactNumber = user.contactNumber,
+      addressLine1 = address.addressLine1,
+      addressLine2 = address.addressLine2,
+      city = address.city,
+      state = address.state,
+      country = address.country,
+      pincode = address.pincode,
+      isPrimary = address.isPrimary,
+    } = parsedData.data;
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.contactNumber = contactNumber;
+
+    address.addressLine1 = addressLine1;
+    address.addressLine2 = addressLine2;
+    address.city = city;
+    address.state = state;
+    address.country = country;
+    address.pincode = pincode;
+    address.isPrimary = isPrimary;
+
+    await user.save();
+
+    await address.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User details updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getUserById = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.params.id;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const user = await User.findById(id)
+      .select(
+        "-password -transactions -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData -disputes -twoFactorAuth -accountBalance"
+      )
+      .populate({
+        path: "address",
+        select: "-userId",
+      })
+      .populate<{ ratingAndReviews: IRatingAndReview[] }>({
+        path: "ratingAndReviews",
+        select: "rating",
+      });
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    let totalRating = 0,
+      avgRating = 0;
+
+    if (user?.ratingAndReviews.length === 0) {
+      user?.ratingAndReviews.forEach((ratingAndReview) => {
+        totalRating += ratingAndReview.rating;
+      });
+
+      avgRating = totalRating / user?.ratingAndReviews.length;
+    }
+
+    const updatedUser = { ...user, avgRating };
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getStatisticalData = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+
+    if (!id) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized Access",
+      });
+      return;
+    }
+
+    const statsData = (await User.findById(id)
+      .select("statisticalData")
+      .populate({
+        path: "statisticalData",
+        select: "-userId",
+        populate: {
+          path: "itemId",
+          select: "name description price category images ratingAndReviews",
+          populate: [
+            {
+              path: "ratingAndReviews",
+              select: "rating",
+            },
+            {
+              path: "category",
+              select: "name",
+            },
+          ],
+        },
+      })) as unknown as IStatisticalData[];
+
+    if (!statsData) {
+      res.status(400).json({
+        success: false,
+        message: "No statistical data found",
+      });
+      return;
+    }
+
+    let totalRating = 0,
+      avgRating = 0;
+
+    statsData.forEach((data) => {
+      totalRating = 0;
+      avgRating = 0;
+
+      if (data.itemId.ratingAndReviews.length !== 0) {
+        data.itemId.ratingAndReviews.forEach((ratingAndReview) => {
+          totalRating += ratingAndReview.rating;
+        });
+
+        avgRating = totalRating / data.itemId.ratingAndReviews.length;
+      }
+
+      data.avgRating = avgRating;
+    });
+
+    res.status(200).json({
+      success: true,
+      statsData,
     });
   } catch (error) {
     res.status(500).json({

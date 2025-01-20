@@ -300,12 +300,27 @@ export const getItemsOfALender = async (
   res: Response
 ): Promise<void> => {
   try {
-    const id = req.user?.id;
+    let id;
+    if (req.query.userId) {
+      id = req.query.userId;
+    } else {
+      id = req.user?.id;
+    }
 
-    if (!id) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id as string)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
       });
       return;
     }
