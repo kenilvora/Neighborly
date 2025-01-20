@@ -4,7 +4,6 @@ import { z } from "zod";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
 import Item from "../models/Item";
 import Category from "../models/Category";
-import Profile from "../models/Profile";
 import User from "../models/User";
 import mongoose from "mongoose";
 
@@ -103,9 +102,7 @@ export const addItem = async (
       availableFrom,
     });
 
-    const user = await User.findById(id);
-
-    await Profile.findByIdAndUpdate(user?.profileId, {
+    await User.findByIdAndUpdate(id, {
       $push: {
         lendItems: item._id,
       },
@@ -157,11 +154,9 @@ export const deleteItem = async (
     if (item.isAvailable) {
       const user = await User.findById(id);
 
-      const profile = await Profile.findById(user?.profileId);
-
       const uuid = new mongoose.Schema.Types.ObjectId(itemId);
 
-      if (profile?.lendItems.includes(uuid)) {
+      if (user?.lendItems.includes(uuid)) {
         res.status(400).json({
           success: false,
           message: "Item not found",
@@ -174,7 +169,7 @@ export const deleteItem = async (
         $pull: { items: item._id },
       });
 
-      await Profile.findByIdAndUpdate(user?.profileId, {
+      await User.findByIdAndUpdate(id, {
         $pull: { lendItems: item._id },
       });
 

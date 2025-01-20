@@ -10,13 +10,19 @@ interface IUser extends mongoose.Document {
   governmentId?: string;
   governmentIdType?: "Aadhar" | "PAN" | "Driving License";
   governmentIdVerified?: boolean;
-  profileId: mongoose.Schema.Types.ObjectId;
+  role: "User" | "Admin";
+  profileImage: string;
   transactions: mongoose.Schema.Types.ObjectId[];
   ratingAndReviews: mongoose.Schema.Types.ObjectId[];
+  borrowItems: mongoose.Schema.Types.ObjectId[];
+  lendItems: mongoose.Schema.Types.ObjectId[];
+  upiId: string;
+  upiIdVerified: boolean;
+  accountBalance: number;
+  notofications: mongoose.Schema.Types.ObjectId[];
   twoFactorAuth?: boolean;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
-  role: "User" | "Admin";
 }
 
 const userSchema = new mongoose.Schema(
@@ -65,10 +71,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    profileId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Profile",
+    role: {
+      type: String,
+      enum: ["User", "Admin"],
+      default: "User",
+    },
+    profileImage: {
+      type: String,
       required: true,
+      trim: true,
     },
     transactions: [
       {
@@ -82,6 +93,37 @@ const userSchema = new mongoose.Schema(
         ref: "RatingAndReview",
       },
     ],
+    borrowItems: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Item",
+      },
+    ],
+    lendItems: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Item",
+      },
+    ],
+    upiId: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    upiIdVerified: {
+      type: Boolean,
+      required: true,
+    },
+    accountBalance: {
+      type: Number,
+      required: true,
+    },
+    notofications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Notification",
+      },
+    ],
     twoFactorAuth: {
       type: Boolean,
       default: false,
@@ -91,11 +133,6 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordExpires: {
       type: Date,
-    },
-    role: {
-      type: String,
-      enum: ["User", "Admin"],
-      default: "User",
     },
   },
   {

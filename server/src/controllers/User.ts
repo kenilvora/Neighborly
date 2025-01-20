@@ -4,7 +4,6 @@ import User from "../models/User";
 import Otp from "../models/Otp";
 import bcrypt from "bcrypt";
 import Address from "../models/Address";
-import Profile from "../models/Profile";
 import emailValidator from "../utils/emailValidator";
 import jwt from "jsonwebtoken";
 import otpGenerator from "otp-generator";
@@ -128,26 +127,27 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       isPrimary,
     });
 
-    const profile = await Profile.create({
+    await User.create({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      contactNumber,
+      address: address._id,
+      governmentId: "",
+      governmentIdType: "",
+      governmentIdVerified: false,
+      role,
       profileImage: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
+      transactions: [],
+      ratingAndReviews: [],
       borrowItems: [],
       lendItems: [],
       upiId: "",
       upiIdVerified: false,
       accountBalance: 0,
-    });
-
-    await User.create({
-      firstName,
-      lastName,
-      email,
-      role,
-      password: hashedPassword,
-      contactNumber,
-      address: address._id,
-      profileId: profile._id,
-      transactions: [],
-      ratingAndReviews: [],
+      notifications: [],
+      twoFactorAuth: false,
     });
 
     res.status(201).json({
@@ -375,12 +375,10 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
     }
 
     const user = await User.findById(id)
-      .select("-password -transactions -ratingAndReviews")
+      .select(
+        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires"
+      )
       .populate("address")
-      .populate({
-        path: "profileId",
-        select: "-borrowItems -lendItems",
-      })
       .exec();
 
     res.status(200).json({
