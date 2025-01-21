@@ -1,0 +1,249 @@
+import { Response } from "express";
+import { AuthRequest } from "../middlewares/Auth";
+import { z } from "zod";
+import User from "../models/User";
+import mongoose from "mongoose";
+import RatingAndReview from "../models/RatingAndReview";
+import Item from "../models/Item";
+
+const createRatingAndReviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  review: z.string().min(1).max(500),
+  toWhom: z.string().uuid(),
+  type: z.enum(["Item", "User"]),
+});
+
+export const createRatingAndReview = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const parsedData = createRatingAndReviewSchema.safeParse(req.body);
+    const id = req.user?.id;
+
+    if (!parsedData.success || !id) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const { rating, review, toWhom, type } = parsedData.data;
+
+    if (!mongoose.Types.ObjectId.isValid(toWhom)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid toWhom",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    if (type === "User" && toWhom === id) {
+      res.status(400).json({
+        success: false,
+        message: "You cannot review yourself",
+      });
+      return;
+    }
+
+    let toWhomUser, toWhomItem;
+
+    if (type === "User") {
+      toWhomUser = await User.findById(toWhom);
+      if (!toWhomUser) {
+        res.status(404).json({
+          success: false,
+          message: "Reviewee User not found",
+        });
+        return;
+      }
+    } else {
+      toWhomItem = await Item.findById(toWhom);
+      if (!toWhomItem) {
+        res.status(404).json({
+          success: false,
+          message: "Reviewee Item not found",
+        });
+        return;
+      }
+    }
+
+    if (
+      type === "Item" &&
+      user.lendItems.includes(new mongoose.Schema.Types.ObjectId(toWhom))
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "You cannot review your own item",
+      });
+      return;
+    }
+
+    if (
+      type === "Item" &&
+      !user.borrowItems.includes(new mongoose.Schema.Types.ObjectId(toWhom))
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "You cannot review an item you have not borrowed",
+      });
+      return;
+    }
+
+    const existingReview = await RatingAndReview.findOne({
+      reviewer: id,
+      toWhom,
+      type,
+    });
+
+    if (existingReview) {
+      res.status(400).json({
+        success: false,
+        message: "You have already reviewed this",
+      });
+      return;
+    }
+
+    const newRatingAndReview = await RatingAndReview.create({
+      rating,
+      review,
+      reviewer: id,
+      toWhom,
+      type,
+    });
+
+    if (type === "User") {
+      toWhomUser?.ratingAndReviews.push(
+        newRatingAndReview._id as mongoose.Schema.Types.ObjectId
+      );
+      await toWhomUser?.save();
+    } else {
+      toWhomItem?.ratingAndReviews.push(
+        newRatingAndReview._id as mongoose.Schema.Types.ObjectId
+      );
+      await toWhomItem?.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Review created successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getRatingAndReviewsOfAUser = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    let id;
+    if (req.query.id) {
+      id = req.query.id;
+    } else {
+      id = req.user?.id;
+    }
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id as string)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    const ratingAndReviews = await User.findById(id)
+      .select("ratingAndReviews")
+      .populate({
+        path: "ratingAndReviews",
+        populate: {
+          path: "reviewer",
+          select: "firstName lastName profileImage",
+        },
+        select: "-toWhom -type",
+      });
+
+    res.status(200).json({
+      success: true,
+      data: ratingAndReviews,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getRatingAndReviewsOfAnItem = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.query.id;
+
+    if (!id || !mongoose.Types.ObjectId.isValid(id as string)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id",
+      });
+      return;
+    }
+
+    const item = await Item.findById(id);
+
+    if (!item) {
+      res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+      return;
+    }
+
+    const ratingAndReviews = await Item.findById(id)
+      .select("ratingAndReviews")
+      .populate({
+        path: "ratingAndReviews",
+        populate: {
+          path: "reviewer",
+          select: "firstName lastName profileImage",
+        },
+        select: "-toWhom -type",
+      });
+
+    res.status(200).json({
+      success: true,
+      data: ratingAndReviews,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

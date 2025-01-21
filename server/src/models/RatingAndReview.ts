@@ -4,6 +4,8 @@ interface IRatingAndReview extends mongoose.Document {
   rating: number;
   review: string;
   reviewer: mongoose.Schema.Types.ObjectId;
+  toWhom: mongoose.Schema.Types.ObjectId;
+  type: "Item" | "User";
 }
 
 const ratingAndReviewSchema = new mongoose.Schema(
@@ -20,6 +22,16 @@ const ratingAndReviewSchema = new mongoose.Schema(
     reviewer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    toWhom: {
+      type: mongoose.Schema.Types.ObjectId,
+      refPath: "type",
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["Item", "User"],
       required: true,
     },
   },
