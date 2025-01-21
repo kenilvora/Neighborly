@@ -5,7 +5,7 @@ import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
 import Item from "../models/Item";
 import Category from "../models/Category";
 import User from "../models/User";
-import mongoose, { model } from "mongoose";
+import mongoose from "mongoose";
 import Notification from "../models/Notification";
 
 const addItemSchema = z.object({

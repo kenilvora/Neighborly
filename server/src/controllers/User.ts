@@ -12,7 +12,6 @@ import { AuthRequest } from "../middlewares/Auth";
 import mailSender from "../utils/mailSender";
 import { resetPasswordTokenTemplate } from "../mails/resetPasswordTokenTemplate";
 import mongoose from "mongoose";
-import { populate } from "dotenv";
 
 const signUpSchema = z.object({
   firstName: z.string().min(2),

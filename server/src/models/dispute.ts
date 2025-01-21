@@ -1,28 +1,24 @@
 import mongoose from "mongoose";
 
 interface IDispute extends mongoose.Document {
-  borrowItemId: mongoose.Schema.Types.ObjectId;
-  lenderId: mongoose.Schema.Types.ObjectId;
-  borrowerId: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId;
+  itemId: mongoose.Schema.Types.ObjectId;
   reason: string;
+  images: string[];
+  type: "Create By Other" | "Create By You";
   status: "Open" | "Resolved" | "Closed";
 }
 
 const disputeSchema = new mongoose.Schema(
   {
-    borrowItemId: {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    itemId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BorrowItem",
-      required: true,
-    },
-    lenderId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    borrowerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
       required: true,
     },
     reason: {
@@ -30,10 +26,23 @@ const disputeSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    images: [
+      {
+        type: String,
+        required: true,
+        trim: true,
+      },
+    ],
+    type: {
+      type: String,
+      required: true,
+      enum: ["Create By Other", "Create By You"],
+    },
     status: {
       type: String,
       required: true,
       enum: ["Open", "Resolved", "Closed"],
+      default: "Open",
     },
   },
   { timestamps: true }

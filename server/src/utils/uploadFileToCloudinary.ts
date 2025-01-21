@@ -27,7 +27,9 @@ export const uploadFileToCloudinary = async (
 
     options.resource_type = "auto";
 
-    return await cloudinary.uploader.upload(file.tempFilePath, options);
+    const res = await cloudinary.uploader.upload(file.tempFilePath, options);
+
+    return res;
   } catch (err) {
     throw new Error("Error uploading file to Cloudinary");
   }
