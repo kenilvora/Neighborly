@@ -188,7 +188,8 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       notifications: [],
       twoFactorAuth: false,
       statisticalData: [],
-      disputes: [],
+      disputesCreatedByMe: [],
+      disputesCreatedAgainstMe: [],
     });
 
     res.status(201).json({
@@ -417,7 +418,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 
     const user = await User.findById(id)
       .select(
-        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData -disputes"
+        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData -disputesCreatedAgainstMe -disputesCreatedByMe"
       )
       .populate({
         path: "address",
@@ -811,7 +812,7 @@ export const getUserById = async (
 
     const user = await User.findById(id)
       .select(
-        "-password -transactions -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData -disputes -twoFactorAuth -accountBalance"
+        "firstName lastName email contactNumber profileImage address ratingAndReviews disputesCreatedAgainstMe"
       )
       .populate({
         path: "address",
@@ -820,6 +821,29 @@ export const getUserById = async (
       .populate<{ ratingAndReviews: IRatingAndReview[] }>({
         path: "ratingAndReviews",
         select: "rating",
+      })
+      .populate({
+        path: "disputesCreatedAgainstMe",
+        select: "-images",
+        match: {
+          status: "Open",
+        },
+        populate: [
+          {
+            path: "userId",
+            select: "firstName lastName email contactNumber profileImage",
+          },
+          {
+            path: "againstWhomId",
+            select: {
+              $cond: {
+                if: { $eq: ["$againstWhom", "User"] },
+                then: "firstName lastName email contactNumber profileImage",
+                else: "name description price",
+              },
+            },
+          },
+        ],
       });
 
     if (!user) {

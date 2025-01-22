@@ -8,9 +8,9 @@ import Dispute from "../models/Dispute";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
 
 const createDisputeSchema = z.object({
-  itemId: z.string(),
+  againstWhomId: z.string(),
   reason: z.string(),
-  type: z.enum(["Create By Other", "Create By You"]),
+  againstWhom: z.enum(["User", "Item"]),
 });
 
 const changeDisputeStatusSchema = z.object({
@@ -33,7 +33,15 @@ export const createDispute = async (
       return;
     }
 
-    const { itemId, reason, type } = parsedData.data;
+    const { againstWhom, againstWhomId, reason } = parsedData.data;
+
+    if (!mongoose.Types.ObjectId.isValid(againstWhomId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid ",
+      });
+      return;
+    }
 
     const user = await User.findById(id);
 
@@ -45,67 +53,96 @@ export const createDispute = async (
       return;
     }
 
-    const item = await Item.findById(itemId);
+    let againstWhomUserId;
 
-    if (!item) {
-      res.status(404).json({
-        success: false,
-        message: "Item not found",
-      });
-      return;
-    }
+    if (againstWhom === "Item") {
+      const item = await Item.findById(againstWhomId);
 
-    const uuid = new mongoose.Schema.Types.ObjectId(itemId);
+      if (!item) {
+        res.status(404).json({
+          success: false,
+          message: "Item not found",
+        });
+        return;
+      }
 
-    if (!user.borrowItems.includes(uuid)) {
-      res.status(400).json({
-        success: false,
-        message: "You can't create dispute for this item",
-      });
-      return;
-    }
+      const uuid = new mongoose.Schema.Types.ObjectId(item._id as string);
 
-    if (user.lendItems.includes(uuid)) {
-      res.status(400).json({
-        success: false,
-        message: "You can't create dispute for your own item",
-      });
-      return;
+      if (!user.borrowItems.includes(uuid)) {
+        res.status(400).json({
+          success: false,
+          message: "You can't create dispute for this item",
+        });
+        return;
+      }
+
+      if (user.lendItems.includes(uuid)) {
+        res.status(400).json({
+          success: false,
+          message: "You can't create dispute for your own item",
+        });
+        return;
+      }
+
+      againstWhomUserId = item.lenderId;
+    } else {
+      const againstWhomUser = await User.findById(againstWhomId);
+
+      if (!againstWhomUser) {
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
+
+      if (againstWhomUser._id === id) {
+        res.status(400).json({
+          success: false,
+          message: "You can't create dispute for yourself",
+        });
+        return;
+      }
+
+      againstWhomUserId = againstWhomUser._id;
     }
 
     const images = req.files?.images;
+    let fileUrls: string[] = [];
 
-    if (!images || (Array.isArray(images) && images.length === 0)) {
-      res.status(400).json({
-        success: false,
-        message: "No images found",
-      });
-      return;
+    if (images) {
+      const imageArray = Array.isArray(images) ? images : [images];
+
+      const uploadPromise = imageArray.map((image) =>
+        uploadFileToCloudinary(image, process.env.CLOUD_FOLDER_NAME as string)
+      );
+
+      const results = await Promise.all(uploadPromise);
+
+      fileUrls = results.map((result) => result.secure_url);
     }
-
-    const imageArray = Array.isArray(images) ? images : [images];
-
-    const uploadPromise = imageArray.map((image) =>
-      uploadFileToCloudinary(image, process.env.CLOUD_FOLDER_NAME as string)
-    );
-
-    const results = await Promise.all(uploadPromise);
-
-    const fileUrls = results.map((result) => result.secure_url);
 
     const dispute = await Dispute.create({
       userId: id,
-      itemId,
+      againstWhomId,
+      againstWhom,
       reason,
       images: fileUrls,
-      type,
     });
 
     const disputeId = new mongoose.Schema.Types.ObjectId(dispute._id as string);
 
-    user.disputes?.push(disputeId);
+    user.disputesCreatedByMe?.push(disputeId);
 
     await user.save();
+
+    const againstWhomUser = await User.findById(againstWhomUserId);
+
+    if (againstWhomUser) {
+      againstWhomUser.disputesCreatedAgainstMe?.push(disputeId);
+
+      await againstWhomUser.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -119,7 +156,7 @@ export const createDispute = async (
   }
 };
 
-export const getDisputes = async (
+export const getDisputesCreatedByMe = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
@@ -145,22 +182,80 @@ export const getDisputes = async (
     }
 
     const disputes = await User.findById(id)
-      .select("disputes")
+      .select("disputesCreatedByMe")
       .populate({
-        path: "disputes",
+        path: "disputesCreatedByMe",
+        select: "-images -userId",
+        populate: [
+          {
+            path: "againstWhomId",
+            select: {
+              $cond: {
+                if: { $eq: ["$againstWhom", "Item"] },
+                then: "name description price",
+                else: "firstName lastName email contactNumber profileImage",
+              },
+            },
+          },
+        ],
+      });
+
+    res.status(200).json({
+      success: true,
+      data: disputes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getDisputesCreatedAgainstMe = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+
+    if (!id) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    const disputes = await User.findById(id)
+      .select("disputesCreatedAgainstMe")
+      .populate({
+        path: "disputesCreatedAgainstMe",
         select: "-images",
         populate: [
           {
-            path: "itemId",
-            select: "name description price condition",
-            populate: {
-              path: "category",
-              select: "name",
-            },
-          },
-          {
             path: "userId",
             select: "firstName lastName email contactNumber profileImage",
+          },
+          {
+            path: "againstWhomId",
+            select: {
+              $cond: {
+                if: { $eq: ["$againstWhom", "Item"] },
+                then: "name description price",
+                else: "",
+              },
+            },
           },
         ],
       });
@@ -207,9 +302,7 @@ export const changeDisputeStatus = async (
 
     const dispute = await Dispute.findById(disputeId);
 
-    const uuid = new mongoose.Schema.Types.ObjectId(dispute?._id as string);
-
-    if (!dispute || !user.disputes?.includes(uuid)) {
+    if (!dispute) {
       res.status(404).json({
         success: false,
         message: "Dispute not found",
@@ -229,14 +322,6 @@ export const changeDisputeStatus = async (
       res.status(400).json({
         success: false,
         message: "Dispute already resolved",
-      });
-      return;
-    }
-
-    if (dispute.type === "Create By You") {
-      res.status(400).json({
-        success: false,
-        message: "You can't change status of dispute created by you",
       });
       return;
     }
@@ -272,7 +357,7 @@ export const getDisputeById = async (
     const id = req.user?.id;
     const disputeId = req.params.id;
 
-    if (!id || !disputeId) {
+    if (!id || !disputeId || !mongoose.Types.ObjectId.isValid(disputeId)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -292,12 +377,14 @@ export const getDisputeById = async (
 
     const uuid = new mongoose.Schema.Types.ObjectId(disputeId);
 
-    if (!user.disputes?.includes(uuid)) {
+    if (
+      !user.disputesCreatedByMe?.includes(uuid) &&
+      !user.disputesCreatedAgainstMe?.includes(uuid)
+    ) {
       res.status(400).json({
         success: false,
-        message: "You can't access this dispute",
+        message: "You are not authorized to view this dispute",
       });
-      return;
     }
 
     const dispute = await Dispute.findById(disputeId)
@@ -306,11 +393,13 @@ export const getDisputeById = async (
         select: "firstName lastName email contactNumber profileImage",
       })
       .populate({
-        path: "itemId",
-        select: "name description price condition",
-        populate: {
-          path: "category",
-          select: "name",
+        path: "againstWhomId",
+        select: {
+          $cond: {
+            if: { $eq: ["$againstWhom", "Item"] },
+            then: "name description price",
+            else: "firstName lastName email contactNumber profileImage",
+          },
         },
       });
 

@@ -22,7 +22,8 @@ interface IUser extends mongoose.Document {
   notofications: mongoose.Schema.Types.ObjectId[];
   twoFactorAuth?: boolean;
   statisticalData?: mongoose.Schema.Types.ObjectId[];
-  disputes?: mongoose.Schema.Types.ObjectId[];
+  disputesCreatedByMe?: mongoose.Schema.Types.ObjectId[];
+  disputesCreatedAgainstMe?: mongoose.Schema.Types.ObjectId[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 }
@@ -136,7 +137,13 @@ const userSchema = new mongoose.Schema(
         ref: "ItemStat",
       },
     ],
-    disputes: [
+    disputesCreatedByMe: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Dispute",
+      },
+    ],
+    disputesCreatedAgainstMe: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Dispute",

@@ -2,10 +2,10 @@ import mongoose from "mongoose";
 
 interface IDispute extends mongoose.Document {
   userId: mongoose.Schema.Types.ObjectId;
-  itemId: mongoose.Schema.Types.ObjectId;
+  againstWhomId: mongoose.Schema.Types.ObjectId;
+  againstWhom: "User" | "Item";
   reason: string;
-  images: string[];
-  type: "Create By Other" | "Create By You";
+  images?: string[];
   status: "Open" | "Resolved" | "Closed";
 }
 
@@ -16,10 +16,15 @@ const disputeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    itemId: {
+    againstWhomId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "BorrowItem",
+      refPath: "againstWhom",
       required: true,
+    },
+    againstWhom: {
+      type: String,
+      required: true,
+      enum: ["User", "Item"],
     },
     reason: {
       type: String,
@@ -29,15 +34,9 @@ const disputeSchema = new mongoose.Schema(
     images: [
       {
         type: String,
-        required: true,
         trim: true,
       },
     ],
-    type: {
-      type: String,
-      required: true,
-      enum: ["Create By Other", "Create By You"],
-    },
     status: {
       type: String,
       required: true,
