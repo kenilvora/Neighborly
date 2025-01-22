@@ -4,14 +4,10 @@ interface ITransaction extends mongoose.Document {
   borrowerId: mongoose.Schema.Types.ObjectId;
   lenderId: mongoose.Schema.Types.ObjectId;
   borrowItemId: mongoose.Schema.Types.ObjectId;
-  transactionType:
-    | "Deposit"
-    | "Withdraw"
-    | "Refund"
-    | "RentPayment"
-    | "Penalty";
+  transactionType: "Deposit" | "Withdraw" | "Refund" | "Penalty";
   amount: number;
-  status: "Pending" | "Completed" | "Failed";
+  paymentId: string;
+  status: "Completed" | "Failed";
 }
 
 const transactionSchema = new mongoose.Schema(
@@ -34,16 +30,20 @@ const transactionSchema = new mongoose.Schema(
     transactionType: {
       type: String,
       required: true,
-      enum: ["Deposit", "Withdraw", "Refund", "RentPayment", "Penalty"],
+      enum: ["Deposit", "Withdraw", "Refund", "Penalty"],
     },
     amount: {
       type: Number,
       required: true,
     },
+    paymentId: {
+      type: String,
+      required: true,
+    },
     status: {
       type: String,
       required: true,
-      enum: ["Pending", "Completed", "Failed"],
+      enum: ["Completed", "Failed"],
     },
   },
   { timestamps: true }
