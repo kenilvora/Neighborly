@@ -9,6 +9,8 @@ interface IAddress extends mongoose.Document {
   country: string;
   pincode: string;
   isPrimary: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const addressSchema = new mongoose.Schema(

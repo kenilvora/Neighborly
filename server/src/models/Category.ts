@@ -4,6 +4,8 @@ interface ICategory extends mongoose.Document {
   name: string;
   itemCount: number;
   items: mongoose.Schema.Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const categorySchema = new mongoose.Schema(

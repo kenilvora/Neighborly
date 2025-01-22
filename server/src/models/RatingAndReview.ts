@@ -6,6 +6,8 @@ interface IRatingAndReview extends mongoose.Document {
   reviewer: mongoose.Schema.Types.ObjectId;
   toWhom: mongoose.Schema.Types.ObjectId;
   type: "Item" | "User";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const ratingAndReviewSchema = new mongoose.Schema(

@@ -7,6 +7,8 @@ interface IOtp extends mongoose.Document {
   otp: number;
   type: "signup" | "login" | "twoFactorAuth";
   expiry: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const otpSchema = new mongoose.Schema(

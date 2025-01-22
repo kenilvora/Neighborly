@@ -5,6 +5,8 @@ interface INotification extends mongoose.Document {
   recipient: mongoose.Schema.Types.ObjectId;
   isRead: boolean;
   type: "System" | "User" | "Transaction";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const notificationSchema = new mongoose.Schema(

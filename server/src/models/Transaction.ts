@@ -8,6 +8,8 @@ interface ITransaction extends mongoose.Document {
   amount: number;
   paymentId: string;
   status: "Completed" | "Failed";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const transactionSchema = new mongoose.Schema(

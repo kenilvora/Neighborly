@@ -5,6 +5,8 @@ interface IItemStat extends mongoose.Document {
   userId: mongoose.Schema.Types.ObjectId;
   borrowCount: number;
   totalProfit: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const itemStatSchema = new mongoose.Schema(

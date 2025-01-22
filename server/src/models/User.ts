@@ -26,6 +26,8 @@ interface IUser extends mongoose.Document {
   disputesCreatedAgainstMe?: mongoose.Schema.Types.ObjectId[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new mongoose.Schema(

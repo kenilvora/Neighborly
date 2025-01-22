@@ -7,6 +7,8 @@ interface IDispute extends mongoose.Document {
   reason: string;
   images?: string[];
   status: "Open" | "Resolved" | "Closed";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const disputeSchema = new mongoose.Schema(

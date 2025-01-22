@@ -21,6 +21,8 @@ interface IItem extends mongoose.Document {
   deliveryType?: "Pickup" | "Delivery" | "Both (Pickup & Delivery)";
   deliveryRadius?: number;
   itemLocation: mongoose.Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const itemSchema = new mongoose.Schema(
