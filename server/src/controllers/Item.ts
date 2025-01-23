@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthRequest, FileUploadRequest } from "../middlewares/Auth";
+import { AuthRequest } from "../middlewares/Auth";
 import { z } from "zod";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
 import Item from "../models/Item";
@@ -95,7 +95,7 @@ interface IAllItems {
 }
 
 export const addItem = async (
-  req: FileUploadRequest,
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {
@@ -727,7 +727,7 @@ export const deleteItemImages = async (
 };
 
 export const addNewImages = async (
-  req: FileUploadRequest,
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {

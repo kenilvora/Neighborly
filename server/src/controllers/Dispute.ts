@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { AuthRequest, FileUploadRequest } from "../middlewares/Auth";
+import { AuthRequest } from "../middlewares/Auth";
 import { z } from "zod";
 import User from "../models/User";
 import Item from "../models/Item";
@@ -18,7 +18,7 @@ const changeDisputeStatusSchema = z.object({
 });
 
 export const createDispute = async (
-  req: FileUploadRequest,
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {

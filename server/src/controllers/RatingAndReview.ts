@@ -13,6 +13,21 @@ const createRatingAndReviewSchema = z.object({
   type: z.enum(["Item", "User"]),
 });
 
+interface IRatingAndReview {
+  rating: number;
+  review: string;
+  reviewer: {
+    firstName: string;
+    lastName: string;
+    profileImage: string;
+  };
+}
+
+interface IGeneralRatingAndReview {
+  ratingAndReviews: IRatingAndReview[];
+  avgRating?: number;
+}
+
 export const createRatingAndReview = async (
   req: AuthRequest,
   res: Response
@@ -177,7 +192,7 @@ export const getRatingAndReviewsOfAUser = async (
       return;
     }
 
-    const ratingAndReviews = await User.findById(id)
+    const ratingAndReviews = (await User.findById(id)
       .select("ratingAndReviews")
       .populate({
         path: "ratingAndReviews",
@@ -186,7 +201,16 @@ export const getRatingAndReviewsOfAUser = async (
           select: "firstName lastName profileImage",
         },
         select: "-toWhom -type",
-      });
+      })) as unknown as IGeneralRatingAndReview;
+
+    let totalRating = 0;
+
+    ratingAndReviews.ratingAndReviews.forEach((ratingAndReview) => {
+      totalRating += ratingAndReview.rating;
+    });
+
+    ratingAndReviews.avgRating =
+      totalRating / ratingAndReviews.ratingAndReviews.length;
 
     res.status(200).json({
       success: true,
@@ -225,7 +249,7 @@ export const getRatingAndReviewsOfAnItem = async (
       return;
     }
 
-    const ratingAndReviews = await Item.findById(id)
+    const ratingAndReviews = (await Item.findById(id)
       .select("ratingAndReviews")
       .populate({
         path: "ratingAndReviews",
@@ -234,7 +258,16 @@ export const getRatingAndReviewsOfAnItem = async (
           select: "firstName lastName profileImage",
         },
         select: "-toWhom -type",
-      });
+      })) as unknown as IGeneralRatingAndReview;
+
+    let totalRating = 0;
+
+    ratingAndReviews.ratingAndReviews.forEach((ratingAndReview) => {
+      totalRating += ratingAndReview.rating;
+    });
+
+    ratingAndReviews.avgRating =
+      totalRating / ratingAndReviews.ratingAndReviews.length;
 
     res.status(200).json({
       success: true,
