@@ -12,7 +12,7 @@ const borrowItemSchema = z.object({
   itemId: z.string(),
   startDate: z.string(),
   endDate: z.string(),
-  paymentMode: z.enum(["Cash", "Online"]),
+  paymentMode: z.enum(["Cash", "Online", "Wallet"]),
   paymentStatus: z.enum(["Pending", "Paid"]),
   deliveryType: z.enum(["Pickup", "Delivery"]),
   deliveryCharges: z.number().optional(),
@@ -40,7 +40,7 @@ export const borrowItem = async (
       return;
     }
 
-    const {
+    let {
       itemId,
       startDate,
       endDate,
@@ -175,7 +175,10 @@ export const borrowItem = async (
       }
 
       if (deliveryType === "Delivery") {
-        if (transaction.amount !== item.price + (deliveryCharges || 0)) {
+        if (
+          transaction.amount !==
+          item.depositAmount + (deliveryCharges || 0)
+        ) {
           res.status(400).json({
             success: false,
             message: "Invalid Transaction amount",
@@ -206,6 +209,22 @@ export const borrowItem = async (
         message: "Invalid payment status",
       });
       return;
+    }
+
+    if (paymentMode === "Wallet") {
+      const userWallet = user.accountBalance;
+
+      if (userWallet < item.depositAmount + (deliveryCharges || 0)) {
+        res.status(400).json({
+          success: false,
+          message: "Insufficient balance",
+        });
+        return;
+      }
+
+      user.accountBalance -= item.depositAmount + (deliveryCharges || 0);
+
+      paymentStatus = "Paid";
     }
 
     item.isAvailable = false;

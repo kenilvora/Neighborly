@@ -6,7 +6,7 @@ interface IBorrowItem extends mongoose.Document {
   lender: mongoose.Schema.Types.ObjectId;
   startDate: Date;
   endDate: Date;
-  paymentMode: "Cash" | "Online";
+  paymentMode: "Cash" | "Online" | "Wallet";
   paymentStatus: "Pending" | "Paid";
   deliveryType: "Pickup" | "Delivery";
   deliveryCharges?: number;
@@ -44,7 +44,7 @@ const borrowItemSchema = new mongoose.Schema(
     },
     paymentMode: {
       type: String,
-      enum: ["Cash", "Online"],
+      enum: ["Cash", "Online", "Wallet"],
       required: true,
     },
     paymentStatus: {
