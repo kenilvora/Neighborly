@@ -8,7 +8,7 @@ import Dispute from "../models/Dispute";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
 
 const createDisputeSchema = z.object({
-  againstWhomId: z.string(),
+  againstWhomId: z.instanceof(mongoose.Schema.Types.ObjectId),
   reason: z.string(),
   againstWhom: z.enum(["User", "Item"]),
 });
@@ -35,10 +35,10 @@ export const createDispute = async (
 
     const { againstWhom, againstWhomId, reason } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(againstWhomId)) {
+    if (!mongoose.Types.ObjectId.isValid(againstWhomId.toString())) {
       res.status(400).json({
         success: false,
-        message: "Invalid ",
+        message: "Invalid againstWhomId",
       });
       return;
     }
@@ -66,9 +66,7 @@ export const createDispute = async (
         return;
       }
 
-      const uuid = new mongoose.Schema.Types.ObjectId(item._id as string);
-
-      if (!user.borrowItems.includes(uuid)) {
+      if (!user.borrowItems.includes(item._id)) {
         res.status(400).json({
           success: false,
           message: "You can't create dispute for this item",
@@ -76,7 +74,7 @@ export const createDispute = async (
         return;
       }
 
-      if (user.lendItems.includes(uuid)) {
+      if (user.lendItems.includes(item._id)) {
         res.status(400).json({
           success: false,
           message: "You can't create dispute for your own item",
@@ -130,16 +128,14 @@ export const createDispute = async (
       images: fileUrls,
     });
 
-    const disputeId = new mongoose.Schema.Types.ObjectId(dispute._id as string);
-
-    user.disputesCreatedByMe?.push(disputeId);
+    user.disputesCreatedByMe?.push(dispute._id);
 
     await user.save();
 
     const againstWhomUser = await User.findById(againstWhomUserId);
 
     if (againstWhomUser) {
-      againstWhomUser.disputesCreatedAgainstMe?.push(disputeId);
+      againstWhomUser.disputesCreatedAgainstMe?.push(dispute._id);
 
       await againstWhomUser.save();
     }
@@ -282,7 +278,12 @@ export const changeDisputeStatus = async (
 
     const parsedData = changeDisputeStatusSchema.safeParse(req.body);
 
-    if (!id || !disputeId || !parsedData.success) {
+    if (
+      !id ||
+      !disputeId ||
+      !parsedData.success ||
+      !mongoose.Types.ObjectId.isValid(disputeId)
+    ) {
       res.status(400).json({
         success: false,
         message: "Invalid data",

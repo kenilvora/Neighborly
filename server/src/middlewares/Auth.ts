@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
+import mongoose from "mongoose";
 
 type UserPayload = {
-  id: string;
+  id: mongoose.Schema.Types.ObjectId;
   email: string;
   role: "User" | "Admin";
 };

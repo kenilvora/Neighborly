@@ -55,7 +55,7 @@ const resetPasswordSchema = z.object({
   confirmPassword: z.string().min(6),
 });
 
-const enableTwoFactorAuthSchema = z.object({
+const changeTwoFactorAuthSchema = z.object({
   otp: z.number().min(100000).max(999999),
   twoFactorAuth: z.boolean(),
 });
@@ -173,9 +173,6 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       password: hashedPassword,
       contactNumber,
       address: address._id,
-      governmentId: "",
-      governmentIdType: "",
-      governmentIdVerified: false,
       role,
       profileImage: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`,
       transactions: [],
@@ -197,6 +194,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       message: "User created successfully",
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -418,7 +416,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
 
     const user = await User.findById(id)
       .select(
-        "-password -transactions -ratingAndReviews -borrowItems -lendItems -notifications -resetPasswordToken -resetPasswordExpires -statisticalData -disputesCreatedAgainstMe -disputesCreatedByMe"
+        "firstName lastName email contactNumber address profileImage ratingAndReviews upiId upiIdVerified accountBalance twoFactorAuth"
       )
       .populate({
         path: "address",
@@ -440,7 +438,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       avgRating = totalRating / user?.ratingAndReviews.length;
     }
 
-    const updatedUser = { ...user, avgRating };
+    const updatedUser = { ...user?.toObject(), avgRating };
 
     res.status(200).json({
       success: true,
@@ -652,12 +650,12 @@ export const resetPassword = async (
   }
 };
 
-export const enableTwoFactorAuth = async (
+export const changeTwoFactorAuth = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
   try {
-    const parsedData = enableTwoFactorAuthSchema.safeParse(req.body);
+    const parsedData = changeTwoFactorAuthSchema.safeParse(req.body);
     const id = req.user?.id;
 
     if (!parsedData.success || !id) {

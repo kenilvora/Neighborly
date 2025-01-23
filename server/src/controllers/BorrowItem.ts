@@ -9,7 +9,7 @@ import BorrowItem from "../models/BorrowItem";
 import ItemStat from "../models/ItemStat";
 
 const borrowItemSchema = z.object({
-  itemId: z.string(),
+  itemId: z.instanceof(mongoose.Schema.Types.ObjectId),
   startDate: z.string(),
   endDate: z.string(),
   paymentMode: z.enum(["Cash", "Online", "Wallet"]),
@@ -52,7 +52,7 @@ export const borrowItem = async (
       deliveryStatus,
     } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!mongoose.Types.ObjectId.isValid(itemId.toString())) {
       res.status(400).json({
         success: false,
         message: "Invalid item id",
@@ -79,9 +79,7 @@ export const borrowItem = async (
       return;
     }
 
-    const uuid = new mongoose.Schema.Types.ObjectId(itemId);
-
-    if (user.lendItems.includes(uuid)) {
+    if (user.lendItems.includes(itemId)) {
       res.status(400).json({
         success: false,
         message: "You can't borrow your own item",
@@ -158,7 +156,7 @@ export const borrowItem = async (
         }
       }
 
-      if (transaction.borrowerId.toString() !== id) {
+      if (transaction.borrowerId !== id) {
         res.status(400).json({
           success: false,
           message: "You are not the borrower of this transaction",
@@ -166,7 +164,7 @@ export const borrowItem = async (
         return;
       }
 
-      if (transaction.borrowItemId.toString() !== itemId) {
+      if (transaction.borrowItemId !== itemId) {
         res.status(400).json({
           success: false,
           message: "Transaction is not for this item",
@@ -229,15 +227,15 @@ export const borrowItem = async (
 
     item.isAvailable = false;
 
-    item.currentBorrowerId = new mongoose.Schema.Types.ObjectId(id);
+    item.currentBorrowerId = id;
 
-    item.borrowers.push(new mongoose.Schema.Types.ObjectId(id));
+    item.borrowers.push(id);
 
     item.availableFrom = new Date(endDate);
 
     await item.save();
 
-    user.borrowItems.push(new mongoose.Schema.Types.ObjectId(itemId));
+    user.borrowItems.push(itemId);
 
     await BorrowItem.create({
       item: itemId,
@@ -293,22 +291,12 @@ export const returnItem = async (
 ): Promise<void> => {
   try {
     const id = req.user?.id;
-    const parsedData = returnItemSchema.safeParse(req.body);
+    const itemId = req.params.itemId;
 
-    if (!id || !parsedData.success) {
+    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(401).json({
         success: false,
         message: "Invalid data",
-      });
-      return;
-    }
-
-    const { borrowItemId } = parsedData.data;
-
-    if (!mongoose.Types.ObjectId.isValid(borrowItemId)) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid borrow item id",
       });
       return;
     }
@@ -323,7 +311,7 @@ export const returnItem = async (
       return;
     }
 
-    const borrowItem = await BorrowItem.findById(borrowItemId);
+    const borrowItem = await BorrowItem.findById(itemId);
 
     if (!borrowItem) {
       res.status(404).json({
@@ -333,7 +321,7 @@ export const returnItem = async (
       return;
     }
 
-    if (borrowItem.borrower.toString() !== id) {
+    if (borrowItem.borrower !== id) {
       res.status(400).json({
         success: false,
         message: "You are not the borrower of this item",
@@ -351,7 +339,7 @@ export const returnItem = async (
       return;
     }
 
-    if (item.currentBorrowerId?.toString() !== id) {
+    if (item.currentBorrowerId !== id) {
       res.status(400).json({
         success: false,
         message: "You are not the current borrower of this item",
@@ -380,7 +368,7 @@ export const returnItem = async (
     await borrowItem.save();
 
     user.borrowItems = user.borrowItems.filter(
-      (bid) => bid.toString() !== borrowItemId
+      (bid) => bid.toString() !== itemId
     );
 
     await user.save();

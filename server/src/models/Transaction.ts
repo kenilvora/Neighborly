@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface ITransaction extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   borrowerId: mongoose.Schema.Types.ObjectId;
   lenderId: mongoose.Schema.Types.ObjectId;
   borrowItemId: mongoose.Schema.Types.ObjectId;

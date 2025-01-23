@@ -18,7 +18,7 @@ const router = express.Router();
 router.post("/create", auth, isUser, addItem);
 
 // Delete Item Route
-router.post("/delete/:id", auth, isUser, deleteItem);
+router.delete("/delete/:itemId", auth, isUser, deleteItem);
 
 // Get Items of a Lender Route
 router.get("/getItemsOfALender", auth, getItemsOfALender);
@@ -33,15 +33,15 @@ router.get("/getAllItems", auth, getAllItems);
 router.put("/update/:itemId", auth, isUser, updateItem);
 
 // Delete Item Image Route
-router.delete("/deleteItemImage/:id", auth, isUser, deleteItemImages);
+router.delete("/deleteItemImage/:itemId", auth, isUser, deleteItemImages);
 
 // Add New Images Route
-router.put("/addNewImages/:id", auth, isUser, addNewImages);
+router.put("/addNewImages/:itemId", auth, isUser, addNewImages);
 
 // Borrow Item Route
 router.post("/borrowItem", auth, isUser, borrowItem);
 
 // Return Item Route
-router.put("/returnItem", auth, isUser, returnItem);
+router.put("/returnItem/:itemId", auth, isUser, returnItem);
 
 export default router;

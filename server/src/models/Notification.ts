@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface INotification extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   message: string;
   recipient: mongoose.Schema.Types.ObjectId;
   isRead: boolean;

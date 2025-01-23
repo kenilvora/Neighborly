@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface IItemStat extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   itemId: mongoose.Schema.Types.ObjectId;
   userId: mongoose.Schema.Types.ObjectId;
   borrowCount: number;

@@ -9,7 +9,7 @@ import Item from "../models/Item";
 const createRatingAndReviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   review: z.string().min(1).max(500),
-  toWhom: z.string().uuid(),
+  toWhom: z.instanceof(mongoose.Schema.Types.ObjectId),
   type: z.enum(["Item", "User"]),
 });
 
@@ -46,7 +46,7 @@ export const createRatingAndReview = async (
 
     const { rating, review, toWhom, type } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(toWhom)) {
+    if (!mongoose.Types.ObjectId.isValid(toWhom.toString())) {
       res.status(400).json({
         success: false,
         message: "Invalid toWhom",
@@ -94,10 +94,7 @@ export const createRatingAndReview = async (
       }
     }
 
-    if (
-      type === "Item" &&
-      user.lendItems.includes(new mongoose.Schema.Types.ObjectId(toWhom))
-    ) {
+    if (type === "Item" && user.lendItems.includes(toWhom)) {
       res.status(400).json({
         success: false,
         message: "You cannot review your own item",
@@ -105,10 +102,7 @@ export const createRatingAndReview = async (
       return;
     }
 
-    if (
-      type === "Item" &&
-      !user.borrowItems.includes(new mongoose.Schema.Types.ObjectId(toWhom))
-    ) {
+    if (type === "Item" && !user.borrowItems.includes(toWhom)) {
       res.status(400).json({
         success: false,
         message: "You cannot review an item you have not borrowed",

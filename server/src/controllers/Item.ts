@@ -13,11 +13,11 @@ const addItemSchema = z.object({
   description: z.string(),
   price: z.number(),
   depositAmount: z.number(),
-  category: z.string(),
+  category: z.instanceof(mongoose.Schema.Types.ObjectId),
   tags: z.array(z.string()),
   isAvailable: z.boolean(),
   condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]),
-  availableFrom: z.date(),
+  availableFrom: z.string().datetime(),
   deliveryCharges: z.number().optional(),
   deliveryType: z
     .enum(["Pickup", "Delivery", "Both (Pickup & Delivery)"])
@@ -30,11 +30,11 @@ const updateItemSchema = z.object({
   description: z.string().optional(),
   price: z.number().optional(),
   depositAmount: z.number().optional(),
-  category: z.string().optional(),
+  category: z.instanceof(mongoose.Schema.Types.ObjectId).optional(),
   tags: z.array(z.string()).optional(),
   isAvailable: z.boolean().optional(),
   condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]).optional(),
-  availableFrom: z.date().optional(),
+  availableFrom: z.string().datetime().optional(),
   deliveryCharges: z.number().optional(),
   deliveryType: z
     .enum(["Pickup", "Delivery", "Both (Pickup & Delivery)"])
@@ -99,13 +99,27 @@ export const addItem = async (
   res: Response
 ): Promise<void> => {
   try {
-    const parsedData = addItemSchema.safeParse(req.body);
+    const parsedBody = {
+      ...req.body,
+      price: parseInt(req.body.price),
+      depositAmount: parseInt(req.body.depositAmount),
+      tags: JSON.parse(req.body.tags),
+      isAvailable: req.body.isAvailable === "true",
+      deliveryCharges: req.body.deliveryCharges
+        ? parseInt(req.body.deliveryCharges)
+        : 0,
+      deliveryRadius: req.body.deliveryRadius
+        ? parseInt(req.body.deliveryRadius)
+        : 0,
+    };
+    const parsedData = addItemSchema.safeParse(parsedBody);
     const id = req.user?.id;
 
     if (!parsedData.success) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
+        error: parsedData.error,
       });
       return;
     }
@@ -125,12 +139,20 @@ export const addItem = async (
       deliveryRadius = 0,
     } = parsedData.data;
 
-    const user = await User.findById(id);
-
-    if (!user?.upiIdVerified) {
+    if (!mongoose.Types.ObjectId.isValid(category.toString())) {
       res.status(400).json({
         success: false,
-        message: "Please verify your UPI ID first",
+        message: "Invalid category",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
       });
       return;
     }
@@ -230,7 +252,7 @@ export const deleteItem = async (
     const itemId = req.params.itemId;
     const id = req.user?.id;
 
-    if (!itemId || !id) {
+    if (!itemId || !id || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -249,9 +271,7 @@ export const deleteItem = async (
     }
 
     if (item.isAvailable) {
-      const uuid = new mongoose.Schema.Types.ObjectId(id as string);
-
-      if (item.lenderId !== uuid) {
+      if (item.lenderId !== id) {
         res.status(400).json({
           success: false,
           message: "Item not found",
@@ -393,7 +413,7 @@ export const getItemById = async (
   try {
     const itemId = req.params.itemId;
 
-    if (!itemId) {
+    if (!itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -604,11 +624,17 @@ export const updateItem = async (
       return;
     }
 
+    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid id of either user or item",
+      });
+      return;
+    }
+
     const item = await Item.findById(itemId);
 
-    const uuid = new mongoose.Schema.Types.ObjectId(id as string);
-
-    if (!item || item.lenderId !== uuid) {
+    if (!item || item.lenderId !== id) {
       res.status(404).json({
         success: false,
         message: "Item not found",
@@ -631,15 +657,61 @@ export const updateItem = async (
       deliveryRadius = item.deliveryRadius,
     } = parsedData.data;
 
+    if (!mongoose.Types.ObjectId.isValid(category.toString())) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid category",
+      });
+      return;
+    }
+
+    if (price <= 0 || depositAmount <= 0 || depositAmount <= price) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid price or deposit amount",
+      });
+      return;
+    }
+
+    const existingCategory = await Category.findById(category);
+
+    if (!existingCategory) {
+      res.status(400).json({
+        success: false,
+        message: "Category does not exist",
+      });
+      return;
+    }
+
+    if (parsedData.data.category !== item.category) {
+      await Category.findByIdAndUpdate(item.category, {
+        $inc: { itemCount: -1 },
+        $pull: { items: item._id },
+      });
+
+      await Category.findByIdAndUpdate(parsedData.data.category, {
+        $inc: { itemCount: 1 },
+        $push: { items: item._id },
+      });
+    }
+
+    if (parsedData.data.availableFrom && new Date(availableFrom) < new Date()) {
+      res.status(400).json({
+        success: false,
+        message: "Available from date should be in the future",
+      });
+      return;
+    }
+
     item.name = name;
     item.description = description;
     item.price = price;
     item.depositAmount = depositAmount;
-    item.category = new mongoose.Schema.Types.ObjectId(category as string);
+    item.category = existingCategory._id;
     item.tags = tags;
     item.isAvailable = isAvailable;
     item.condition = condition;
-    item.availableFrom = availableFrom;
+    item.availableFrom = new Date(availableFrom);
     item.deliveryCharges = deliveryCharges;
     item.deliveryType = deliveryType;
     item.deliveryRadius = deliveryRadius;
@@ -654,6 +726,7 @@ export const updateItem = async (
     res.status(500).json({
       success: false,
       message: "Internal server error",
+      error: err,
     });
   }
 };
@@ -666,7 +739,7 @@ export const deleteItemImages = async (
     const itemId = req.params.itemId;
     const id = req.user?.id;
 
-    if (!id || !itemId) {
+    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -686,9 +759,7 @@ export const deleteItemImages = async (
 
     const item = await Item.findById(itemId);
 
-    const uuid = new mongoose.Schema.Types.ObjectId(id as string);
-
-    if (!item || item.lenderId !== uuid) {
+    if (!item || item.lenderId !== id) {
       res.status(404).json({
         success: false,
         message: "Item not found",
@@ -734,7 +805,7 @@ export const addNewImages = async (
     const itemId = req.params.itemId;
     const id = req.user?.id;
 
-    if (!id || !itemId) {
+    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",

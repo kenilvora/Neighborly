@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface IBorrowItem extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   item: mongoose.Schema.Types.ObjectId;
   borrower: mongoose.Schema.Types.ObjectId;
   lender: mongoose.Schema.Types.ObjectId;

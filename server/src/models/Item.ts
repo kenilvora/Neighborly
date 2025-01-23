@@ -3,6 +3,7 @@ import mailSender from "../utils/mailSender";
 import { itemAddedTemplate } from "../mails/itemAddedTemplate";
 
 interface IItem extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   name: string;
   description: string;
   price: number;

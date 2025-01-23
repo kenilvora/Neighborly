@@ -1,23 +1,21 @@
 import mongoose from "mongoose";
 
 interface IUser extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   contactNumber: string;
   address: mongoose.Schema.Types.ObjectId;
-  governmentId?: string;
-  governmentIdType?: "Aadhar" | "PAN" | "Driving License";
-  governmentIdVerified?: boolean;
   role: "User" | "Admin";
   profileImage: string;
   transactions: mongoose.Schema.Types.ObjectId[];
   ratingAndReviews: mongoose.Schema.Types.ObjectId[];
   borrowItems: mongoose.Schema.Types.ObjectId[];
   lendItems: mongoose.Schema.Types.ObjectId[];
-  upiId: string;
-  upiIdVerified: boolean;
+  upiId?: string;
+  upiIdVerified?: boolean;
   accountBalance: number;
   notofications: mongoose.Schema.Types.ObjectId[];
   twoFactorAuth?: boolean;
@@ -63,19 +61,6 @@ const userSchema = new mongoose.Schema(
       ref: "Address",
       required: true,
     },
-    governmentId: {
-      type: String,
-      trim: true,
-    },
-    governmentIdType: {
-      type: String,
-      enum: ["Aadhar", "PAN", "Driving License"],
-      trim: true,
-    },
-    governmentIdVerified: {
-      type: Boolean,
-      default: false,
-    },
     role: {
       type: String,
       enum: ["User", "Admin"],
@@ -112,12 +97,11 @@ const userSchema = new mongoose.Schema(
     ],
     upiId: {
       type: String,
-      required: true,
       trim: true,
     },
     upiIdVerified: {
       type: Boolean,
-      required: true,
+      default: false,
     },
     accountBalance: {
       type: Number,

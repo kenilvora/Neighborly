@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface IRatingAndReview extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   rating: number;
   review: string;
   reviewer: mongoose.Schema.Types.ObjectId;

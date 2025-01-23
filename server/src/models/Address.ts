@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 interface IAddress extends mongoose.Document {
-  userId: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
   addressLine1: string;
   addressLine2: string;
   city: string;
@@ -15,11 +15,6 @@ interface IAddress extends mongoose.Document {
 
 const addressSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
     addressLine1: {
       type: String,
       required: true,

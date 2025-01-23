@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 interface IDispute extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId;
   userId: mongoose.Schema.Types.ObjectId;
   againstWhomId: mongoose.Schema.Types.ObjectId;
   againstWhom: "User" | "Item";

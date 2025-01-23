@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import Category from "../models/Category";
+import mongoose from "mongoose";
 
 const addCategorySchema = z.object({
   name: z.string(),
@@ -24,7 +25,7 @@ export const addCategory = async (
     const { name } = parsedData.data;
 
     const category = await Category.findOne({
-      name: name.toLowerCase().replace(" ", "-"),
+      name: name.toLowerCase().replace(/ /g, "-"),
     });
 
     if (category) {
@@ -36,7 +37,7 @@ export const addCategory = async (
     }
 
     await Category.create({
-      name: name.toLowerCase().replace(" ", "-"),
+      name: name.toLowerCase().replace(/ /g, "-"),
       itemCount: 0,
       items: [],
     });
@@ -60,7 +61,7 @@ export const deleteCategory = async (
   try {
     const id = req.params.id;
 
-    if (!id) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -74,6 +75,14 @@ export const deleteCategory = async (
       res.status(404).json({
         success: false,
         message: "Category not found",
+      });
+      return;
+    }
+
+    if (category.itemCount > 0) {
+      res.status(400).json({
+        success: false,
+        message: "Category has items",
       });
       return;
     }
@@ -104,7 +113,7 @@ export const getCategories = async (
         $regex: filter.toLowerCase().replace(" ", "-"),
         $options: "i",
       },
-    });
+    }).select("-items");
 
     res.status(200).json({
       success: true,

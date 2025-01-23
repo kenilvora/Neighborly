@@ -2,7 +2,7 @@ import express from "express";
 import { auth } from "../middlewares/Auth";
 import {
   changePassword,
-  enableTwoFactorAuth,
+  changeTwoFactorAuth,
   getMe,
   getStatisticalData,
   getUserById,
@@ -33,16 +33,16 @@ router.post("/logout", logout);
 router.get("/me", auth, getMe);
 
 // Change Password Route
-router.post("/changePassword", auth, changePassword);
+router.put("/changePassword", auth, changePassword);
 
 // Reset Password Token Route
 router.post("/resetPasswordToken", resetPasswordToken);
 
 // Reset Password Route
-router.post("/resetPassword", resetPassword);
+router.put("/resetPassword/:token", resetPassword);
 
 // Enable Two Factor Authentication Route
-router.post("/enableTwoFactorAuth", auth, enableTwoFactorAuth);
+router.put("/changeTwoFactorAuth", auth, changeTwoFactorAuth);
 
 // Update User Details Route
 router.put("/updateProfile", auth, updateUserDetails);
