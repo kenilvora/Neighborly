@@ -85,11 +85,15 @@ interface ILendItem {
   images: string[];
   condition: "New" | "Like New" | "Good" | "Average" | "Poor";
   availableFrom: Date;
-  avgRating?: number; // Add the calculated property
   deliveryCharges?: number;
   deliveryType?: "Pickup" | "Delivery" | "Both (Pickup & Delivery)";
   deliveryRadius?: number;
   itemLocation?: IAddress;
+}
+
+interface IItemWithAvgRating {
+  item: ILendItem;
+  avgRating: number;
 }
 
 interface IAllItems {
@@ -390,13 +394,18 @@ export const getItemsOfALender = async (
       });
     }
 
+    let updatedItems: IItemWithAvgRating[] = [];
+
     if (items?.lendItems && items.lendItems.length > 0) {
-      items.lendItems.forEach((item) => {
-        item.avgRating = getAvgRating(item.ratingAndReviews);
-      });
+      updatedItems = items.lendItems.map((item) => {
+        return {
+          item: item,
+          avgRating: getAvgRating(item.ratingAndReviews),
+        };
+      }) as IItemWithAvgRating[];
     }
 
-    if (items?.lendItems && items.lendItems.length === 0) {
+    if (updatedItems && updatedItems.length === 0) {
       res.status(404).json({
         success: false,
         message: "No items found",
@@ -406,7 +415,7 @@ export const getItemsOfALender = async (
 
     res.status(200).json({
       success: true,
-      data: items?.lendItems,
+      data: updatedItems,
     });
   } catch (err) {
     res.status(500).json({
@@ -477,17 +486,22 @@ export const getItemById = async (
       item.borrowers = undefined;
     }
 
-    let totalRating = 0;
+    let updatedItem: IItemWithAvgRating, avgRating: number;
 
     if (item.ratingAndReviews && item.ratingAndReviews.length > 0) {
-      item.avgRating = getAvgRating(item.ratingAndReviews);
+      avgRating = getAvgRating(item.ratingAndReviews);
     } else {
-      item.avgRating = 0;
+      avgRating = 0;
     }
+
+    updatedItem = {
+      item: item,
+      avgRating: avgRating,
+    };
 
     res.status(200).json({
       success: true,
-      data: item,
+      data: updatedItem,
     });
   } catch (err) {
     res.status(500).json({
@@ -638,18 +652,18 @@ export const getAllItems = async (
       return item.category !== null && item.itemLocation !== null;
     });
 
-    items.forEach((item) => {
-      let totalRating = 0; // Reset for each item
-      if (item.ratingAndReviews && item.ratingAndReviews.length > 0) {
-        item.avgRating = getAvgRating(item.ratingAndReviews);
-      } else {
-        item.avgRating = 0; // Default if no ratings
-      }
+    let updatedItems: IItemWithAvgRating[] = [];
+
+    updatedItems = items.map((item) => {
+      return {
+        item: item,
+        avgRating: getAvgRating(item.ratingAndReviews),
+      };
     });
 
     res.status(200).json({
       success: true,
-      data: items,
+      data: updatedItems,
     });
   } catch (err) {
     res.status(500).json({

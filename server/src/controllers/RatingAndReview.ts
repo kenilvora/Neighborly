@@ -5,6 +5,7 @@ import User from "../models/User";
 import mongoose from "mongoose";
 import RatingAndReview from "../models/RatingAndReview";
 import Item from "../models/Item";
+import getAvgRating from "../utils/getAverageRating";
 
 const createRatingAndReviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
@@ -195,20 +196,18 @@ export const getRatingAndReviewsOfAUser = async (
           select: "firstName lastName profileImage",
         },
         select: "-toWhom -type",
-      })) as unknown as IGeneralRatingAndReview;
+      })) as unknown as IRatingAndReview[];
 
-    let totalRating = 0;
+    const avgRating = getAvgRating(ratingAndReviews);
 
-    ratingAndReviews.ratingAndReviews.forEach((ratingAndReview) => {
-      totalRating += ratingAndReview.rating;
-    });
-
-    ratingAndReviews.avgRating =
-      totalRating / ratingAndReviews.ratingAndReviews.length;
+    const updatedRatingAndReviews: IGeneralRatingAndReview = {
+      ratingAndReviews,
+      avgRating,
+    };
 
     res.status(200).json({
       success: true,
-      data: ratingAndReviews,
+      data: updatedRatingAndReviews,
     });
   } catch (error) {
     res.status(500).json({
@@ -252,20 +251,18 @@ export const getRatingAndReviewsOfAnItem = async (
           select: "firstName lastName profileImage",
         },
         select: "-toWhom -type",
-      })) as unknown as IGeneralRatingAndReview;
+      })) as unknown as IRatingAndReview[];
 
-    let totalRating = 0;
+    const avgRating = getAvgRating(ratingAndReviews);
 
-    ratingAndReviews.ratingAndReviews.forEach((ratingAndReview) => {
-      totalRating += ratingAndReview.rating;
-    });
-
-    ratingAndReviews.avgRating =
-      totalRating / ratingAndReviews.ratingAndReviews.length;
+    const updatedRatingAndReviews: IGeneralRatingAndReview = {
+      ratingAndReviews,
+      avgRating,
+    };
 
     res.status(200).json({
       success: true,
-      data: ratingAndReviews,
+      data: updatedRatingAndReviews,
     });
   } catch (error) {
     res.status(500).json({

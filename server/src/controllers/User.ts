@@ -91,7 +91,11 @@ interface IStatisticalData {
   };
   borrowedCount: number;
   totalProfit: number;
-  avgRating?: number;
+}
+
+interface IStatisticalDataWithAvgRating {
+  statData: IStatisticalData;
+  avgRating: number;
 }
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
@@ -912,8 +916,13 @@ export const getStatisticalData = async (
       return;
     }
 
-    statsData.forEach((data) => {
-      data.avgRating = getAvgRating(data.itemId.ratingAndReviews);
+    let updatedStatsData: IStatisticalDataWithAvgRating[] = [];
+
+    updatedStatsData = statsData.map((data) => {
+      return {
+        statData: data,
+        avgRating: getAvgRating(data.itemId.ratingAndReviews),
+      };
     });
 
     res.status(200).json({
