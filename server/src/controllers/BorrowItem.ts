@@ -7,9 +7,10 @@ import mongoose from "mongoose";
 import Transaction from "../models/Transaction";
 import BorrowItem from "../models/BorrowItem";
 import ItemStat from "../models/ItemStat";
+import { objectIdSchema } from "./RatingAndReview";
 
 const borrowItemSchema = z.object({
-  itemId: z.instanceof(mongoose.Schema.Types.ObjectId),
+  itemId: objectIdSchema,
   startDate: z.string(),
   endDate: z.string(),
   paymentMode: z.enum(["Cash", "Online", "Wallet"]),

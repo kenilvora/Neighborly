@@ -6,9 +6,10 @@ import Item from "../models/Item";
 import mongoose from "mongoose";
 import Dispute from "../models/Dispute";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
+import { objectIdSchema } from "./RatingAndReview";
 
 const createDisputeSchema = z.object({
-  againstWhomId: z.instanceof(mongoose.Schema.Types.ObjectId),
+  againstWhomId: objectIdSchema,
   reason: z.string(),
   againstWhom: z.enum(["User", "Item"]),
 });

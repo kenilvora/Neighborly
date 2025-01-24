@@ -7,10 +7,20 @@ import RatingAndReview from "../models/RatingAndReview";
 import Item from "../models/Item";
 import getAvgRating from "../utils/getAverageRating";
 
+export const objectIdSchema = z.custom<mongoose.Schema.Types.ObjectId>(
+  (data) => {
+    if (mongoose.Types.ObjectId.isValid(data)) {
+      return data;
+    } else {
+      throw new Error("Invalid ObjectId");
+    }
+  }
+);
+
 const createRatingAndReviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   review: z.string().min(1).max(500),
-  toWhom: z.instanceof(mongoose.Schema.Types.ObjectId),
+  toWhom: objectIdSchema,
   type: z.enum(["Item", "User"]),
 });
 
@@ -41,6 +51,7 @@ export const createRatingAndReview = async (
       res.status(400).json({
         success: false,
         message: "Invalid data",
+        error: parsedData.error,
       });
       return;
     }

@@ -8,13 +8,14 @@ import User from "../models/User";
 import mongoose from "mongoose";
 import Notification from "../models/Notification";
 import getAvgRating from "../utils/getAverageRating";
+import { objectIdSchema } from "./RatingAndReview";
 
 const addItemSchema = z.object({
   name: z.string(),
   description: z.string(),
   price: z.number(),
   depositAmount: z.number(),
-  category: z.instanceof(mongoose.Schema.Types.ObjectId),
+  category: objectIdSchema,
   tags: z.array(z.string()),
   isAvailable: z.boolean(),
   condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]),
@@ -31,7 +32,7 @@ const updateItemSchema = z.object({
   description: z.string().optional(),
   price: z.number().optional(),
   depositAmount: z.number().optional(),
-  category: z.instanceof(mongoose.Schema.Types.ObjectId).optional(),
+  category: objectIdSchema.optional(),
   tags: z.array(z.string()).optional(),
   isAvailable: z.boolean().optional(),
   condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]).optional(),
