@@ -12,6 +12,7 @@ import { AuthRequest } from "../middlewares/Auth";
 import mailSender from "../utils/mailSender";
 import { resetPasswordTokenTemplate } from "../mails/resetPasswordTokenTemplate";
 import mongoose from "mongoose";
+import getAvgRating from "../utils/getAverageRating";
 
 const signUpSchema = z.object({
   firstName: z.string().min(2),
@@ -427,15 +428,10 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
         select: "rating",
       });
 
-    let totalRating = 0,
-      avgRating = 0;
+    let avgRating = 0;
 
     if (user?.ratingAndReviews.length === 0) {
-      user?.ratingAndReviews.forEach((ratingAndReview) => {
-        totalRating += ratingAndReview.rating;
-      });
-
-      avgRating = totalRating / user?.ratingAndReviews.length;
+      avgRating = getAvgRating(user?.ratingAndReviews);
     }
 
     const updatedUser = { ...user?.toObject(), avgRating };
@@ -852,18 +848,13 @@ export const getUserById = async (
       return;
     }
 
-    let totalRating = 0,
-      avgRating = 0;
+    let avgRating = 0;
 
     if (user?.ratingAndReviews.length === 0) {
-      user?.ratingAndReviews.forEach((ratingAndReview) => {
-        totalRating += ratingAndReview.rating;
-      });
-
-      avgRating = totalRating / user?.ratingAndReviews.length;
+      avgRating = getAvgRating(user?.ratingAndReviews);
     }
 
-    const updatedUser = { ...user, avgRating };
+    const updatedUser = { ...user.toObject(), avgRating };
 
     res.status(200).json({
       success: true,
@@ -921,22 +912,8 @@ export const getStatisticalData = async (
       return;
     }
 
-    let totalRating = 0,
-      avgRating = 0;
-
     statsData.forEach((data) => {
-      totalRating = 0;
-      avgRating = 0;
-
-      if (data.itemId.ratingAndReviews.length !== 0) {
-        data.itemId.ratingAndReviews.forEach((ratingAndReview) => {
-          totalRating += ratingAndReview.rating;
-        });
-
-        avgRating = totalRating / data.itemId.ratingAndReviews.length;
-      }
-
-      data.avgRating = avgRating;
+      data.avgRating = getAvgRating(data.itemId.ratingAndReviews);
     });
 
     res.status(200).json({

@@ -7,6 +7,7 @@ import Category from "../models/Category";
 import User from "../models/User";
 import mongoose from "mongoose";
 import Notification from "../models/Notification";
+import getAvgRating from "../utils/getAverageRating";
 
 const addItemSchema = z.object({
   name: z.string(),
@@ -61,6 +62,7 @@ interface IAddress {
 }
 
 interface IUser {
+  _id: mongoose.Schema.Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
@@ -320,11 +322,13 @@ export const getItemsOfALender = async (
   res: Response
 ): Promise<void> => {
   try {
+    let includeBorrowers = false;
     let id;
     if (req.query.userId) {
       id = req.query.userId;
     } else {
       id = req.user?.id;
+      includeBorrowers = true;
     }
 
     if (!id || !mongoose.Types.ObjectId.isValid(id as string)) {
@@ -352,11 +356,9 @@ export const getItemsOfALender = async (
       .select("lendItems")
       .populate<ILendItem>({
         path: "lendItems",
-        options: {
-          sort: { createdAt: -1 },
-          limit,
-          skip: (page - 1) * limit,
-        },
+        select: includeBorrowers
+          ? "-lenderId -itemLocation"
+          : "-lenderId -borrowers -itemLocation",
         populate: [
           {
             path: "category",
@@ -366,23 +368,31 @@ export const getItemsOfALender = async (
             path: "ratingAndReviews",
             select: "rating",
           },
+          {
+            path: "lenderId",
+            select: "firstName lastName email contactNumber profileImage",
+          },
+          {
+            path: "currentBorrowerId",
+            select: "firstName lastName email contactNumber profileImage",
+          },
         ],
-        select:
-          "-lenderId -borrowers -currentBorrowerId -itemLocation -statisticalData",
+        options: {
+          sort: { createdAt: -1 },
+          limit,
+          skip: (page - 1) * limit,
+        },
       })) as unknown as IAllItems;
+
+    if (includeBorrowers) {
+      items.lendItems.forEach((item) => {
+        item.lenderId = undefined;
+      });
+    }
 
     if (items?.lendItems && items.lendItems.length > 0) {
       items.lendItems.forEach((item) => {
-        let totalRating = 0; // Reset for each item
-        if (item.ratingAndReviews && item.ratingAndReviews.length > 0) {
-          item.ratingAndReviews.forEach((rating) => {
-            totalRating += rating.rating;
-          });
-          // Calculate and assign avgRating
-          item.avgRating = totalRating / item.ratingAndReviews.length;
-        } else {
-          item.avgRating = 0; // Default if no ratings
-        }
+        item.avgRating = getAvgRating(item.ratingAndReviews);
       });
     }
 
@@ -412,6 +422,7 @@ export const getItemById = async (
 ): Promise<void> => {
   try {
     const itemId = req.params.itemId;
+    const id = req.user?.id;
 
     if (!itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
@@ -462,13 +473,14 @@ export const getItemById = async (
       return;
     }
 
+    if (item.lenderId?._id.toString() !== id) {
+      item.borrowers = undefined;
+    }
+
     let totalRating = 0;
 
     if (item.ratingAndReviews && item.ratingAndReviews.length > 0) {
-      item.ratingAndReviews.forEach((rating) => {
-        totalRating += rating.rating;
-      });
-      item.avgRating = totalRating / item.ratingAndReviews.length;
+      item.avgRating = getAvgRating(item.ratingAndReviews);
     } else {
       item.avgRating = 0;
     }
@@ -498,47 +510,64 @@ export const getAllItems = async (
     const filterDeliveryType = (req.query.filterDeliveryType as string) || "";
     const filterCity = (req.query.filterCity as string) || "";
     const filterState = (req.query.filterState as string) || "";
+    const filterCountry = (req.query.filterCountry as string) || "";
+    const filterTags =
+      ((req.query.filterTags &&
+        JSON.parse(req.query.filterTags as string)) as string[]) || [];
 
     const page = parseInt(req.query.page as string);
     const limit = parseInt(req.query.limit as string) || 15;
 
-    const items = (await Item.find({
-      $or: [
+    let items = (await Item.find({
+      $and: [
         {
-          name: {
-            $regex: filter,
+          $or: [
+            {
+              name: {
+                $regex: filter,
+                $options: "i",
+              },
+            },
+            {
+              description: {
+                $regex: filter,
+                $options: "i",
+              },
+            },
+            {
+              tags: {
+                $regex: filter,
+                $options: "i",
+              },
+            },
+          ],
+        },
+        {
+          price: {
+            $gte: filterPrice,
+          },
+        },
+        {
+          depositAmount: {
+            $gte: filterDeposit,
+          },
+        },
+        {
+          condition: {
+            $regex: filterCondition,
             $options: "i",
           },
         },
         {
-          description: {
-            $regex: filter,
+          deliveryType: {
+            $regex: filterDeliveryType,
             $options: "i",
           },
         },
-        {
-          tags: {
-            $regex: filter,
-            $options: "i",
-          },
-        },
+        { isAvailable: true },
       ],
-      price: {
-        $gte: filterPrice,
-      },
-      depositAmount: {
-        $gte: filterDeposit,
-      },
-      condition: {
-        $regex: filterCondition,
-        $options: "i",
-      },
-      deliveryType: {
-        $regex: filterDeliveryType,
-        $options: "i",
-      },
-      isAvailable: true,
     })
+      .select("-borrowers -currentBorrowerId")
       .populate({
         path: "category",
         select: "name",
@@ -559,16 +588,28 @@ export const getAllItems = async (
       })
       .populate({
         path: "itemLocation",
-        select: "city state",
+        select: "city state country",
         match: {
-          city: {
-            $regex: filterCity,
-            $options: "i",
-          },
-          state: {
-            $regex: filterState,
-            $options: "i",
-          },
+          $and: [
+            {
+              city: {
+                $regex: filterCity,
+                $options: "i",
+              },
+            },
+            {
+              state: {
+                $regex: filterState,
+                $options: "i",
+              },
+            },
+            {
+              country: {
+                $regex: filterCountry,
+                $options: "i",
+              },
+            },
+          ],
         },
       })
       .skip((page - 1) * limit)
@@ -582,14 +623,25 @@ export const getAllItems = async (
       return;
     }
 
+    items = items.filter((item) => {
+      if (filterTags && filterTags.length > 0) {
+        return (
+          item.category !== null &&
+          item.itemLocation !== null &&
+          filterTags.some((tag) =>
+            item.tags.some(
+              (itemTag) => itemTag.toLowerCase() === tag.toLowerCase()
+            )
+          )
+        );
+      }
+      return item.category !== null && item.itemLocation !== null;
+    });
+
     items.forEach((item) => {
       let totalRating = 0; // Reset for each item
       if (item.ratingAndReviews && item.ratingAndReviews.length > 0) {
-        item.ratingAndReviews.forEach((rating) => {
-          totalRating += rating.rating;
-        });
-        // Calculate and assign avgRating
-        item.avgRating = totalRating / item.ratingAndReviews.length;
+        item.avgRating = getAvgRating(item.ratingAndReviews);
       } else {
         item.avgRating = 0; // Default if no ratings
       }
