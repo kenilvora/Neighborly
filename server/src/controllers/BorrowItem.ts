@@ -505,8 +505,12 @@ export const getAllBorrowedItems = async (
 ): Promise<void> => {
   try {
     const id = req.user?.id;
+    const type = req.query.type || "CB";
 
-    if (!id) {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 15;
+
+    if (!id || !type || (type !== "CB" && type !== "PB")) {
       res.status(401).json({
         success: false,
         message: "Invalid data",
@@ -514,25 +518,24 @@ export const getAllBorrowedItems = async (
       return;
     }
 
-    const borrowedItems = await User.findById(id)
-      .select("borrowItems")
+    const borrowedItems = await BorrowItem.findOne({
+      borrower: id,
+      type: type === "CB" ? "Currently Borrowed" : "Previously Borrowed",
+    })
       .populate({
-        path: "borrowItems",
-        populate: [
-          {
-            path: "item",
-            select: "name description price depositAmount images",
-          },
-          {
-            path: "lender",
-            select: "firstName lastName email contactNumber profileImage",
-          },
-          {
-            path: "transactionId",
-            select: "amount paymentId status transactionType",
-          },
-        ],
-      });
+        path: "item",
+        select: "name description price depositAmount images",
+      })
+      .populate({
+        path: "lender",
+        select: "firstName lastName email contactNumber profileImage",
+      })
+      .populate({
+        path: "transactionId",
+        select: "amount paymentId status transactionType",
+      })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     if (!borrowedItems) {
       res.status(404).json({
@@ -544,7 +547,7 @@ export const getAllBorrowedItems = async (
 
     res.status(200).json({
       success: true,
-      data: borrowedItems.borrowItems,
+      data: borrowedItems,
     });
   } catch (error) {
     res.status(500).json({
