@@ -1,4 +1,4 @@
-# Neighbourly: Peer-to-Peer Item Rental Platform
+# Neighborly: Peer-to-Peer Item Rental Platform
 
 ## Overview
 

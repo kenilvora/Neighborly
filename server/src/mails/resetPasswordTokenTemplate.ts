@@ -64,7 +64,7 @@ export const resetPasswordTokenTemplate = (url: string, name: string) => {
                   <p>We received a request to reset your password. To proceed, please click the button below:</p>
                   <a class="cta-button" href="${url}" target="_blank">Reset Password</a>
                   <p>If you did not request this change, you can safely ignore this email.</p>
-                  <p class="footer">Thank you,<br>Neighbourly</p>
+                  <p class="footer">Thank you,<br>Neighborly</p>
               </div>
           </body>
   

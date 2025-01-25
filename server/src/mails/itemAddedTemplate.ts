@@ -89,7 +89,7 @@ export const itemAddedTemplate = (title: string) => {
         <a href="[Link to Dashboard]" class="btn">View Your Dashboard</a>
       </div>
       <div class="footer">
-        <p>&copy; 2025 Neighbourly. All rights reserved.</p>
+        <p>&copy; 2025 Neighborly. All rights reserved.</p>
         <p>
           If you did not add this item, please contact our support immediately.
         </p>

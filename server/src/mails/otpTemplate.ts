@@ -49,7 +49,7 @@ export const otpTemplate = (otp: number) => {
             If you did not request this OTP, please ignore this email or contact
             support.
           </p>
-          <p>Best regards,<br />Neighbourly Team</p>
+          <p>Best regards,<br />Neighborly Team</p>
         </div>
         <div
           style="
@@ -60,7 +60,7 @@ export const otpTemplate = (otp: number) => {
             background: #f9f9f9;
           "
         >
-          &copy; ${new Date().getFullYear()} Neighbourly. All rights reserved.
+          &copy; ${new Date().getFullYear()} Neighborly. All rights reserved.
         </div>
       </div>
     </body>

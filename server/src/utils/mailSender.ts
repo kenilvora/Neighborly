@@ -15,7 +15,7 @@ export default async function mailSender(
     });
 
     await transporter.sendMail({
-      from: "Neighbourly",
+      from: "Neighborly",
       to,
       subject,
       html,
