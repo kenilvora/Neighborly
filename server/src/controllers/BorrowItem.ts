@@ -11,18 +11,12 @@ import { objectIdSchema } from "./RatingAndReview";
 
 const borrowItemSchema = z.object({
   itemId: objectIdSchema,
-  startDate: z.string(),
-  endDate: z.string(),
+  startDate: z.string().date(),
+  endDate: z.string().date(),
   paymentMode: z.enum(["Cash", "Online", "Wallet"]),
   paymentStatus: z.enum(["Pending", "Paid"]),
   deliveryType: z.enum(["Pickup", "Delivery"]),
-  deliveryCharges: z.number().optional(),
-  deliveryStatus: z.enum(["Pending", "Accepted", "Rejected"]).optional(),
   transactionId: z.string().optional(),
-});
-
-const returnItemSchema = z.object({
-  borrowItemId: z.string(),
 });
 
 export const borrowItem = async (
@@ -37,6 +31,7 @@ export const borrowItem = async (
       res.status(401).json({
         success: false,
         message: "Invalid data",
+        error: parsedData.error,
       });
       return;
     }
@@ -49,8 +44,6 @@ export const borrowItem = async (
       paymentStatus,
       transactionId,
       deliveryType,
-      deliveryCharges,
-      deliveryStatus,
     } = parsedData.data;
 
     if (!mongoose.Types.ObjectId.isValid(itemId.toString())) {
@@ -60,9 +53,9 @@ export const borrowItem = async (
       });
     }
 
-    const user = await User.findById(id);
+    const borrower = await User.findById(id);
 
-    if (!user) {
+    if (!borrower) {
       res.status(404).json({
         success: false,
         message: "User not found",
@@ -80,7 +73,19 @@ export const borrowItem = async (
       return;
     }
 
-    if (user.lendItems.includes(itemId)) {
+    const lender = await User.findById(item.lenderId);
+
+    if (!lender) {
+      res.status(404).json({
+        success: false,
+        message: "Lender not found",
+      });
+      return;
+    }
+
+    const deliveryCharges = item.deliveryCharges;
+
+    if (borrower.lendItems.includes(itemId)) {
       res.status(400).json({
         success: false,
         message: "You can't borrow your own item",
@@ -96,18 +101,26 @@ export const borrowItem = async (
       return;
     }
 
-    if (new Date(startDate) < new Date() || new Date(endDate) < new Date()) {
+    if (
+      new Date(startDate).toISOString().slice(0, 10) !==
+      new Date(item.availableFrom).toISOString().slice(0, 10)
+    ) {
       res.status(400).json({
         success: false,
-        message: "Start date and end date should be greater than current date",
+        message: "Start date should be equal to available from date",
       });
       return;
     }
 
-    if (new Date(startDate) > new Date(endDate)) {
+    if (
+      new Date(endDate).toISOString().slice(0, 10) <
+        new Date().toISOString().slice(0, 10) ||
+      new Date(endDate).toISOString().slice(0, 10) <
+        new Date(startDate).toISOString().slice(0, 10)
+    ) {
       res.status(400).json({
         success: false,
-        message: "End date should be greater than start date",
+        message: "Start date and end date should be greater than current date",
       });
       return;
     }
@@ -211,7 +224,7 @@ export const borrowItem = async (
     }
 
     if (paymentMode === "Wallet") {
-      const userWallet = user.accountBalance;
+      const userWallet = borrower.accountBalance;
 
       if (userWallet < item.depositAmount + (deliveryCharges || 0)) {
         res.status(400).json({
@@ -221,7 +234,10 @@ export const borrowItem = async (
         return;
       }
 
-      user.accountBalance -= item.depositAmount + (deliveryCharges || 0);
+      borrower.accountBalance -= item.depositAmount + (deliveryCharges || 0);
+
+      lender.accountBalance += item.depositAmount + (deliveryCharges || 0);
+      await lender.save();
 
       paymentStatus = "Paid";
     }
@@ -232,11 +248,12 @@ export const borrowItem = async (
 
     item.borrowers.push(id);
 
-    item.availableFrom = new Date(endDate);
+    const endingDate = new Date(endDate);
+    item.availableFrom = new Date(endingDate.setDate(endingDate.getDate() + 1));
 
     await item.save();
 
-    user.borrowItems.push(itemId);
+    borrower.borrowItems.push(item._id);
 
     await BorrowItem.create({
       item: itemId,
@@ -248,8 +265,9 @@ export const borrowItem = async (
       paymentStatus,
       deliveryType,
       deliveryCharges: deliveryCharges || 0,
-      deliveryStatus: deliveryStatus || "Pending",
+      deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
       transactionId: paymentMode === "Online" ? transactionId : undefined,
+      type: "Currently Borrowed",
     });
 
     let itemStat = await ItemStat.findOne({
@@ -270,9 +288,11 @@ export const borrowItem = async (
       });
     }
 
-    user.statisticalData?.push(new mongoose.Schema.Types.ObjectId(itemStat.id));
+    lender.statisticalData?.push(itemStat._id);
 
-    await user.save();
+    await borrower.save();
+
+    await lender.save();
 
     res.status(200).json({
       success: true,
@@ -312,25 +332,7 @@ export const returnItem = async (
       return;
     }
 
-    const borrowItem = await BorrowItem.findById(itemId);
-
-    if (!borrowItem) {
-      res.status(404).json({
-        success: false,
-        message: "Borrow item not found",
-      });
-      return;
-    }
-
-    if (borrowItem.borrower !== id) {
-      res.status(400).json({
-        success: false,
-        message: "You are not the borrower of this item",
-      });
-      return;
-    }
-
-    const item = await Item.findById(borrowItem.item);
+    const item = await Item.findById(itemId);
 
     if (!item) {
       res.status(404).json({
@@ -340,10 +342,31 @@ export const returnItem = async (
       return;
     }
 
-    if (item.currentBorrowerId !== id) {
+    if (item.lenderId.toString() !== id.toString()) {
       res.status(400).json({
         success: false,
-        message: "You are not the current borrower of this item",
+        message: "You are not the lender of this item",
+      });
+      return;
+    }
+
+    if (item.isAvailable) {
+      res.status(400).json({
+        success: false,
+        message: "Item is already returned",
+      });
+    }
+
+    const borrowItem = await BorrowItem.findOne({
+      item: itemId,
+      borrower: item.currentBorrowerId,
+      lender: id,
+    });
+
+    if (!borrowItem) {
+      res.status(404).json({
+        success: false,
+        message: "Borrow item not found",
       });
       return;
     }
@@ -353,30 +376,175 @@ export const returnItem = async (
         success: false,
         message: "Item is already returned",
       });
+    }
+
+    if (borrowItem.paymentStatus === "Pending") {
+      res.status(400).json({
+        success: false,
+        message: "Payment is pending",
+      });
       return;
     }
 
     item.isAvailable = true;
-
     item.currentBorrowerId = undefined;
-
     item.availableFrom = new Date();
 
     await item.save();
 
     borrowItem.isReturned = true;
+    borrowItem.type = "Previously Borrowed";
 
     await borrowItem.save();
-
-    user.borrowItems = user.borrowItems.filter(
-      (bid) => bid.toString() !== itemId
-    );
-
-    await user.save();
 
     res.status(200).json({
       success: true,
       message: "Item returned successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const paymentReceived = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+    const itemId = req.params.itemId;
+
+    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    const item = await Item.findById(itemId);
+
+    if (!item) {
+      res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+      return;
+    }
+
+    if (item.lenderId.toString() !== id.toString()) {
+      res.status(400).json({
+        success: false,
+        message: "You are not the lender of this item",
+      });
+      return;
+    }
+
+    const borrowItem = await BorrowItem.findOne({
+      item: itemId,
+      borrower: item.currentBorrowerId,
+      lender: id,
+    });
+
+    if (!borrowItem) {
+      res.status(404).json({
+        success: false,
+        message: "Borrow item not found",
+      });
+      return;
+    }
+
+    if (borrowItem.paymentMode !== "Cash") {
+      res.status(400).json({
+        success: false,
+        message: "Payment mode is not cash",
+      });
+      return;
+    }
+
+    if (borrowItem.paymentStatus === "Paid") {
+      res.status(400).json({
+        success: false,
+        message: "Payment is already received",
+      });
+      return;
+    }
+
+    borrowItem.paymentStatus = "Paid";
+
+    await borrowItem.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Payment received successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getAllBorrowedItems = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+
+    if (!id) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const borrowedItems = await User.findById(id)
+      .select("borrowItems")
+      .populate({
+        path: "borrowItems",
+        populate: [
+          {
+            path: "item",
+            select: "name description price depositAmount images",
+          },
+          {
+            path: "lender",
+            select: "firstName lastName email contactNumber profileImage",
+          },
+          {
+            path: "transactionId",
+            select: "amount paymentId status transactionType",
+          },
+        ],
+      });
+
+    if (!borrowedItems) {
+      res.status(404).json({
+        success: false,
+        message: "Borrowed items not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      data: borrowedItems.borrowItems,
     });
   } catch (error) {
     res.status(500).json({

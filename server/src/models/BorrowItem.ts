@@ -14,6 +14,7 @@ interface IBorrowItem extends mongoose.Document {
   deliveryStatus?: "Pending" | "Accepted" | "Rejected";
   transactionId?: mongoose.Schema.Types.ObjectId;
   isReturned: boolean;
+  type?: "Currently Borrowed" | "Previously Borrowed";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,6 +84,11 @@ const borrowItemSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
       default: false,
+    },
+    type: {
+      type: String,
+      enum: ["Currently Borrowed", "Previously Borrowed"],
+      default: "Currently Borrowed",
     },
   },
   { timestamps: true }

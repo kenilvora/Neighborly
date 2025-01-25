@@ -10,7 +10,12 @@ import {
   getItemsOfALender,
   updateItem,
 } from "../controllers/Item";
-import { borrowItem, returnItem } from "../controllers/BorrowItem";
+import {
+  borrowItem,
+  getAllBorrowedItems,
+  paymentReceived,
+  returnItem,
+} from "../controllers/BorrowItem";
 
 const router = express.Router();
 
@@ -43,5 +48,11 @@ router.post("/borrowItem", auth, isUser, borrowItem);
 
 // Return Item Route
 router.put("/returnItem/:itemId", auth, isUser, returnItem);
+
+// Payment Received Route
+router.put("/paymentReceived/:itemId", auth, isUser, paymentReceived);
+
+// Get All Borrowed Items Route
+router.get("/getAllBorrowedItems", auth, isUser, getAllBorrowedItems);
 
 export default router;

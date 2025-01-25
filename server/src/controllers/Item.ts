@@ -19,7 +19,7 @@ const addItemSchema = z.object({
   tags: z.array(z.string()),
   isAvailable: z.boolean(),
   condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]),
-  availableFrom: z.string().datetime(),
+  availableFrom: z.string().date(),
   deliveryCharges: z.number().optional(),
   deliveryType: z
     .enum(["Pickup", "Delivery", "Both (Pickup & Delivery)"])
@@ -36,7 +36,7 @@ const updateItemSchema = z.object({
   tags: z.array(z.string()).optional(),
   isAvailable: z.boolean().optional(),
   condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]).optional(),
-  availableFrom: z.string().datetime().optional(),
+  availableFrom: z.string().date().optional(),
   deliveryCharges: z.number().optional(),
   deliveryType: z
     .enum(["Pickup", "Delivery", "Both (Pickup & Delivery)"])
@@ -762,7 +762,11 @@ export const updateItem = async (
       });
     }
 
-    if (parsedData.data.availableFrom && new Date(availableFrom) < new Date()) {
+    if (
+      parsedData.data.availableFrom &&
+      new Date(availableFrom).toISOString().slice(0, 10) <
+        new Date().toISOString().slice(0, 10)
+    ) {
       res.status(400).json({
         success: false,
         message: "Available from date should be in the future",
