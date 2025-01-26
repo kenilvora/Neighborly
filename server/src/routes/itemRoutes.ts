@@ -29,10 +29,10 @@ router.delete("/delete/:itemId", auth, isUser, deleteItem);
 router.get("/getItemsOfALender", auth, getItemsOfALender);
 
 // Get Item by Id Route
-router.get("/getItem/:itemId", auth, getItemById);
+router.get("/getItem/:itemId", getItemById);
 
 // Get All Items Route
-router.get("/getAllItems", auth, getAllItems);
+router.get("/getAllItems", getAllItems);
 
 // Update Item Route
 router.put("/update/:itemId", auth, isUser, updateItem);

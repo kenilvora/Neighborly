@@ -432,7 +432,6 @@ export const getItemById = async (
 ): Promise<void> => {
   try {
     const itemId = req.params.itemId;
-    const id = req.user?.id;
 
     if (!itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
@@ -481,10 +480,6 @@ export const getItemById = async (
         message: "Item not found",
       });
       return;
-    }
-
-    if (item.lenderId?._id.toString() !== id) {
-      item.borrowers = undefined;
     }
 
     let updatedItem: IItemWithAvgRating, avgRating: number;
