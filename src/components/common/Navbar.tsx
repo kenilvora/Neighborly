@@ -53,24 +53,24 @@ const Navbar = () => {
       </div>
 
       <div className="flex items-center space-x-5">
-        {token && (
+        {!token && (
           <div className="flex space-x-5 items-center">
             <NavLink
               to={"/signup"}
-              className="text-lg text-neutral-800 font-semibold border-2 border-neutral-300 px-5 py-2 rounded-md"
+              className="text-neutral-800 font-semibold border-2 border-neutral-300 px-5 py-2 rounded-md"
             >
               Sign Up
             </NavLink>
             <NavLink
               to={"/login"}
-              className="text-lg text-neutral-800 font-semibold border-2 border-neutral-300 px-5 py-2 rounded-md"
+              className="text-neutral-800 font-semibold border-2 border-neutral-300 px-5 py-2 rounded-md"
             >
               Login
             </NavLink>
           </div>
         )}
 
-        {!token && (
+        {token && (
           <div className="flex items-center relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
