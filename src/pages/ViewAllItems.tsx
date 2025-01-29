@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAllCategories } from "../services/operations/categoryAPI";
 import toast from "react-hot-toast";
 import CustomDropdown from "../components/common/CustomDropdown";
@@ -68,6 +68,8 @@ const ViewAllItems = () => {
   const [cityData, setCityData] = useState([] as City[]);
   const [tags, setTags] = useState([] as string[]);
 
+  const loader = useRef<HTMLDivElement | null>(null);
+
   const [allItems, setAllItems] = useState<Item[]>([]);
 
   useEffect(() => {
@@ -113,42 +115,56 @@ const ViewAllItems = () => {
     getCategories();
   }, []);
 
-  const getItems = async () => {
-    if (!hasMore) return;
-    try {
-      const res = (await dispatch(
-        getAllItems(page, page === 1) as any
-      )) as Item[];
-      setAllItems((prev) => [...prev, ...res]);
-
-      if (res.length < 15) {
-        setHasMore(false);
-      }
-    } catch (error) {
-      toast.error("An error occurred while fetching items");
-    }
-  };
-
   useEffect(() => {
+    const getItems = async () => {
+      if (!hasMore || isLoading) return;
+      try {
+        const res = (await dispatch(
+          getAllItems(page, page === 1) as any
+        )) as Item[];
+
+        if (res.length < 15) {
+          setHasMore(false);
+        }
+
+        setAllItems((prev) => [...prev, ...res]);
+      } catch (error) {
+        toast.error("An error occurred while fetching items");
+      }
+    };
     console.log("Current Page: ", page);
     getItems();
   }, [page, dispatch]);
 
-  const handleScroll = () => {
-    if (
-      window.innerHeight + document.documentElement.scrollTop >=
-      document.documentElement.scrollHeight
-    ) {
-      if (hasMore && !isLoading) {
-        setPage((prevPage) => prevPage + 1); // Increment page number
-      }
-    }
-  };
-
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    let observer: IntersectionObserver;
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      if (!isLoading && hasMore && entries[0].isIntersecting) {
+        console.log("Intersecting");
+        setPage((prevPage) => prevPage + 1);
+      }
+    };
+
+    const createObserver = () => {
+      observer = new IntersectionObserver(observerCallback, {
+        threshold: 0,
+      });
+
+      if (loader.current) {
+        observer.observe(loader.current);
+      }
+    };
+
+    const timeOut = setTimeout(createObserver, 500);
+
+    return () => {
+      clearTimeout(timeOut);
+      if (loader.current && observer) {
+        observer.unobserve(loader.current);
+      }
+    };
+  }, [isLoading]);
 
   const conditions = [
     {
@@ -229,7 +245,7 @@ const ViewAllItems = () => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading && page === 1 ? (
         <Loader />
       ) : (
         <div className="w-[94%] max-w-[1480px] mx-auto my-8 mt-[6.7rem] flex gap-9">
@@ -343,13 +359,11 @@ const ViewAllItems = () => {
               <ItemCard key={i} {...item} />
             ))}
             {hasMore && (
-              <div className="w-full flex justify-center items-center text-xl font-semibold">
-                Loading...
-              </div>
-            )}
-            {!hasMore && (
-              <div className="w-full flex justify-center items-center text-xl font-semibold">
-                No more items to show
+              <div
+                className="w-full flex justify-center items-center text-xl font-semibold"
+                ref={loader}
+              >
+                Loading More Data...
               </div>
             )}
           </div>

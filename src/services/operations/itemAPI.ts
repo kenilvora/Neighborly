@@ -22,9 +22,9 @@ export function getAllItems(page: number, makeLoading: boolean = true) {
     let result: Item[] = [];
     let toastId: string | number = "";
     try {
+      dispatch(setIsLoading(true));
       if (makeLoading) {
         toastId = toast.loading("Fetching items...");
-        dispatch(setIsLoading(true));
       }
       const response = await apiConnector(
         "GET",
@@ -42,9 +42,9 @@ export function getAllItems(page: number, makeLoading: boolean = true) {
     } catch (error) {
       toast.error("An error occurred while fetching items");
     } finally {
+      dispatch(setIsLoading(false));
       if (makeLoading) {
         toast.dismiss(toastId);
-        dispatch(setIsLoading(false));
       }
     }
     return result;
