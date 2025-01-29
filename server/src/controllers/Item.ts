@@ -73,6 +73,7 @@ interface IUser {
 }
 
 interface ILendItem {
+  _id: mongoose.Schema.Types.ObjectId;
   name: string;
   description: string;
   price: number;
@@ -95,6 +96,19 @@ interface ILendItem {
 interface IItemWithAvgRating {
   item: ILendItem;
   avgRating: number;
+}
+
+interface IAllItem {
+  _id: mongoose.Schema.Types.ObjectId;
+  name: string;
+  description: string;
+  price: number;
+  depositAmount: number;
+  images: string[];
+  condition: "New" | "Like New" | "Good" | "Average" | "Poor";
+  deliveryCharges: number;
+  avgRating: number;
+  totalRating?: number;
 }
 
 interface IAllItems {
@@ -512,15 +526,15 @@ export const getAllItems = async (
   res: Response
 ): Promise<void> => {
   try {
-    const filter = (req.query.filter as string) || "";
-    const filterPrice = parseInt(req.query.filterPrice as string) || 0;
+    const filter = (req.query.filter as string) || ""; // done
+    const filterPrice = parseInt(req.query.filterPrice as string) || 0; // done
     const filterDeposit = parseInt(req.query.filterDeposit as string) || 0;
-    const filterCondition = (req.query.filterCondition as string) || "";
-    const filterCategory = (req.query.filterCategory as string) || "";
+    const filterCondition = (req.query.filterCondition as string) || ""; // done
+    const filterCategory = (req.query.filterCategory as string) || ""; // done
     const filterDeliveryType = (req.query.filterDeliveryType as string) || "";
-    const filterCity = (req.query.filterCity as string) || "";
-    const filterState = (req.query.filterState as string) || "";
-    const filterCountry = (req.query.filterCountry as string) || "";
+    const filterCity = (req.query.filterCity as string) || ""; // done
+    const filterState = (req.query.filterState as string) || ""; // done
+    const filterCountry = (req.query.filterCountry as string) || ""; // done
     const filterTags =
       ((req.query.filterTags &&
         JSON.parse(req.query.filterTags as string)) as string[]) || [];
@@ -648,12 +662,20 @@ export const getAllItems = async (
       return item.category !== null && item.itemLocation !== null;
     });
 
-    let updatedItems: IItemWithAvgRating[] = [];
+    let updatedItems: IAllItem[] = [];
 
     updatedItems = items.map((item) => {
       return {
-        item: item,
+        _id: item._id,
+        name: item.name,
+        description: item.description,
+        condition: item.condition,
+        deliveryCharges: item.deliveryCharges || 0,
+        price: item.price,
+        depositAmount: item.depositAmount,
+        images: item.images,
         avgRating: getAvgRating(item.ratingAndReviews),
+        totalRating: item.ratingAndReviews.length,
       };
     });
 

@@ -20,6 +20,11 @@
   height: 0;
 }
 
+* {
+  font-family: "Rubik", sans-serif;
+  box-sizing: border-box;
+}
+
 /* The slider */
 .slider {
   position: absolute;
@@ -72,4 +77,16 @@ input:checked + .slider:before {
 
 .enable-pointer-events {
   pointer-events: auto;
+}
+
+input[type="search"]::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  cursor: pointer;
 }

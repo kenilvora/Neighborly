@@ -15,6 +15,6 @@ router.post("/create", auth, isAdmin, addCategory);
 router.delete("/delete/:id", auth, isAdmin, deleteCategory);
 
 // Get All Categories Route
-router.get("/getAll", auth, getCategories);
+router.get("/getAll", getCategories);
 
 export default router;
