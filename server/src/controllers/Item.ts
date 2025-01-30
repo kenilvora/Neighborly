@@ -91,6 +91,9 @@ interface ILendItem {
   deliveryType?: "Pickup" | "Delivery" | "Both (Pickup & Delivery)";
   deliveryRadius?: number;
   itemLocation?: IAddress;
+  avgRating?: number;
+  totalRating?: number;
+  roundedAvgRating?: number;
 }
 
 interface IItemWithAvgRating {
@@ -539,128 +542,144 @@ export const getAllItems = async (
       ((req.query.filterTags &&
         JSON.parse(req.query.filterTags as string)) as string[]) || [];
 
-    const page = parseInt(req.query.page as string);
+    const isAvailable = req.query.isAvailable as string;
+
+    const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 15;
 
-    let items = (await Item.find({
-      $and: [
-        {
-          $or: [
-            {
-              name: {
-                $regex: filter,
-                $options: "i",
-              },
-            },
-            {
-              description: {
-                $regex: filter,
-                $options: "i",
-              },
-            },
-            {
-              tags: {
-                $regex: filter,
-                $options: "i",
-              },
-            },
-          ],
+    const sortField = req.query.sortField as string;
+    const sortOrder = parseInt(req.query.sortOrder as string);
+
+    const skip = (page - 1) * limit;
+
+    const pipeline: any[] = [];
+
+    // Base query for direct filtering
+    const query: any = {};
+
+    if (isAvailable && (isAvailable === "true" || isAvailable === "false")) {
+      query.isAvailable = isAvailable === "true";
+    }
+
+    if (filter) {
+      query.$or = [
+        { name: { $regex: filter, $options: "i" } },
+        { description: { $regex: filter, $options: "i" } },
+      ];
+    }
+
+    if (filterPrice > 0) {
+      query.price = { $gte: filterPrice };
+    }
+
+    if (filterDeposit > 0) {
+      query.depositAmount = { $gte: filterDeposit };
+    }
+
+    if (filterCondition) {
+      query.condition = filterCondition;
+    }
+
+    if (filterDeliveryType) {
+      query.deliveryType = filterDeliveryType;
+    }
+
+    if (filterTags.length > 0) {
+      query.tags = { $in: filterTags.map((tag) => new RegExp(tag, "i")) };
+    }
+
+    if (filterCategory) {
+      const category = await Category.findOne({ name: filterCategory });
+      if (category) {
+        query.category = category._id;
+      }
+    }
+
+    // Push initial $match for direct filtering
+    pipeline.push({ $match: query });
+
+    // Lookup for itemLocation (Address collection)
+    pipeline.push(
+      {
+        $lookup: {
+          from: "addresses", // Reference collection name
+          localField: "itemLocation",
+          foreignField: "_id",
+          as: "address",
         },
-        {
-          price: {
-            $gte: filterPrice,
+      },
+      {
+        $unwind: "$address", // Convert array to object
+      }
+    );
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: "ratingandreviews",
+          localField: "ratingAndReviews",
+          foreignField: "_id",
+          as: "ratingAndReviews",
+        },
+      },
+      {
+        $addFields: {
+          avgRating: { $avg: "$ratingAndReviews.rating" }, // Compute avgRating
+          totalRating: { $size: "$ratingAndReviews" }, // Compute totalRating
+        },
+      },
+      {
+        $addFields: {
+          roundedAvgRating: {
+            $multiply: [{ $round: { $divide: ["$avgRating", 0.5] } }, 0.5],
           },
         },
-        {
-          depositAmount: {
-            $gte: filterDeposit,
-          },
-        },
-        {
-          condition: {
-            $regex: filterCondition,
-            $options: "i",
-          },
-        },
-        {
-          deliveryType: {
-            $regex: filterDeliveryType,
-            $options: "i",
-          },
-        },
-        { isAvailable: true },
-      ],
-    })
-      .select("-borrowers -currentBorrowerId")
-      .populate({
-        path: "category",
-        select: "name",
-        match: {
-          name: {
-            $regex: filterCategory,
-            $options: "i",
-          },
-        },
-      })
-      .populate({
-        path: "lenderId",
-        select: "firstName lastName profileImage",
-      })
-      .populate({
-        path: "ratingAndReviews",
-        select: "rating",
-      })
-      .populate({
-        path: "itemLocation",
-        select: "city state country",
-        match: {
-          $and: [
-            {
-              city: {
-                $regex: filterCity,
-                $options: "i",
-              },
-            },
-            {
-              state: {
-                $regex: filterState,
-                $options: "i",
-              },
-            },
-            {
-              country: {
-                $regex: filterCountry,
-                $options: "i",
-              },
-            },
-          ],
-        },
-      })
-      .skip((page - 1) * limit)
-      .limit(limit)) as unknown as ILendItem[];
+      }
+    );
+
+    const locationFilters: any = {};
+
+    if (filterCity) {
+      locationFilters["address.city"] = { $regex: filterCity, $options: "i" };
+    }
+
+    if (filterState) {
+      locationFilters["address.state"] = { $regex: filterState, $options: "i" };
+    }
+
+    if (filterCountry) {
+      locationFilters["address.country"] = {
+        $regex: filterCountry,
+        $options: "i",
+      };
+    }
+
+    // Apply location filters if any exist
+    if (Object.keys(locationFilters).length > 0) {
+      pipeline.push({ $match: locationFilters });
+    }
+
+    if (sortField !== "" && (sortOrder === 1 || sortOrder === -1)) {
+      pipeline.push(
+        { $sort: { [sortField]: sortOrder } } // Sorting
+      );
+    }
+
+    pipeline.push(
+      { $skip: skip }, // Pagination
+      { $limit: limit }
+    );
+
+    // Execute the pipeline
+    let items = (await Item.aggregate(pipeline)) as unknown as ILendItem[];
 
     if (!items || items.length === 0) {
-      res.status(404).json({
-        success: false,
+      res.status(200).json({
+        success: true,
         message: "No items found",
       });
       return;
     }
-
-    items = items.filter((item) => {
-      if (filterTags && filterTags.length > 0) {
-        return (
-          item.category !== null &&
-          item.itemLocation !== null &&
-          filterTags.some((tag) =>
-            item.tags.some(
-              (itemTag) => itemTag.toLowerCase() === tag.toLowerCase()
-            )
-          )
-        );
-      }
-      return item.category !== null && item.itemLocation !== null;
-    });
 
     let updatedItems: IAllItem[] = [];
 
@@ -674,8 +693,8 @@ export const getAllItems = async (
         price: item.price,
         depositAmount: item.depositAmount,
         images: item.images,
-        avgRating: getAvgRating(item.ratingAndReviews),
-        totalRating: item.ratingAndReviews.length,
+        avgRating: item.roundedAvgRating || 0,
+        totalRating: item.totalRating,
       };
     });
 
@@ -685,6 +704,7 @@ export const getAllItems = async (
     });
   } catch (err) {
     res.status(500).json({
+      error: err,
       success: false,
       message: "Internal server error",
     });

@@ -43,7 +43,7 @@ const ItemCard = (item: Item) => {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-[350px] h-auto min-h-[541.6px] flex-wrap items-start rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 border border-neutral-200 overflow-hidden bg-white">
+    <div className="flex flex-col w-full max-w-[350px] min-h-[541.6px] max-h-[547px] flex-wrap items-start rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 border border-neutral-200 overflow-hidden bg-white">
       <div className="w-full h-60 relative">
         <img
           src={images[index]}

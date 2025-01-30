@@ -5,9 +5,16 @@ interface CustomDropdownProps {
   label: string;
   fn: any;
   value: string;
+  name: string;
 }
 
-const CustomDropdown = ({ data, label, fn, value }: CustomDropdownProps) => {
+const CustomDropdown = ({
+  data,
+  label,
+  fn,
+  value,
+  name,
+}: CustomDropdownProps) => {
   const customStyles = {
     control: (base: any) => ({
       ...base,
@@ -37,7 +44,12 @@ const CustomDropdown = ({ data, label, fn, value }: CustomDropdownProps) => {
       options={data}
       placeholder={`${label}`}
       styles={customStyles}
-      onChange={(selectedOption: any) => fn(selectedOption?.value || "")}
+      onChange={(selectedOption: any) =>
+        fn((prev: any) => ({
+          ...prev,
+          [name]: selectedOption.value || "",
+        }))
+      }
       className="w-[290px] max-w-[290px]"
     />
   );

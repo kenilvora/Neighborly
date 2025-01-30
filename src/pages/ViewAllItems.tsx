@@ -9,6 +9,7 @@ import { getAllItems } from "../services/operations/itemAPI";
 import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
 import ItemCard from "../components/core/Items/ItemCard";
+import { setHasMore, setPage } from "../slices/itemSlice";
 
 const countryData = data as Country[];
 
@@ -48,25 +49,47 @@ interface Item {
 }
 
 const ViewAllItems = () => {
-  const { isLoading } = useSelector((state: RootState) => state.item);
+  const { isLoading, hasMore, page } = useSelector(
+    (state: RootState) => state.item
+  );
 
   const dispatch = useDispatch();
 
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const isFirstRender = useRef(true);
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [itemPrice, setItemPrice] = useState(100);
-  const [deposit, setDeposit] = useState(100);
-  const [category, setCategory] = useState("");
-  const [country, setCountry] = useState("");
-  const [state, setState] = useState("");
-  const [city, setCity] = useState("");
-  const [condition, setCondition] = useState("");
-  const [deliveryType, setDeliveryType] = useState("");
+
+  const [filters, setFilters] = useState({
+    price: 0,
+    deposit: 0,
+    category: "",
+    country: "",
+    state: "",
+    city: "",
+    condition: "",
+    deliveryType: "",
+    tags: [] as string[],
+    isAvailable: true,
+    sorting: "",
+  });
+
+  const [appliedFilters, setAppliedFilters] = useState(filters);
+
+  const {
+    price,
+    deposit,
+    category,
+    country,
+    state,
+    city,
+    condition,
+    deliveryType,
+    tags,
+    isAvailable,
+  } = filters;
+
   const [stateData, setStateData] = useState([] as State[]);
   const [cityData, setCityData] = useState([] as City[]);
-  const [tags, setTags] = useState([] as string[]);
 
   const loader = useRef<HTMLDivElement | null>(null);
 
@@ -115,34 +138,63 @@ const ViewAllItems = () => {
     getCategories();
   }, []);
 
-  useEffect(() => {
-    const getItems = async () => {
-      if (!hasMore || isLoading) return;
-      try {
-        const res = (await dispatch(
-          getAllItems(page, page === 1) as any
-        )) as Item[];
+  const getItems = async () => {
+    if (!hasMore || isLoading) return;
+    try {
+      const res = (await dispatch(
+        getAllItems(
+          page,
+          page === 1,
+          undefined,
+          appliedFilters.price.toString(),
+          appliedFilters.deposit.toString(),
+          appliedFilters.condition,
+          appliedFilters.category.toLowerCase(),
+          appliedFilters.deliveryType,
+          appliedFilters.city,
+          appliedFilters.state,
+          appliedFilters.country,
+          JSON.stringify(appliedFilters.tags),
+          appliedFilters.isAvailable,
+          appliedFilters.sorting
+        ) as any
+      )) as Item[];
 
-        if (res.length < 15) {
-          setHasMore(false);
+      if (res === undefined || res === null) {
+        dispatch(setHasMore(false));
+        if (allItems.length === 0) {
+          setAllItems([]);
         }
-
-        setAllItems((prev) => [...prev, ...res]);
-      } catch (error) {
-        toast.error("An error occurred while fetching items");
+        return;
       }
-    };
-    console.log("Current Page: ", page);
+
+      setAllItems((prev) => [...prev, ...res]);
+    } catch (error) {
+      toast.error("Something went wrong while fetching items");
+    }
+  };
+
+  useEffect(() => {
     getItems();
   }, [page, dispatch]);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setAllItems([]);
+    dispatch(setPage(1));
+    dispatch(setHasMore(true));
+    getItems();
+  }, [appliedFilters]);
 
   useEffect(() => {
     let observer: IntersectionObserver;
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
       if (!isLoading && hasMore && entries[0].isIntersecting) {
-        console.log("Intersecting");
-        setPage((prevPage) => prevPage + 1);
+        dispatch(setPage(page + 1));
       }
     };
 
@@ -156,10 +208,10 @@ const ViewAllItems = () => {
       }
     };
 
-    const timeOut = setTimeout(createObserver, 500);
+    const timeout = setTimeout(createObserver, 200);
 
     return () => {
-      clearTimeout(timeOut);
+      clearTimeout(timeout);
       if (loader.current && observer) {
         observer.unobserve(loader.current);
       }
@@ -204,6 +256,29 @@ const ViewAllItems = () => {
     },
   ];
 
+  const sortingOptions = [
+    {
+      value: "price-asc",
+      label: "Price: Low to High",
+    },
+    {
+      value: "price-desc",
+      label: "Price: High to Low",
+    },
+    {
+      value: "rating-desc",
+      label: "Rating: High to Low",
+    },
+    {
+      value: "rating-asc",
+      label: "Rating: Low to High",
+    },
+    {
+      value: "newest-first",
+      label: "Newest First",
+    },
+  ];
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "," || e.key === "Enter") {
       e.preventDefault();
@@ -211,7 +286,7 @@ const ViewAllItems = () => {
 
       const tag = (e?.target as HTMLInputElement).value.trim();
       if (tag && !tags.includes(tag.toLowerCase())) {
-        setTags([...tags, tag.toLowerCase()]);
+        setFilters((prev) => ({ ...prev, tags: [...prev.tags, tag] }));
       } else if (tag && tags.includes(tag.toLowerCase())) {
         toast.error("Tag already exists");
       }
@@ -226,21 +301,46 @@ const ViewAllItems = () => {
     e.preventDefault();
     const tagsCopy = [...tags];
     tagsCopy.splice(index, 1);
-    setTags(tagsCopy);
+    setFilters((prev) => ({ ...prev, tags: tagsCopy }));
   };
 
   const resetFilters = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     e.stopPropagation();
-    setItemPrice(100);
-    setDeposit(100);
-    setCategory("");
-    setCountry("");
-    setState("");
-    setCity("");
-    setCondition("");
-    setDeliveryType("");
-    setTags([]);
+
+    setFilters({
+      price: 0,
+      deposit: 0,
+      category: "",
+      country: "",
+      state: "",
+      city: "",
+      condition: "",
+      deliveryType: "",
+      tags: [],
+      isAvailable: true,
+      sorting: "",
+    });
+
+    setAppliedFilters({
+      price: 0,
+      deposit: 0,
+      category: "",
+      country: "",
+      state: "",
+      city: "",
+      condition: "",
+      deliveryType: "",
+      tags: [],
+      isAvailable: true,
+      sorting: "",
+    });
+
+    if (allItems.length === 0) {
+      dispatch(setPage(1));
+      dispatch(setHasMore(true));
+      getItems();
+    }
   };
 
   return (
@@ -248,20 +348,25 @@ const ViewAllItems = () => {
       {isLoading && page === 1 ? (
         <Loader />
       ) : (
-        <div className="w-[94%] max-w-[1480px] mx-auto my-8 mt-[6.7rem] flex gap-9">
+        <div className="w-[94%] max-w-[1480px] mx-auto my-8 mt-[6.6rem] flex gap-9">
           <div className="w-[30%] max-w-[290px] h-full flex flex-col gap-5">
             <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
               <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
               <div>
-                <h1 className="">Price Range: Above ₹ {itemPrice}</h1>
+                <h1 className="">Price Range: Above ₹ {price}</h1>
                 <input
                   type="range"
                   className="w-full"
-                  min={100}
+                  min={0}
                   max={10000}
-                  value={itemPrice}
-                  onChange={(e) => setItemPrice(parseInt(e.target.value))}
+                  value={price}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      price: parseInt(e.target.value),
+                    }))
+                  }
                 />
               </div>
 
@@ -270,10 +375,15 @@ const ViewAllItems = () => {
                 <input
                   type="range"
                   className="w-full"
-                  min={100}
+                  min={0}
                   max={10000}
                   value={deposit}
-                  onChange={(e) => setDeposit(parseInt(e.target.value))}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      deposit: parseInt(e.target.value),
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -281,43 +391,49 @@ const ViewAllItems = () => {
               <CustomDropdown
                 data={categories}
                 label="Category"
-                fn={setCategory}
+                fn={setFilters}
                 value={category}
+                name="category"
               />
 
               <CustomDropdown
                 data={countryData}
                 label="Country"
-                fn={setCountry}
+                fn={setFilters}
                 value={country}
+                name="country"
               />
 
               <CustomDropdown
                 data={stateData}
                 label="State"
-                fn={setState}
+                fn={setFilters}
                 value={state}
+                name="state"
               />
 
               <CustomDropdown
                 data={cityData}
                 label="City"
-                fn={setCity}
+                fn={setFilters}
                 value={city}
+                name="city"
               />
 
               <CustomDropdown
                 data={conditions}
                 label="Condition"
-                fn={setCondition}
+                fn={setFilters}
                 value={condition}
+                name="condition"
               />
 
               <CustomDropdown
                 data={deliveryTypes}
                 label="Delivery Type"
-                fn={setDeliveryType}
+                fn={setFilters}
                 value={deliveryType}
+                name="deliveryType"
               />
 
               <div className="flex flex-col w-sm">
@@ -346,24 +462,78 @@ const ViewAllItems = () => {
                 )}
               </div>
 
-              <button
-                className="bg-blue-500 text-white px-[0.7rem] py-[0.4rem] h-fit rounded-md hover:bg-blue-600 hover:cursor-pointer text-lg"
-                onClick={resetFilters}
-              >
-                Reset Filters
-              </button>
+              <div className="flex gap-2 items-center">
+                <div className="font-semibold text-lg">
+                  Show only Available Items
+                </div>
+
+                <div className="container">
+                  <input
+                    type="checkbox"
+                    className="checkbox"
+                    id="checkbox"
+                    checked={isAvailable}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        isAvailable: e.target.checked,
+                      }))
+                    }
+                  />
+                  <label className="switch" htmlFor="checkbox">
+                    <span className="isAvailable"></span>
+                  </label>
+                </div>
+              </div>
+
+              <CustomDropdown
+                data={sortingOptions}
+                label="Sort By"
+                fn={setFilters}
+                value={filters.sorting}
+                name="sorting"
+              />
+
+              <div className="w-full flex justify-between items-center">
+                <button
+                  className="bg-blue-500 text-white px-[0.7rem] py-[0.4rem] h-fit rounded-md hover:bg-blue-600 hover:cursor-pointer text-lg"
+                  onClick={(
+                    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+                  ) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    setAppliedFilters(filters);
+                  }}
+                >
+                  Apply Filters
+                </button>
+                <button
+                  className="bg-neutral-800 text-white px-[0.7rem] py-[0.4rem] h-fit 
+                  rounded-md hover:bg-neutral-500 hover:cursor-pointer text-lg"
+                  onClick={resetFilters}
+                >
+                  Reset Filters
+                </button>
+              </div>
             </div>
           </div>
           <div className="w-full flex gap-6 flex-wrap">
-            {allItems.map((item, i) => (
-              <ItemCard key={i} {...item} />
-            ))}
-            {hasMore && (
-              <div
-                className="w-full flex justify-center items-center text-xl font-semibold"
-                ref={loader}
-              >
-                Loading More Data...
+            {allItems.length > 0 ? (
+              <>
+                {allItems.map((item, i) => (
+                  <ItemCard key={i} {...item} />
+                ))}
+                <div
+                  className="w-full flex justify-center items-center text-xl font-semibold"
+                  ref={loader}
+                >
+                  {hasMore ? "Loading more items..." : "No more Items"}
+                </div>
+              </>
+            ) : (
+              <div className="w-full flex justify-center items-center text-xl font-semibold">
+                No items found
               </div>
             )}
           </div>
