@@ -348,8 +348,12 @@ const ViewAllItems = () => {
       {isLoading && page === 1 ? (
         <Loader />
       ) : (
-        <div className="w-[94%] max-w-[1480px] mx-auto my-8 mt-[6.6rem] flex gap-9">
-          <div className="w-[30%] max-w-[290px] h-full flex flex-col gap-5">
+        <div
+          className="w-[94%] max-w-[1480px] mx-auto my-8 mt-[6.6rem] flex gap-9
+          max-[650px]:flex-col 
+        "
+        >
+          <div className="min-[1110px]:w-[30%] min-[651px]:w-[40%] max-[650px]:w-full min-[651px]:max-w-[500px] min-[1110px]:max-w-[400px] h-full flex flex-col gap-5">
             <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
               <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
@@ -506,19 +510,19 @@ const ViewAllItems = () => {
                     setAppliedFilters(filters);
                   }}
                 >
-                  Apply Filters
+                  Apply
                 </button>
                 <button
                   className="bg-neutral-800 text-white px-[0.7rem] py-[0.4rem] h-fit 
                   rounded-md hover:bg-neutral-500 hover:cursor-pointer text-lg"
                   onClick={resetFilters}
                 >
-                  Reset Filters
+                  Reset
                 </button>
               </div>
             </div>
           </div>
-          <div className="w-full flex gap-6 flex-wrap">
+          <div className="w-full grid grid-cols-1 gap-5 min-[1110px]:grid-cols-2 min-[1515px]:grid-cols-3">
             {allItems.length > 0 ? (
               <>
                 {allItems.map((item, i) => (

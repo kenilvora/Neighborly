@@ -43,7 +43,7 @@ const ItemCard = (item: Item) => {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-[350px] min-h-[541.6px] max-h-[547px] flex-wrap items-start rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 border border-neutral-200 overflow-hidden bg-white">
+    <div className="flex flex-col w-full h-[541.6px] max-h-[570px] flex-wrap items-start rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 ease-linear border border-neutral-200 overflow-hidden bg-white whitespace-normal">
       <div className="w-full h-60 relative">
         <img
           src={images[index]}
@@ -81,29 +81,29 @@ const ItemCard = (item: Item) => {
         </div>
       </div>
       <div className="p-6 flex flex-col gap-2 h-[300px]">
-        <div className="text-2xl font-bold text-neutral-800 leading-7 line-clamp-2">
+        <div className="text-2xl font-bold text-neutral-800 leading-7 line-clamp-2 max-[370px]:text-xl">
           {name}
         </div>
-        <div className="text-neutral-600 leading-5 text-[1rem] line-clamp-2">
+        <div className="text-neutral-600 leading-5 text-[1rem] line-clamp-2 max-[370px]:text-sm">
           {description}
         </div>
         <div className="space-y-1">
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-lg font-semibold text-blue-600 max-[370px]:text-[1rem]">
             Price: <span className="text-neutral-800">₹{price}</span>
           </div>
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-lg font-semibold text-blue-600 max-[370px]:text-[1rem]">
             Deposit Amount:{" "}
             <span className="text-neutral-800">₹{depositAmount}</span>
           </div>
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-lg font-semibold text-blue-600 max-[370px]:text-[1rem]">
             Delivery Charges:{" "}
             <span className="text-neutral-800">₹{deliveryCharges}</span>
           </div>
         </div>
         <div className="flex items-center justify-between mt-auto w-full">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-[370px]:gap-0">
             <IoMdStarOutline className="text-2xl text-yellow-500" />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 max-[370px]:gap-1">
               <span className="font-semibold text-neutral-800">
                 {avgRating}
               </span>
@@ -112,7 +112,7 @@ const ItemCard = (item: Item) => {
           </div>
           <NavLink
             to={`/item/${_id}`}
-            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 hover:cursor-pointer"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 hover:cursor-pointer max-[370px]:px-2"
           >
             View Details
           </NavLink>

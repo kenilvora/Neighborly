@@ -37,15 +37,17 @@ const Navbar = () => {
   }, [isMenuOpen]);
 
   return (
-    <div className="w-full border-b-1 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
+    <div className="w-full border-b-1 px-2 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
       <div className="w-[98%] max-w-[1480px] flex justify-between py-4 items-center">
-        <div className="w-[211px] flex">
+        <div className="flex w-[160px] max-[1000px]:w-[130px] max-[420px]:w-[115px]">
           <NavLink to={"/"}>
-            <img src={navImage} alt="Logo Image" width={160} />
+            <img src={navImage} alt="Logo Image" />
           </NavLink>
         </div>
 
-        <div className="max-w-lg flex grow relative font-serif items-center">
+        <div
+          className="max-w-lg max-[1000px]:max-w-md max-[855px]:max-w-xs max-[720px]:max-w-3xs flex grow relative font-serif items-center max-[630px]:hidden"
+        >
           <IoIosSearch className="absolute text-3xl top-1/2 -translate-y-1/2 left-2 text-neutral-500" />
           <input
             type="search"
@@ -56,18 +58,24 @@ const Navbar = () => {
           />
         </div>
 
-        <div className="flex items-center gap-5 min-w-[211px] justify-end">
+        <div className="flex items-center gap-4 justify-end max-[420px]:gap-2">
+
+          <div className="max-[630px]:flex hidden bg-neutral-100 p-1.5 rounded-full justify-center items-center border border-neutral-200 shadow-lg" title="Search">
+            <IoIosSearch className="text-3xl text-neutral-500 max-[420px]:text-xl" />
+          </div>
           {!token && (
-            <div className="flex gap-5 items-center">
+            <div className="flex gap-4 max-[420px]:gap-2 items-center">
               <NavLink
                 to={"/signup"}
-                className="text-neutral-800 font-semibold border border-neutral-300 px-5 py-2 rounded-md hover:bg-gray-100"
+                className="text-neutral-800 font-semibold border border-neutral-300 px-5 max-[855px]:px-3 max-[855px]:text-sm py-2 max-[855px]:py-2.5 rounded-md max-[420px]:px-1.5
+                hover:bg-gray-100"
               >
                 Sign Up
               </NavLink>
               <NavLink
                 to={"/login"}
-                className="text-neutral-800 font-semibold border border-neutral-300 px-5 py-2 rounded-md hover:bg-gray-100"
+                className="text-neutral-800 font-semibold border border-neutral-300 px-5 py-2 rounded-md max-[855px]:px-3 max-[855px]:text-sm max-[855px]:py-2.5 max-[420px]:px-1.5
+                hover:bg-gray-100"
               >
                 Login
               </NavLink>

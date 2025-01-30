@@ -50,7 +50,7 @@ const CustomDropdown = ({
           [name]: selectedOption.value || "",
         }))
       }
-      className="w-[290px] max-w-[290px]"
+      className="w-full"
     />
   );
 };
