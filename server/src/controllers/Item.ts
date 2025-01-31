@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { AuthRequest } from "../middlewares/Auth";
-import { z } from "zod";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
 import Item from "../models/Item";
 import Category from "../models/Category";
@@ -8,115 +7,15 @@ import User from "../models/User";
 import mongoose from "mongoose";
 import Notification from "../models/Notification";
 import getAvgRating from "../utils/getAverageRating";
-import { objectIdSchema } from "./RatingAndReview";
-
-const addItemSchema = z.object({
-  name: z.string(),
-  description: z.string(),
-  price: z.number(),
-  depositAmount: z.number(),
-  category: objectIdSchema,
-  tags: z.array(z.string()),
-  isAvailable: z.boolean(),
-  condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]),
-  availableFrom: z.string().date(),
-  deliveryCharges: z.number().optional(),
-  deliveryType: z
-    .enum(["Pickup", "Delivery", "Both (Pickup & Delivery)"])
-    .optional(),
-  deliveryRadius: z.number().optional(),
-});
-
-const updateItemSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  price: z.number().optional(),
-  depositAmount: z.number().optional(),
-  category: objectIdSchema.optional(),
-  tags: z.array(z.string()).optional(),
-  isAvailable: z.boolean().optional(),
-  condition: z.enum(["New", "Like New", "Good", "Average", "Poor"]).optional(),
-  availableFrom: z.string().date().optional(),
-  deliveryCharges: z.number().optional(),
-  deliveryType: z
-    .enum(["Pickup", "Delivery", "Both (Pickup & Delivery)"])
-    .optional(),
-  deliveryRadius: z.number().optional(),
-});
-
-const deleteItemImagesSchema = z.object({
-  images: z.array(z.string()),
-});
-
-interface IRating {
-  rating: number;
-  review?: string;
-}
-
-interface IAddress {
-  addressLine1: string;
-  addressLine2: string;
-  city: string;
-  state: string;
-  country: string;
-  pincode: string;
-}
-
-interface IUser {
-  _id: mongoose.Schema.Types.ObjectId;
-  firstName: string;
-  lastName: string;
-  email: string;
-  contactNumber: string;
-  upiId?: string;
-  profileImage: string;
-}
-
-interface ILendItem {
-  _id: mongoose.Schema.Types.ObjectId;
-  name: string;
-  description: string;
-  price: number;
-  depositAmount: number;
-  category: { name: string };
-  tags: string[];
-  lenderId?: IUser;
-  borrowers?: IUser[];
-  ratingAndReviews: IRating[];
-  isAvailable: boolean;
-  images: string[];
-  condition: "New" | "Like New" | "Good" | "Average" | "Poor";
-  availableFrom: Date;
-  deliveryCharges?: number;
-  deliveryType?: "Pickup" | "Delivery" | "Both (Pickup & Delivery)";
-  deliveryRadius?: number;
-  itemLocation?: IAddress;
-  avgRating?: number;
-  totalRating?: number;
-  roundedAvgRating?: number;
-}
-
-interface IItemWithAvgRating {
-  item: ILendItem;
-  avgRating: number;
-}
-
-interface IAllItem {
-  _id: mongoose.Schema.Types.ObjectId;
-  name: string;
-  description: string;
-  price: number;
-  depositAmount: number;
-  images: string[];
-  condition: "New" | "Like New" | "Good" | "Average" | "Poor";
-  deliveryCharges: number;
-  avgRating: number;
-  totalRating?: number;
-}
-
-interface IAllItems {
-  lendItems: ILendItem[];
-}
+import {
+  addItemSchema,
+  updateItemSchema,
+  deleteItemImagesSchema,
+  ILendItem,
+  IItemWithAvgRating,
+  IAllItem,
+  IAllItems,
+} from "@kenil_vora/neighborly";
 
 export const addItem = async (
   req: AuthRequest,

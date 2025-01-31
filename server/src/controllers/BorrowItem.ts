@@ -1,23 +1,12 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/Auth";
-import { z } from "zod";
 import User from "../models/User";
 import Item from "../models/Item";
 import mongoose from "mongoose";
 import Transaction from "../models/Transaction";
 import BorrowItem from "../models/BorrowItem";
 import ItemStat from "../models/ItemStat";
-import { objectIdSchema } from "./RatingAndReview";
-
-const borrowItemSchema = z.object({
-  itemId: objectIdSchema,
-  startDate: z.string().date(),
-  endDate: z.string().date(),
-  paymentMode: z.enum(["Cash", "Online", "Wallet"]),
-  paymentStatus: z.enum(["Pending", "Paid"]),
-  deliveryType: z.enum(["Pickup", "Delivery"]),
-  transactionId: z.string().optional(),
-});
+import { borrowItemSchema } from "@kenil_vora/neighborly";
 
 export const borrowItem = async (
   req: AuthRequest,

@@ -5,21 +5,9 @@ import {
   MdOutlineKeyboardArrowRight,
 } from "react-icons/md";
 import { NavLink } from "react-router-dom";
+import { IAllItem } from "@kenil_vora/neighborly";
 
-interface Item {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  depositAmount: number;
-  images: string[];
-  condition: "New" | "Like New" | "Good" | "Average" | "Poor";
-  deliveryCharges: number;
-  avgRating: number;
-  totalRating: number;
-}
-
-const ItemCard = (item: Item) => {
+const ItemCard = (item: IAllItem) => {
   const {
     _id,
     name,

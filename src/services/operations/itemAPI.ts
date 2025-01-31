@@ -3,19 +3,7 @@ import { apiConnector } from "../apiConnector";
 import { itemEndpoints } from "../apis";
 import { setIsLoading } from "../../slices/itemSlice";
 import { Dispatch } from "redux";
-
-interface Item {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  depositAmount: number;
-  images: string[];
-  condition: "New" | "Like New" | "Good" | "Average" | "Poor";
-  deliveryCharges: number;
-  avgRating: number;
-  totalRating: number;
-}
+import { IAllItem } from "@kenil_vora/neighborly";
 
 export function getAllItems(
   page: number,
@@ -33,8 +21,8 @@ export function getAllItems(
   isAvailable: boolean = true,
   sorting: string = ""
 ) {
-  return async (dispatch: Dispatch): Promise<Item[]> => {
-    let result: Item[] = [];
+  return async (dispatch: Dispatch): Promise<IAllItem[]> => {
+    let result: IAllItem[] = [];
     let toastId: string | number = "";
     try {
       const available = isAvailable ? "true" : "false";

@@ -1,43 +1,15 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/Auth";
-import { z } from "zod";
 import User from "../models/User";
 import mongoose from "mongoose";
 import RatingAndReview from "../models/RatingAndReview";
 import Item from "../models/Item";
 import getAvgRating from "../utils/getAverageRating";
-
-export const objectIdSchema = z.custom<mongoose.Schema.Types.ObjectId>(
-  (data) => {
-    if (mongoose.Types.ObjectId.isValid(data)) {
-      return data;
-    } else {
-      throw new Error("Invalid ObjectId");
-    }
-  }
-);
-
-const createRatingAndReviewSchema = z.object({
-  rating: z.number().int().min(1).max(5),
-  review: z.string().min(1).max(500),
-  toWhom: objectIdSchema,
-  type: z.enum(["Item", "User"]),
-});
-
-interface IRatingAndReview {
-  rating: number;
-  review: string;
-  reviewer: {
-    firstName: string;
-    lastName: string;
-    profileImage: string;
-  };
-}
-
-interface IGeneralRatingAndReview {
-  ratingAndReviews: IRatingAndReview[];
-  avgRating?: number;
-}
+import {
+  createRatingAndReviewSchema,
+  IRatingAndReview,
+  IGeneralRatingAndReview,
+} from "@kenil_vora/neighborly";
 
 export const createRatingAndReview = async (
   req: AuthRequest,

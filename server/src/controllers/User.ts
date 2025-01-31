@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { z } from "zod";
 import User from "../models/User";
 import Otp from "../models/Otp";
 import bcrypt from "bcrypt";
@@ -13,90 +12,19 @@ import mailSender from "../utils/mailSender";
 import { resetPasswordTokenTemplate } from "../mails/resetPasswordTokenTemplate";
 import mongoose from "mongoose";
 import getAvgRating from "../utils/getAverageRating";
-
-const signUpSchema = z.object({
-  firstName: z.string().min(2),
-  lastName: z.string().min(2),
-  email: z.string().email(),
-  password: z.string().min(6),
-  contactNumber: z.string().min(10),
-  otp: z.number().min(100000).max(999999),
-  role: z.enum(["User", "Admin"]),
-  addressLine1: z.string(),
-  addressLine2: z.string().optional(),
-  city: z.string(),
-  state: z.string(),
-  country: z.string(),
-  pincode: z.string(),
-  isPrimary: z.boolean(),
-});
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  otp: z.number().min(100000).max(999999).optional(),
-});
-
-const sendOtpSchema = z.object({
-  email: z.string().email(),
-  type: z.enum(["signup", "login", "twoFactorAuth"]),
-});
-
-const changePasswordSchema = z.object({
-  oldPassword: z.string().min(6),
-  newPassword: z.string().min(6),
-});
-
-const resetPasswordTokenSchema = z.object({
-  email: z.string().email(),
-});
-
-const resetPasswordSchema = z.object({
-  password: z.string().min(6),
-  confirmPassword: z.string().min(6),
-});
-
-const changeTwoFactorAuthSchema = z.object({
-  otp: z.number().min(100000).max(999999),
-  twoFactorAuth: z.boolean(),
-});
-
-const updateUserDetailsSchema = z.object({
-  firstName: z.string().min(2).optional(),
-  lastName: z.string().min(2).optional(),
-  contactNumber: z.string().min(10).optional(),
-  addressLine1: z.string().optional(),
-  addressLine2: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  country: z.string().optional(),
-  pincode: z.string().optional(),
-  isPrimary: z.boolean().optional(),
-});
-
-interface IRatingAndReview {
-  rating: number;
-}
-
-interface IStatisticalData {
-  itemId: {
-    name: string;
-    description: string;
-    price: number;
-    category: {
-      name: string;
-    };
-    images: string[];
-    ratingAndReviews: IRatingAndReview[];
-  };
-  borrowedCount: number;
-  totalProfit: number;
-}
-
-interface IStatisticalDataWithAvgRating {
-  statData: IStatisticalData;
-  avgRating: number;
-}
+import {
+  signUpSchema,
+  loginSchema,
+  sendOtpSchema,
+  changePasswordSchema,
+  resetPasswordTokenSchema,
+  resetPasswordSchema,
+  changeTwoFactorAuthSchema,
+  updateUserDetailsSchema,
+  IRatings,
+  IStatisticalData,
+  IStatisticalDataWithAvgRating,
+} from "@kenil_vora/neighborly";
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -427,7 +355,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
         path: "address",
         select: "-userId",
       })
-      .populate<{ ratingAndReviews: IRatingAndReview[] }>({
+      .populate<{ ratingAndReviews: IRatings[] }>({
         path: "ratingAndReviews",
         select: "rating",
       });
@@ -816,7 +744,7 @@ export const getUserById = async (
         path: "address",
         select: "-userId",
       })
-      .populate<{ ratingAndReviews: IRatingAndReview[] }>({
+      .populate<{ ratingAndReviews: IRatings[] }>({
         path: "ratingAndReviews",
         select: "rating",
       })

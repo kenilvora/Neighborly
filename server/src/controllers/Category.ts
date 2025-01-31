@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
-import { z } from "zod";
 import Category from "../models/Category";
 import mongoose from "mongoose";
-
-const addCategorySchema = z.object({
-  name: z.string(),
-});
+import { addCategorySchema } from "@kenil_vora/neighborly";
 
 export const addCategory = async (
   req: Request,

@@ -10,6 +10,7 @@ import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
 import ItemCard from "../components/core/Items/ItemCard";
 import { setHasMore, setPage } from "../slices/itemSlice";
+import { IAllItem } from "@kenil_vora/neighborly";
 // import { IoMenu } from "react-icons/io5";
 
 const countryData = data as Country[];
@@ -34,19 +35,6 @@ interface City {
 interface Category {
   value: string;
   label: string;
-}
-
-interface Item {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  depositAmount: number;
-  images: string[];
-  condition: "New" | "Like New" | "Good" | "Average" | "Poor";
-  deliveryCharges: number;
-  avgRating: number;
-  totalRating: number;
 }
 
 const ViewAllItems = () => {
@@ -94,7 +82,7 @@ const ViewAllItems = () => {
 
   const loader = useRef<HTMLDivElement | null>(null);
 
-  const [allItems, setAllItems] = useState<Item[]>([]);
+  const [allItems, setAllItems] = useState<IAllItem[]>([]);
 
   // const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -165,7 +153,7 @@ const ViewAllItems = () => {
           appliedFilters.isAvailable,
           appliedFilters.sorting
         ) as any
-      )) as Item[];
+      )) as IAllItem[];
 
       if (res === undefined || res === null) {
         dispatch(setHasMore(false));
@@ -226,7 +214,7 @@ const ViewAllItems = () => {
         observer.unobserve(loader.current);
       }
     };
-  }, [isLoading]);
+  }, [isLoading, hasMore]);
 
   const conditions = [
     {
@@ -562,24 +550,24 @@ const ViewAllItems = () => {
               </div>
             </div>
           </div>
-          <div className="w-full grid grid-cols-1 gap-5 min-[1110px]:grid-cols-2 min-[1515px]:grid-cols-3">
-            {allItems.length > 0 ? (
-              <>
+          <div className="w-full">
+            {allItems.length > 0 && (
+              <div
+                className={`w-full grid grid-cols-1 gap-5 min-[1110px]:grid-cols-2 min-[1515px]:grid-cols-3`}
+              >
                 {allItems.map((item, i) => (
                   <ItemCard key={i} {...item} />
                 ))}
-                <div
-                  className="w-full flex justify-center items-center text-xl font-semibold"
-                  ref={loader}
-                >
-                  {hasMore ? "Loading more items..." : "No more Items"}
-                </div>
-              </>
-            ) : (
-              <div className="w-full flex justify-center items-center text-xl font-semibold">
-                No items found
               </div>
             )}
+            <div
+              className={`w-full flex justify-center items-center text-xl font-semibold
+              ${allItems.length === 0 ? "h-full" : "mt-20"}
+                `}
+              ref={loader}
+            >
+              {hasMore ? "Loading more items..." : "No more Items"}
+            </div>
           </div>
         </div>
       )}

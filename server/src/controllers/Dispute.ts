@@ -1,22 +1,14 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/Auth";
-import { z } from "zod";
 import User from "../models/User";
 import Item from "../models/Item";
 import mongoose from "mongoose";
 import Dispute from "../models/Dispute";
 import { uploadFileToCloudinary } from "../utils/uploadFileToCloudinary";
-import { objectIdSchema } from "./RatingAndReview";
-
-const createDisputeSchema = z.object({
-  againstWhomId: objectIdSchema,
-  reason: z.string(),
-  againstWhom: z.enum(["User", "Item"]),
-});
-
-const changeDisputeStatusSchema = z.object({
-  status: z.enum(["Resolved", "Closed"]),
-});
+import {
+  createDisputeSchema,
+  changeDisputeStatusSchema,
+} from "@kenil_vora/neighborly";
 
 export const createDispute = async (
   req: AuthRequest,
