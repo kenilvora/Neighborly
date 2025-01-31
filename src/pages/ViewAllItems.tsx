@@ -10,6 +10,7 @@ import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
 import ItemCard from "../components/core/Items/ItemCard";
 import { setHasMore, setPage } from "../slices/itemSlice";
+// import { IoMenu } from "react-icons/io5";
 
 const countryData = data as Country[];
 
@@ -95,6 +96,9 @@ const ViewAllItems = () => {
 
   const [allItems, setAllItems] = useState<Item[]>([]);
 
+  // const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Fetching states based on selected country
   useEffect(() => {
     if (country === "" || country === null || country === undefined) {
       setStateData([]);
@@ -107,6 +111,7 @@ const ViewAllItems = () => {
     }
   }, [country]);
 
+  // Fetching cities based on selected state
   useEffect(() => {
     if (state === "" || state === null || state === undefined) {
       setCityData([]);
@@ -119,6 +124,7 @@ const ViewAllItems = () => {
     }
   }, [state]);
 
+  // Fetching categories
   useEffect(() => {
     const getCategories = async () => {
       try {
@@ -138,6 +144,7 @@ const ViewAllItems = () => {
     getCategories();
   }, []);
 
+  // Fetching items
   const getItems = async () => {
     if (!hasMore || isLoading) return;
     try {
@@ -174,10 +181,12 @@ const ViewAllItems = () => {
     }
   };
 
+  // Fetching items on page changes
   useEffect(() => {
     getItems();
   }, [page, dispatch]);
 
+  // Fetching items on filter changes
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -189,6 +198,7 @@ const ViewAllItems = () => {
     getItems();
   }, [appliedFilters]);
 
+  // Infinite scrolling
   useEffect(() => {
     let observer: IntersectionObserver;
 
@@ -349,11 +359,40 @@ const ViewAllItems = () => {
         <Loader />
       ) : (
         <div
-          className="w-[94%] max-w-[1480px] mx-auto my-8 mt-[6.6rem] flex gap-9
-          max-[650px]:flex-col 
+          className="w-[94%] relative max-w-[1480px] mx-auto my-8 mt-[6.6rem] flex gap-9 max-[670px]:flex-col 
         "
         >
-          <div className="min-[1110px]:w-[30%] min-[651px]:w-[40%] max-[650px]:w-full min-[651px]:max-w-[500px] min-[1110px]:max-w-[400px] h-full flex flex-col gap-5">
+          {/* <div className="absolute h-[900px] overflow-y-auto flex-wrap w-[100%] max-w-[550px] z-10 -top-[1.95rem] -left-5 max-[670px]:flex hidden">
+            <div
+              className={`bg-neutral-200 z-10 absolute w-fit p-2 rounded-full cursor-pointer top-3 transition-all duration-400 ease-in-out left-5
+                ${isMenuOpen ? "rotate-180 right-10" : ""}
+              `}
+              onClick={() =>
+                setIsMenuOpen((prev) => {
+                  if (prev) {
+                    document.body.style.overflow = "auto";
+                  } else {
+                    document.body.style.overflow = "hidden";
+                  }
+                  return !prev;
+                })
+              }
+            >
+              {isMenuOpen ? (
+                <RxCross2 className="text-2xl text-neutral-800" />
+              ) : (
+                <IoMenu className="text-2xl text-neutral-800" />
+              )}
+            </div>
+
+            <div
+              className={`w-full absolute flex flex-wrap rounded-br-2xl rounded-tr-2xl bg-neutral-600 h-full transition-all duration-400 ease-in-out
+              ${isMenuOpen ? "translate-x-0" : "-translate-x-[110%]"}
+            `}
+            ></div>
+          </div> */}
+
+          <div className="min-[1110px]:w-[30%] min-[670px]:w-[40%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1110px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
             <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
               <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
@@ -500,7 +539,8 @@ const ViewAllItems = () => {
 
               <div className="w-full flex justify-between items-center">
                 <button
-                  className="bg-blue-500 text-white px-[0.7rem] py-[0.4rem] h-fit rounded-md hover:bg-blue-600 hover:cursor-pointer text-lg"
+                  className="bg-blue-500 text-white px-[0.7rem] 
+                  py-[0.4rem] h-fit rounded-md hover:bg-blue-600 hover:cursor-pointer text-lg"
                   onClick={(
                     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
                   ) => {

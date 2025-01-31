@@ -80,7 +80,7 @@ const ItemCard = (item: Item) => {
           ))}
         </div>
       </div>
-      <div className="p-6 flex flex-col gap-2 h-[300px]">
+      <div className="p-6 flex flex-col gap-2 h-[300px] w-full">
         <div className="text-2xl font-bold text-neutral-800 leading-7 line-clamp-2 max-[370px]:text-xl">
           {name}
         </div>

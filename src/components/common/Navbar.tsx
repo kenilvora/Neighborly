@@ -60,7 +60,7 @@ const Navbar = () => {
 
         <div className="flex items-center gap-4 justify-end max-[420px]:gap-2">
 
-          <div className="max-[630px]:flex hidden bg-neutral-100 p-1.5 rounded-full justify-center items-center border border-neutral-200 shadow-lg" title="Search">
+          <div className="max-[630px]:flex hidden bg-neutral-100 p-1 rounded-full justify-center items-center border border-neutral-200 shadow-lg" title="Search">
             <IoIosSearch className="text-3xl text-neutral-500 max-[420px]:text-xl" />
           </div>
           {!token && (
