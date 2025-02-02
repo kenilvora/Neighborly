@@ -1,21 +1,22 @@
 import { NavLink } from "react-router-dom";
 import navImage from "../../assets/navbarImage.jpeg";
 import { IoIosSearch } from "react-icons/io";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../reducer/store";
 import { useEffect, useRef, useState } from "react";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import { MdOutlineArrowDropDown, MdOutlineArrowDropUp } from "react-icons/md";
+import { setSearchQuery } from "../../slices/itemSlice";
+import { CgProfile } from "react-icons/cg";
+import { IoLogOutOutline, IoNotifications } from "react-icons/io5";
 
 const Navbar = () => {
-  const { token } = useSelector((state: RootState) => state.user);
-  const { user } = useSelector((state: RootState) => state.user);
+  const { token, user } = useSelector((state: RootState) => state.user);
+  const { searchQuery } = useSelector((state: RootState) => state.item);
 
-  const ref = useRef<HTMLButtonElement>(null);
+  const dispatch = useDispatch();
 
-  const profileImage =
-    user?.profileImage ||
-    "https://api.dicebear.com/9.x/initials/svg?seed=Anonymus%20User";
+  const ref = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -45,9 +46,7 @@ const Navbar = () => {
           </NavLink>
         </div>
 
-        <div
-          className="max-w-lg max-[1000px]:max-w-md max-[855px]:max-w-xs max-[720px]:max-w-3xs flex grow relative font-serif items-center max-[630px]:hidden"
-        >
+        <div className="max-w-lg max-[1000px]:max-w-md max-[855px]:max-w-xs max-[720px]:max-w-3xs flex grow relative font-serif items-center max-[630px]:hidden">
           <IoIosSearch className="absolute text-3xl top-1/2 -translate-y-1/2 left-2 text-neutral-500" />
           <input
             type="search"
@@ -55,15 +54,19 @@ const Navbar = () => {
             placeholder="Search for Items..."
             className="py-2 text-neutral-800 border border-neutral-300 rounded-lg px-4 pl-10 
                     outline-blue-500 w-full font-medium"
+            value={searchQuery}
+            onChange={(e) => dispatch(setSearchQuery(e.target.value))}
           />
         </div>
 
         <div className="flex items-center gap-4 justify-end max-[420px]:gap-2">
-
-          <div className="max-[630px]:flex hidden bg-neutral-100 p-1 rounded-full justify-center items-center border border-neutral-200 shadow-lg" title="Search">
+          <div
+            className="max-[630px]:flex hidden bg-neutral-100 p-1 rounded-full justify-center items-center border border-neutral-200 shadow-lg"
+            title="Search"
+          >
             <IoIosSearch className="text-3xl text-neutral-500 max-[420px]:text-xl" />
           </div>
-          {!token && (
+          {(!token || !user) && (
             <div className="flex gap-4 max-[420px]:gap-2 items-center">
               <NavLink
                 to={"/signup"}
@@ -82,15 +85,14 @@ const Navbar = () => {
             </div>
           )}
 
-          {token && (
-            <div className="flex items-center relative">
+          {token && user && (
+            <div className="flex items-center relative" ref={ref}>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="hover:cursor-pointer flex items-center"
-                ref={ref}
               >
                 <img
-                  src={profileImage}
+                  src={user?.profileImage}
                   alt="Profile Image"
                   width={40}
                   className="rounded-full"
@@ -108,21 +110,24 @@ const Navbar = () => {
                   style={{ animation: "fadeIn 0.6s ease" }}
                 >
                   <NavLink
-                    to={"/profile"}
-                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200"
+                    to={"/dashboard/profile"}
+                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
+                    <CgProfile className="text-xl" />
                     Profile
                   </NavLink>
                   <NavLink
                     to={"/notifications"}
-                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200"
+                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
+                    <IoNotifications className="text-xl" />
                     Notifications
                   </NavLink>
                   <NavLink
                     to={"/logout"}
-                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200"
+                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
+                    <IoLogOutOutline className="text-xl" />
                     Logout
                   </NavLink>
                 </div>

@@ -5,6 +5,10 @@ import ErrorPage from "./components/common/ErrorPage";
 import ViewAllItems from "./pages/ViewAllItems";
 import { FaArrowUpLong } from "react-icons/fa6";
 import { useEffect, useState } from "react";
+import SignUp from "./pages/SignUp";
+import OpenRoute from "./components/common/OpenRoute";
+import OTPVerify from "./pages/OTPVerify";
+import Login from "./pages/Login";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -34,11 +38,33 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col w-full">
       <Navbar />
-      <Routes>
-        <Route path="/" element={<ViewAllItems />} />
+      <div className="mt-[4.7rem]">
+        <Routes>
+          <Route path="/" element={<ViewAllItems />} />
 
-        <Route path="*" element={<ErrorPage />} />
-      </Routes>
+          <Route
+            path="/signup"
+            element={
+              <OpenRoute>
+                <SignUp />
+              </OpenRoute>
+            }
+          />
+
+          <Route path="/otp-verify" element={<OTPVerify />} />
+
+          <Route
+            path="/login"
+            element={
+              <OpenRoute>
+                <Login />
+              </OpenRoute>
+            }
+          />
+
+          <Route path="*" element={<ErrorPage />} />
+        </Routes>
+      </div>
       <button
         className={`fixed bottom-5 right-5 bg-gray-300 text-neutral-700 p-2 text-2xl rounded-full shadow-lg cursor-pointer
           transition-opacity ${isVisible ? "opacity-100" : "opacity-0"} z-50`}

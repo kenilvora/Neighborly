@@ -6,6 +6,7 @@ interface CustomDropdownProps {
   fn: any;
   value: string;
   name: string;
+  required?: boolean;
 }
 
 const CustomDropdown = ({
@@ -14,6 +15,7 @@ const CustomDropdown = ({
   fn,
   value,
   name,
+  required = false,
 }: CustomDropdownProps) => {
   const customStyles = {
     control: (base: any) => ({
@@ -50,6 +52,7 @@ const CustomDropdown = ({
           [name]: selectedOption.value || "",
         }))
       }
+      required={required}
       className="w-full"
     />
   );

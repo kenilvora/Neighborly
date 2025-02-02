@@ -38,7 +38,7 @@ interface Category {
 }
 
 const ViewAllItems = () => {
-  const { isLoading, hasMore, page } = useSelector(
+  const { isLoading, hasMore, page, searchQuery } = useSelector(
     (state: RootState) => state.item
   );
 
@@ -83,8 +83,6 @@ const ViewAllItems = () => {
   const loader = useRef<HTMLDivElement | null>(null);
 
   const [allItems, setAllItems] = useState<IAllItem[]>([]);
-
-  // const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Fetching states based on selected country
   useEffect(() => {
@@ -140,7 +138,7 @@ const ViewAllItems = () => {
         getAllItems(
           page,
           page === 1,
-          undefined,
+          searchQuery,
           appliedFilters.price.toString(),
           appliedFilters.deposit.toString(),
           appliedFilters.condition,
@@ -184,7 +182,7 @@ const ViewAllItems = () => {
     dispatch(setPage(1));
     dispatch(setHasMore(true));
     getItems();
-  }, [appliedFilters]);
+  }, [appliedFilters, searchQuery]);
 
   // Infinite scrolling
   useEffect(() => {
@@ -347,39 +345,9 @@ const ViewAllItems = () => {
         <Loader />
       ) : (
         <div
-          className="w-[94%] relative max-w-[1480px] mx-auto my-8 mt-[6.6rem] flex gap-9 max-[670px]:flex-col 
+          className="w-[94%] relative max-w-[1480px] mx-auto my-8 flex gap-9 max-[670px]:flex-col 
         "
         >
-          {/* <div className="absolute h-[900px] overflow-y-auto flex-wrap w-[100%] max-w-[550px] z-10 -top-[1.95rem] -left-5 max-[670px]:flex hidden">
-            <div
-              className={`bg-neutral-200 z-10 absolute w-fit p-2 rounded-full cursor-pointer top-3 transition-all duration-400 ease-in-out left-5
-                ${isMenuOpen ? "rotate-180 right-10" : ""}
-              `}
-              onClick={() =>
-                setIsMenuOpen((prev) => {
-                  if (prev) {
-                    document.body.style.overflow = "auto";
-                  } else {
-                    document.body.style.overflow = "hidden";
-                  }
-                  return !prev;
-                })
-              }
-            >
-              {isMenuOpen ? (
-                <RxCross2 className="text-2xl text-neutral-800" />
-              ) : (
-                <IoMenu className="text-2xl text-neutral-800" />
-              )}
-            </div>
-
-            <div
-              className={`w-full absolute flex flex-wrap rounded-br-2xl rounded-tr-2xl bg-neutral-600 h-full transition-all duration-400 ease-in-out
-              ${isMenuOpen ? "translate-x-0" : "-translate-x-[110%]"}
-            `}
-            ></div>
-          </div> */}
-
           <div className="min-[1110px]:w-[30%] min-[670px]:w-[40%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1110px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
             <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
               <h1 className="text-2xl font-semibold">Advanced Filters</h1>

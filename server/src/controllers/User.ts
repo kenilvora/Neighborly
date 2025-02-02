@@ -24,6 +24,7 @@ import {
   IRatings,
   IStatisticalData,
   IStatisticalDataWithAvgRating,
+  IUserDetails,
 } from "@kenil_vora/neighborly";
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
@@ -31,6 +32,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     const parsedData = signUpSchema.safeParse(req.body);
 
     if (!parsedData.success) {
+      console.log(parsedData.error);
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -212,7 +214,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const token = jwt.sign(payload, process.env.JWT_SECRET as string);
 
     res.cookie("token", token, {
-      httpOnly: true,
+      secure: true,
       sameSite: "lax",
       maxAge: 31536000000,
     });
@@ -319,7 +321,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
     res.clearCookie("token", {
-      httpOnly: true,
+      secure: true,
       sameSite: "lax",
     });
 
@@ -347,7 +349,7 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       return;
     }
 
-    const user = await User.findById(id)
+    const user = (await User.findById(id)
       .select(
         "firstName lastName email contactNumber address profileImage ratingAndReviews upiId upiIdVerified accountBalance twoFactorAuth"
       )
@@ -358,19 +360,15 @@ export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
       .populate<{ ratingAndReviews: IRatings[] }>({
         path: "ratingAndReviews",
         select: "rating",
-      });
-
-    let avgRating = 0;
+      })) as unknown as IUserDetails;
 
     if (user?.ratingAndReviews.length === 0) {
-      avgRating = getAvgRating(user?.ratingAndReviews);
+      user.avgRating = getAvgRating(user?.ratingAndReviews);
     }
-
-    const updatedUser = { ...user?.toObject(), avgRating };
 
     res.status(200).json({
       success: true,
-      user: updatedUser,
+      user: user,
     });
   } catch (error) {
     res.status(500).json({

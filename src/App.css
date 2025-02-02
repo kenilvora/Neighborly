@@ -23,6 +23,7 @@
 * {
   font-family: "Rubik", sans-serif;
   box-sizing: border-box;
+  user-select: none;
 }
 
 /* The slider */
@@ -91,6 +92,11 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
 /* The switch - the box around the slider */
 .container {
@@ -132,10 +138,24 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .checkbox:checked + .switch {
-  background-color: black
+  background-color: black;
 }
 
 .checkbox:checked + .switch .isAvailable {
   left: calc(50% - 27px / 2 + 15px);
   top: calc(50% - 22px / 2);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #262626;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #262626;
 }
