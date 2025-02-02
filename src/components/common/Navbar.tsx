@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import navImage from "../../assets/navbarImage.jpeg";
 import { IoIosSearch } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +15,7 @@ const Navbar = () => {
   const { searchQuery } = useSelector((state: RootState) => state.item);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -55,7 +56,12 @@ const Navbar = () => {
             className="py-2 text-neutral-800 border border-neutral-300 rounded-lg px-4 pl-10 
                     outline-blue-500 w-full font-medium"
             value={searchQuery}
-            onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+            onChange={(e) => {
+              if (window.location.pathname !== "/") {
+                navigate("/");
+              }
+              dispatch(setSearchQuery(e.target.value));
+            }}
           />
         </div>
 
@@ -111,21 +117,21 @@ const Navbar = () => {
                 >
                   <NavLink
                     to={"/dashboard/profile"}
-                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
+                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
                     <CgProfile className="text-xl" />
                     Profile
                   </NavLink>
                   <NavLink
                     to={"/notifications"}
-                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
+                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
                     <IoNotifications className="text-xl" />
                     Notifications
                   </NavLink>
                   <NavLink
                     to={"/logout"}
-                    className="block text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
+                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
                     <IoLogOutOutline className="text-xl" />
                     Logout
