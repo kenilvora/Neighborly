@@ -19,9 +19,14 @@ const Navbar = () => {
 
   const ref = useRef<HTMLDivElement>(null);
 
+  const searchRef = useRef<HTMLDivElement>(null);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+
   useOnClickOutside(ref, () => setIsMenuOpen(false));
+  useOnClickOutside(searchRef, () => setIsSearchBarOpen(false));
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -41,7 +46,11 @@ const Navbar = () => {
   return (
     <div className="w-full border-b-1 px-2 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
       <div className="w-[98%] max-w-[1480px] flex justify-between py-4 items-center">
-        <div className="flex w-[160px] max-[1000px]:w-[130px] max-[420px]:w-[115px]">
+        <div
+          className={`w-[160px] max-[1000px]:w-[130px] max-[420px]:w-[115px]
+              ${isSearchBarOpen ? "hidden" : "flex"}
+          `}
+        >
           <NavLink to={"/"}>
             <img src={navImage} alt="Logo Image" />
           </NavLink>
@@ -65,18 +74,40 @@ const Navbar = () => {
           />
         </div>
 
-        <div className="flex items-center gap-4 justify-end max-[420px]:gap-2">
+        <div className="flex items-center justify-end gap-2">
           <div
-            className="max-[630px]:flex hidden bg-neutral-100 p-1 rounded-full justify-center items-center border border-neutral-200 shadow-lg"
-            title="Search"
+            className="input-wrapper hidden max-[630px]:flex"
+            onFocus={() => setIsSearchBarOpen(true)}
+            onBlur={() => setIsSearchBarOpen(false)}
+            ref={searchRef}
           >
-            <IoIosSearch className="text-3xl text-neutral-500 max-[420px]:text-xl" />
+            <button className="icon">
+              <IoIosSearch className="text-3xl" />
+            </button>
+            <input
+              placeholder="Search.."
+              className="input"
+              name="text"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                if (window.location.pathname !== "/") {
+                  navigate("/");
+                }
+                dispatch(setSearchQuery(e.target.value));
+              }}
+            />
           </div>
+
           {(!token || !user) && (
-            <div className="flex gap-4 max-[420px]:gap-2 items-center">
+            <div
+              className={`gap-4 max-[420px]:gap-2 items-center
+                ${isSearchBarOpen ? "hidden" : "flex"}
+            `}
+            >
               <NavLink
                 to={"/signup"}
-                className="text-neutral-800 font-semibold border border-neutral-300 px-5 max-[855px]:px-3 max-[855px]:text-sm py-2 max-[855px]:py-2.5 rounded-md max-[420px]:px-1.5
+                className="text-neutral-800 font-semibold border border-neutral-300 px-5 max-[855px]:px-3 max-[855px]:text-sm py-2 max-[855px]:py-2.5 rounded-md max-[420px]:px-1.5 line-clamp-1
                 hover:bg-gray-100"
               >
                 Sign Up
@@ -92,7 +123,12 @@ const Navbar = () => {
           )}
 
           {token && user && (
-            <div className="flex items-center relative" ref={ref}>
+            <div
+              className={`items-center relative
+                ${isSearchBarOpen ? "hidden" : "flex"}
+            `}
+              ref={ref}
+            >
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="hover:cursor-pointer flex items-center"
