@@ -7,8 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import { MdOutlineArrowDropDown, MdOutlineArrowDropUp } from "react-icons/md";
 import { setSearchQuery } from "../../slices/itemSlice";
-import { CgProfile } from "react-icons/cg";
 import { IoLogOutOutline, IoNotifications } from "react-icons/io5";
+import { LuLayoutDashboard } from "react-icons/lu";
 
 const Navbar = () => {
   const { token, user } = useSelector((state: RootState) => state.user);
@@ -152,11 +152,11 @@ const Navbar = () => {
                   style={{ animation: "fadeIn 0.6s ease" }}
                 >
                   <NavLink
-                    to={"/dashboard/profile"}
+                    to={"/dashboard"}
                     className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
                   >
-                    <CgProfile className="text-xl" />
-                    Profile
+                    <LuLayoutDashboard className="text-xl" />
+                    Dashboard
                   </NavLink>
                   <NavLink
                     to={"/notifications"}

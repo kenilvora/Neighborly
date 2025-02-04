@@ -47,7 +47,10 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
         secure: true,
         sameSite: "lax",
       });
-      Cookies.remove("user");
+      Cookies.remove("user", {
+        secure: true,
+        sameSite: "lax",
+      });
       dispatch(setToken(null));
       dispatch(setUser(null));
     }
@@ -55,7 +58,7 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
 
   if (isAuthenticated === null) return <Loader />;
 
-  return isAuthenticated ? <Navigate to={"/dashboard/profile"} /> : children;
+  return isAuthenticated ? <Navigate to={"/dashboard"} /> : children;
 };
 
 export default OpenRoute;

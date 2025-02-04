@@ -26,7 +26,7 @@ const OTPVerify = () => {
       navigate("/login");
     }
     if (otpType === "twoFactorAuth" && !twoFactorAuthData) {
-      navigate("/dashboard/profile");
+      navigate("/dashboard");
     }
   }, [otpType, signUpData, loginData, twoFactorAuthData, navigate]);
 
@@ -77,7 +77,7 @@ const OTPVerify = () => {
       (otpType === "twoFactorAuth" && !twoFactorAuthData) ? (
         <Loader />
       ) : (
-        <div className="w-full h-[calc(100vh-75px)] flex justify-center items-center px-5">
+        <div className="w-full h-[calc(100vh-74.8px)] flex justify-center items-center px-5">
           <div className="flex flex-col justify-center rounded-lg gap-3 text-center">
             <h1 className="font-bold text-2xl">Verify Your OTP</h1>
             <p className="text-neutral-600 text-lg max-[500px]:text-base max-[390px]:text-sm">

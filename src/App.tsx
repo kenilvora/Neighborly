@@ -9,6 +9,9 @@ import SignUp from "./pages/SignUp";
 import OpenRoute from "./components/common/OpenRoute";
 import OTPVerify from "./pages/OTPVerify";
 import Login from "./pages/Login";
+import PrivateRoute from "./components/common/PrivateRoute";
+import Dashboard from "./pages/Dashboard";
+import DashboardComponent from "./components/core/Dashboard/Dashboard";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -61,6 +64,16 @@ function App() {
               </OpenRoute>
             }
           />
+
+          <Route
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          >
+            <Route path="/dashboard" element={<DashboardComponent />} />
+          </Route>
 
           <Route path="*" element={<ErrorPage />} />
         </Routes>

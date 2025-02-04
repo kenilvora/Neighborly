@@ -31,7 +31,7 @@ const ItemCard = (item: IAllItem) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-[541.6px] max-h-[570px] flex-wrap items-start rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 ease-linear border border-neutral-200 overflow-hidden bg-white whitespace-normal">
+    <div className="flex flex-col w-full h-[550px] max-h-[570px] flex-wrap items-start justify-between rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 ease-linear border border-neutral-200 overflow-hidden bg-white whitespace-normal">
       <div className="w-full h-60 relative">
         <img
           src={images[index]}

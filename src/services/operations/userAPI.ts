@@ -46,7 +46,9 @@ export function login(data: LoginInput, navigate: NavigateFunction | null) {
 
       dispatch(setToken(res.data.token));
       toast.success("Logged In Successfully.");
-      navigate && navigate("/dashboard/profile");
+      if (navigate) {
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
@@ -99,7 +101,11 @@ export function getMe() {
       }
 
       dispatch(setUser(res.data.user));
-      Cookies.set("user", JSON.stringify(res.data.user));
+      Cookies.set("user", JSON.stringify(res.data.user), {
+        secure: true,
+        sameSite: "lax",
+        expires: 365,
+      });
       return true;
     } catch (error) {
       return false;

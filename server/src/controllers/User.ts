@@ -222,7 +222,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({
       success: true,
       message: "Logged in Successfully",
-      token,
+      token: token,
     });
   } catch (error) {
     res.status(500).json({

@@ -47,7 +47,10 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
         secure: true,
         sameSite: "lax",
       });
-      Cookies.remove("user");
+      Cookies.remove("user", {
+        secure: true,
+        sameSite: "lax",
+      });
       dispatch(setToken(null));
       dispatch(setUser(null));
     }

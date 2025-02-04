@@ -208,7 +208,7 @@ const SignUp = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="w-full min-h-[calc(100vh-75px)] overflow-auto flex justify-center items-center my-12">
+        <div className="w-full min-h-[calc(100vh-74.8px)] overflow-auto flex justify-center items-center my-12">
           <div className="w-[90%] max-w-[1000px] flex flex-col justify-center gap-4 p-5 py-10 max-[800px]:py-5 max-[800px]:pb-1 max-[800px]:px-3 rounded-xl border-3 border-neutral-100 shadow-xl">
             <div className="flex flex-col items-center gap-2 text-center">
               <h1 className="text-4xl font-bold max-[600px]:text-2xl max-[400px]:text-xl">
