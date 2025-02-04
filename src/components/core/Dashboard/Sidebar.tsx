@@ -1,35 +1,61 @@
-import { useState } from "react";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { SidebarLink } from "../../../data/SidebarLink";
 
-const Sidebar = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+type SidebarProps = {
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (value: boolean) => void;
+};
 
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   return (
     <div
-      className={`min-w-[260px] bg-white px-4 py-2 border-r border-neutral-200 flex flex-col
+      className={`bg-white px-4 py-2 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
                 ${
-                  isSidebarOpen ? "translate-x-0" : "-translate-x-[80%]"
+                  isSidebarOpen ? "min-w-[260px] " : "min-w-[60px]"
                 } transition-all duration-300 ease-in-out
         `}
     >
-      <div className="text-xl font-bold flex justify-between items-center">
+      <div className="text-xl font-bold flex justify-between items-center pl-0.5">
         <span
-          className={`
-            ${isSidebarOpen ? "block" : "hidden"}
+          className={` transition-all duration-300 ease-in-out
+            ${isSidebarOpen ? "flex" : "hidden"}
             `}
         >
           Menu
         </span>
         <div
-          className={`text-black hover:cursor-pointer hover:bg-neutral-200 rounded-sm text-xl p-1.5 fixed
-                ${
-                    isSidebarOpen ? "right-4" : "right-2.5 top-2"
-                }
-            `}
+          className={`text-black hover:cursor-pointer hover:bg-neutral-200 rounded-sm text-xl p-1.5`}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          {isSidebarOpen ? <LuChevronLeft /> : <LuChevronRight />}
+          {isSidebarOpen ? (
+            <LuChevronLeft size={24} />
+          ) : (
+            <LuChevronRight size={24} />
+          )}
         </div>
+      </div>
+
+      <div className="flex flex-col justify-center">
+        {SidebarLink.map((link) => (
+          <div
+            key={link.id}
+            title={link.name}
+            className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-100 px-2 py-2 rounded-lg"
+          >
+            <link.icon size={24} />
+            <span
+              className={`absolute left-10 whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out
+                          ${
+                            isSidebarOpen
+                              ? "opacity-100 visible"
+                              : "opacity-0 invisible"
+                          }
+                    `}
+            >
+              {link.name}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
