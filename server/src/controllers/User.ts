@@ -862,3 +862,61 @@ export const getStatisticalData = async (
     });
   }
 };
+
+export const getDashboardData = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+
+    const data = await User.aggregate([
+      {
+        $match: {
+          _id: id,
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "borrowItems",
+          foreignField: "_id",
+          as: "borrowedItems",
+        },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "borrowItems",
+          foreignField: "_id",
+          as: "lentItems",
+        },
+      },
+      {
+        $lookup: {
+          from: "itemstats",
+          localField: "statisticalData",
+          foreignField: "_id",
+          as: "statisticalData",
+        },
+      },
+      {
+        $addFields: {
+          borrowedItemsCount: { $size: "$borrowedItems" },
+          lentItemsCount: { $size: "$lentItems" },
+          totalProfit: { $sum: "$statisticalData.totalProfit" },
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: data[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

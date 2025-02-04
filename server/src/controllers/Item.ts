@@ -16,6 +16,7 @@ import {
   IAllItem,
   IAllItems,
 } from "@kenil_vora/neighborly";
+import RecentActivity from "../models/RecentActivity";
 
 export const addItem = async (
   req: AuthRequest,
@@ -140,6 +141,15 @@ export const addItem = async (
     });
 
     user.lendItems.push(item._id as mongoose.Schema.Types.ObjectId);
+
+    const recentActivity = await RecentActivity.create({
+      userId: id,
+      itemID: item._id,
+      type: "Lent",
+      status: "Item Added",
+    });
+
+    user.recentActivities?.push(recentActivity._id);
 
     await user.save();
 

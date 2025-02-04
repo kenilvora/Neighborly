@@ -9,6 +9,7 @@ import {
   createDisputeSchema,
   changeDisputeStatusSchema,
 } from "@kenil_vora/neighborly";
+import RecentActivity from "../models/RecentActivity";
 
 export const createDispute = async (
   req: AuthRequest,
@@ -46,7 +47,7 @@ export const createDispute = async (
       return;
     }
 
-    let againstWhomUserId;
+    let againstWhomUserId, itemId;
 
     if (againstWhom === "Item") {
       const item = await Item.findById(againstWhomId);
@@ -76,6 +77,7 @@ export const createDispute = async (
       }
 
       againstWhomUserId = item.lenderId;
+      itemId = item._id;
     } else {
       const againstWhomUser = await User.findById(againstWhomId);
 
@@ -121,7 +123,22 @@ export const createDispute = async (
       images: fileUrls,
     });
 
+    const recentActivity1 = await RecentActivity.create({
+      userId: id,
+      itemID: itemId !== undefined ? itemId : null,
+      type: "Dispute Created",
+      status: "Active",
+    });
+
+    const recentActivity2 = await RecentActivity.create({
+      userId: againstWhomUserId,
+      itemID: itemId !== undefined ? itemId : null,
+      type: "Dispute Raised",
+      status: "Active",
+    });
+
     user.disputesCreatedByMe?.push(dispute._id);
+    user.recentActivities?.push(recentActivity1._id);
 
     await user.save();
 
@@ -129,6 +146,7 @@ export const createDispute = async (
 
     if (againstWhomUser) {
       againstWhomUser.disputesCreatedAgainstMe?.push(dispute._id);
+      againstWhomUser.recentActivities?.push(recentActivity2._id);
 
       await againstWhomUser.save();
     }

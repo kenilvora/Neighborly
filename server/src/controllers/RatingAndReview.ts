@@ -10,6 +10,7 @@ import {
   IRatingAndReview,
   IGeneralRatingAndReview,
 } from "@kenil_vora/neighborly";
+import RecentActivity from "../models/RecentActivity";
 
 export const createRatingAndReview = async (
   req: AuthRequest,
@@ -116,15 +117,37 @@ export const createRatingAndReview = async (
       type,
     });
 
+    const recentActivity1 = await RecentActivity.create({
+      userId: id,
+      itemID: toWhomItem ? toWhomItem._id : null,
+      type: "Review Created",
+      status: `${rating}⭐`,
+    });
+
+    user.recentActivities?.push(recentActivity1._id);
+
+    await user.save();
+
+    const recentActivity2 = await RecentActivity.create({
+      userId: toWhom,
+      itemID: toWhomItem ? toWhomItem._id : null,
+      type: "Review Given To Me",
+      status: `${rating}⭐`,
+    });
+
     if (type === "User") {
       toWhomUser?.ratingAndReviews.push(
         newRatingAndReview._id as mongoose.Schema.Types.ObjectId
       );
+      toWhomUser?.recentActivities?.push(recentActivity2._id);
       await toWhomUser?.save();
     } else {
       toWhomItem?.ratingAndReviews.push(
         newRatingAndReview._id as mongoose.Schema.Types.ObjectId
       );
+      const toWhomUser = await User.findById(toWhomItem?.lenderId);
+      toWhomUser?.recentActivities?.push(recentActivity2._id);
+      await toWhomUser?.save();
       await toWhomItem?.save();
     }
 

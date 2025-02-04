@@ -7,6 +7,7 @@ import Transaction from "../models/Transaction";
 import BorrowItem from "../models/BorrowItem";
 import ItemStat from "../models/ItemStat";
 import { borrowItemSchema } from "@kenil_vora/neighborly";
+import RecentActivity from "../models/RecentActivity";
 
 export const borrowItem = async (
   req: AuthRequest,
@@ -279,6 +280,15 @@ export const borrowItem = async (
 
     lender.statisticalData?.push(itemStat._id);
 
+    const recentActivity = await RecentActivity.create({
+      userId: id,
+      itemID: itemId,
+      type: "Borrowed",
+      status: "Success",
+    });
+
+    borrower.recentActivities?.push(recentActivity._id);
+
     await borrower.save();
 
     await lender.save();
@@ -385,6 +395,17 @@ export const returnItem = async (
     borrowItem.type = "Previously Borrowed";
 
     await borrowItem.save();
+
+    const recentActivity = await RecentActivity.create({
+      userId: id,
+      itemID: itemId,
+      type: "Returned",
+      status: "Success",
+    });
+
+    user.recentActivities?.push(recentActivity._id);
+
+    await user.save();
 
     res.status(200).json({
       success: true,

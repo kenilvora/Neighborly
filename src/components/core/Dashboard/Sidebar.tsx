@@ -1,5 +1,6 @@
-import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
+import { LuChevronLeft, LuChevronRight, LuLogOut } from "react-icons/lu";
 import { SidebarLink } from "../../../data/SidebarLink";
+import { NavLink } from "react-router-dom";
 
 type SidebarProps = {
   isSidebarOpen: boolean;
@@ -9,7 +10,7 @@ type SidebarProps = {
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   return (
     <div
-      className={`bg-white px-4 py-2 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
+      className={`bg-white px-4 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
                 ${
                   isSidebarOpen ? "min-w-[260px] " : "min-w-[60px]"
                 } transition-all duration-300 ease-in-out
@@ -37,10 +38,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
 
       <div className="flex flex-col justify-center">
         {SidebarLink.map((link) => (
-          <div
+          <NavLink
+            to={link.path}
             key={link.id}
             title={link.name}
-            className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-100 px-2 py-2 rounded-lg"
+            className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 px-2 py-2 rounded-lg"
           >
             <link.icon size={24} />
             <span
@@ -54,8 +56,25 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
             >
               {link.name}
             </span>
-          </div>
+          </NavLink>
         ))}
+        <button
+          title={"Logout"}
+          className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 px-2 py-2 rounded-lg"
+        >
+          <LuLogOut size={24} />
+          <span
+            className={`absolute left-10 whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out
+                          ${
+                            isSidebarOpen
+                              ? "opacity-100 visible"
+                              : "opacity-0 invisible"
+                          }
+                    `}
+          >
+            Logout
+          </span>
+        </button>
       </div>
     </div>
   );

@@ -24,6 +24,7 @@ interface IUser extends mongoose.Document {
   disputesCreatedAgainstMe?: mongoose.Schema.Types.ObjectId[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  recentActivities?: mongoose.Schema.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -141,6 +142,12 @@ const userSchema = new mongoose.Schema(
     resetPasswordExpires: {
       type: Date,
     },
+    recentActivities: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "RecentActivity",
+      },
+    ],
   },
   {
     timestamps: true,

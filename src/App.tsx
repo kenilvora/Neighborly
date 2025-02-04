@@ -12,6 +12,13 @@ import Login from "./pages/Login";
 import PrivateRoute from "./components/common/PrivateRoute";
 import Dashboard from "./pages/Dashboard";
 import DashboardComponent from "./components/core/Dashboard/Dashboard";
+import Profile from "./components/core/Dashboard/Profile";
+import RatingsReviews from "./components/core/Dashboard/RatingsReviews";
+import BorrowedItems from "./components/core/Dashboard/BorrowedItems";
+import LendingItemsStats from "./components/core/Dashboard/LendingItemsStats";
+import Transactions from "./components/core/Dashboard/Transactions";
+import AddItem from "./components/core/Dashboard/AddItem";
+import Disputes from "./components/core/Dashboard/Disputes";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -73,6 +80,26 @@ function App() {
             }
           >
             <Route path="/dashboard" element={<DashboardComponent />} />
+
+            <Route path="/dashboard/profile" element={<Profile />} />
+
+            <Route path="/dashboard/ratings" element={<RatingsReviews />} />
+
+            <Route
+              path="/dashboard/borrowedItems"
+              element={<BorrowedItems />}
+            />
+
+            <Route
+              path="/dashboard/lendedItemsStats"
+              element={<LendingItemsStats />}
+            />
+
+            <Route path="/dashboard/transactions" element={<Transactions />} />
+
+            <Route path="/dashboard/disputes" element={<Disputes />} />
+
+            <Route path="/dashboard/addItem" element={<AddItem />} />
           </Route>
 
           <Route path="*" element={<ErrorPage />} />
