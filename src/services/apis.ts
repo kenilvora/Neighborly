@@ -13,6 +13,8 @@ export const userEndpoints = {
   UPDATE_PROFILE: `${BACKEND_URL}/user/updateProfile`,
   GET_USER: `${BACKEND_URL}/user/getUser`,
   GET_STATISTICAL_DATA: `${BACKEND_URL}/user/getStatisticalData`,
+  GET_DASHBOARD_DATA: `${BACKEND_URL}/user/getDashboardData`,
+  GET_RECENT_ACTIVITY: `${BACKEND_URL}/user/getRecentActivity`,
 };
 
 export const itemEndpoints = {
@@ -40,6 +42,7 @@ export const ratingAndReviewEndpoints = {
   CREATE_RATING_AND_REVIEW: `${BACKEND_URL}/ratingAndReview/create`,
   GET_RATING_AND_REVIEW_USER: `${BACKEND_URL}/ratingAndReview/getOfUser`,
   GET_RATING_AND_REVIEW_ITEM: `${BACKEND_URL}/ratingAndReview/getOfItem`,
+  GET_RATING_AND_REVIEW_ITEM_OF_USER: `${BACKEND_URL}/ratingAndReview/getOfItemOfUser`,
 };
 
 export const disputeEndpoints = {

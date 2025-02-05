@@ -7,6 +7,13 @@ import { userEndpoints } from "../apis";
 import Cookies from "js-cookie";
 import { LoginInput, SignUpInput } from "@kenil_vora/neighborly";
 
+interface DashboardData {
+  borrowedItemsCount: number;
+  lentItemsCount: number;
+  totalProfit: number;
+  pendingReturns: number;
+}
+
 export function signUp(data: SignUpInput, navigate: NavigateFunction | null) {
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Signing up...");
@@ -113,4 +120,49 @@ export function getMe() {
       dispatch(setIsLoading(false));
     }
   };
+}
+
+export function logOut(navigate: NavigateFunction | null) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    try {
+      dispatch(setIsLoading(true));
+      const res = await apiConnector("POST", userEndpoints.LOGOUT);
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      dispatch(setToken(""));
+      dispatch(setUser(null));
+      Cookies.remove("user", {
+        secure: true,
+        sameSite: "lax",
+      });
+      localStorage.clear();
+      if (navigate) {
+        navigate("/login");
+      }
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  };
+}
+
+export async function getDashboardData(): Promise<DashboardData> {
+  let result: DashboardData = {} as DashboardData;
+  try {
+    const res = await apiConnector("GET", userEndpoints.GET_DASHBOARD_DATA);
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    result = res.data.data;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+  } finally {
+    return result;
+  }
 }

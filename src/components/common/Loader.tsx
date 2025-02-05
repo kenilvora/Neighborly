@@ -1,6 +1,6 @@
 const Loader = () => {
   return (
-    <div role="status" className="flex items-center justify-center w-full h-screen">
+    <div role="status" className="flex items-center justify-center w-full h-[calc(100vh-75px)]">
       <svg
         aria-hidden="true"
         className="inline w-20 h-20 animate-spin fill-blue-600 text-gray-200"

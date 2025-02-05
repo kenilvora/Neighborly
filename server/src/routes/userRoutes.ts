@@ -29,7 +29,7 @@ router.post("/login", login);
 router.post("/sendOtp", sendOtp);
 
 // Logout Route
-router.post("/logout", logout);
+router.post("/logout", auth, logout);
 
 // Get Me Route
 router.get("/me", auth, getMe);

@@ -48,7 +48,7 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col w-full">
       <Navbar />
-      <div className="mt-[4.7rem]">
+      <div className="mt-[4.55rem]">
         <Routes>
           <Route path="/" element={<ViewAllItems />} />
 

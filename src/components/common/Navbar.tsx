@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import navImage from "../../assets/navbarImage.jpeg";
 import { IoIosSearch } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import { MdOutlineArrowDropDown, MdOutlineArrowDropUp } from "react-icons/md";
 import { setSearchQuery } from "../../slices/itemSlice";
 import { IoLogOutOutline, IoNotifications } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
+import { logOut } from "../../services/operations/userAPI";
 
 const Navbar = () => {
   const { token, user } = useSelector((state: RootState) => state.user);
@@ -16,6 +17,8 @@ const Navbar = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const location = useLocation();
 
   const ref = useRef<HTMLDivElement>(null);
 
@@ -43,9 +46,21 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
+  useEffect(() => {
+    if (isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [location, location.pathname]);
+
+  function handleLogout(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+
+    dispatch(logOut(navigate) as any);
+  }
+
   return (
     <div className="w-full border-b-1 px-2 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
-      <div className="w-[98%] max-w-[1480px] flex justify-between py-4 items-center">
+      <div className="w-[97%] max-w-[1480px] flex justify-between py-4 items-center">
         <div
           className={`w-[160px] max-[1000px]:w-[130px] max-[420px]:w-[115px]
               ${isSearchBarOpen ? "hidden" : "flex"}
@@ -130,7 +145,12 @@ const Navbar = () => {
               ref={ref}
             >
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+
+                  setIsMenuOpen((prev) => !prev);
+                }}
                 className="hover:cursor-pointer flex items-center"
               >
                 <img
@@ -153,25 +173,25 @@ const Navbar = () => {
                 >
                   <NavLink
                     to={"/dashboard"}
-                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
+                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
                   >
                     <LuLayoutDashboard className="text-xl" />
                     Dashboard
                   </NavLink>
                   <NavLink
                     to={"/notifications"}
-                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
+                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
                   >
                     <IoNotifications className="text-xl" />
                     Notifications
                   </NavLink>
-                  <NavLink
-                    to={"/logout"}
-                    className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center"
+                  <button
+                    className="text-neutral-800 font-medium cursor-pointer px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
+                    onClick={handleLogout}
                   >
                     <IoLogOutOutline className="text-xl" />
                     Logout
-                  </NavLink>
+                  </button>
                 </div>
               )}
             </div>

@@ -8,8 +8,9 @@ export default function useOnClickOutside(
     const listener = (event: MouseEvent | TouchEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         handler(event);
+      } else {
+        return;
       }
-      return;
     };
 
     document.addEventListener("mousedown", listener);

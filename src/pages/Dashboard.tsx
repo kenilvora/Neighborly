@@ -7,7 +7,8 @@ import { useState } from "react";
 import { SidebarLink } from "../data/SidebarLink";
 
 const Dashboard = () => {
-  const { isLoading } = useSelector((state: RootState) => state.user);
+  const userLoading = useSelector((state: RootState) => state.user.isLoading);
+  const itemLoading = useSelector((state: RootState) => state.item.isLoading);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -19,19 +20,19 @@ const Dashboard = () => {
 
   return (
     <>
-      {isLoading ? (
+      {userLoading || itemLoading ? (
         <Loader />
       ) : (
-        <div className="h-[calc(100vh-76px)] overflow-hidden relative flex bg-neutral-100">
+        <div className="h-[calc(100vh-75px)] overflow-hidden relative flex bg-neutral-100">
           <Sidebar
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
 
           <div
-            className={`w-11/12 mx-auto px-5 py-7 min-h-[calc(100vh-76px)] overflow-auto grow overflow-x-hidden overflow-y-auto
+            className={`w-11/12 mx-auto px-5 py-6 min-h-[calc(100vh-75px)] overflow-auto grow overflow-x-hidden overflow-y-auto
                     ${
-                      isSidebarOpen ? "" : ""
+                      isSidebarOpen ? "max-w-[1100px]" : "max-w-[1300px]"
                     } transition-all duration-300 ease-in-out
             `}
           >

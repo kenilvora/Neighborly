@@ -1,6 +1,8 @@
 import { LuChevronLeft, LuChevronRight, LuLogOut } from "react-icons/lu";
 import { SidebarLink } from "../../../data/SidebarLink";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logOut } from "../../../services/operations/userAPI";
 
 type SidebarProps = {
   isSidebarOpen: boolean;
@@ -8,9 +10,18 @@ type SidebarProps = {
 };
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  function handleLogout(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+
+    dispatch(logOut(navigate) as any);
+  }
+
   return (
     <div
-      className={`bg-white px-4 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
+      className={`bg-white px-3 max-[600px]:px-2 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
                 ${
                   isSidebarOpen ? "min-w-[260px] " : "min-w-[60px]"
                 } transition-all duration-300 ease-in-out
@@ -25,7 +36,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
           Menu
         </span>
         <div
-          className={`text-black hover:cursor-pointer hover:bg-neutral-200 rounded-sm text-xl p-1.5`}
+          className={`text-black hover:cursor-pointer hover:bg-neutral-200 rounded-sm p-1.5 relative`}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           {isSidebarOpen ? (
@@ -63,6 +74,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
           title={"Logout"}
           className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
                     px-2 py-2 rounded-lg"
+          onClick={handleLogout}
         >
           <LuLogOut size={24} />
           <span
