@@ -260,25 +260,26 @@ export const borrowItem = async (
       type: "Currently Borrowed",
     });
 
-    let itemStat = await ItemStat.findOne({
-      itemId: itemId,
-      userId: item.lenderId,
-    });
-
-    if (itemStat) {
-      itemStat.borrowCount += 1;
-      itemStat.totalProfit += item.price;
-      await itemStat.save();
-    } else {
-      itemStat = await ItemStat.create({
+    if (paymentMode !== "Cash") {
+      let itemStat = await ItemStat.findOne({
         itemId: itemId,
         userId: item.lenderId,
-        borrowCount: 1,
-        totalProfit: item.price,
       });
-    }
 
-    lender.statisticalData?.push(itemStat._id);
+      if (itemStat) {
+        itemStat.borrowCount += 1;
+        itemStat.totalProfit += item.price;
+        await itemStat.save();
+      } else {
+        itemStat = await ItemStat.create({
+          itemId: itemId,
+          userId: item.lenderId,
+          borrowCount: 1,
+          totalProfit: item.price,
+        });
+      }
+      lender.statisticalData?.push(itemStat._id);
+    }
 
     const recentActivity = await RecentActivity.create({
       userId: id,
@@ -496,6 +497,25 @@ export const paymentReceived = async (
     borrowItem.paymentStatus = "Paid";
 
     await borrowItem.save();
+
+    let itemStat = await ItemStat.findOne({
+      itemId: itemId,
+      userId: item.lenderId,
+    });
+
+    if (itemStat) {
+      itemStat.borrowCount += 1;
+      itemStat.totalProfit += item.price;
+      await itemStat.save();
+    } else {
+      itemStat = await ItemStat.create({
+        itemId: itemId,
+        userId: item.lenderId,
+        borrowCount: 1,
+        totalProfit: item.price,
+      });
+    }
+    user.statisticalData?.push(itemStat._id);
 
     res.status(200).json({
       success: true,

@@ -3,7 +3,9 @@ import { auth } from "../middlewares/Auth";
 import {
   changePassword,
   changeTwoFactorAuth,
+  getDashboardData,
   getMe,
+  getRecentActivities,
   getStatisticalData,
   getUserById,
   login,
@@ -52,5 +54,11 @@ router.get("/getUser/:id", auth, getUserById);
 
 // Get Statistical Data Route
 router.get("/getStatisticalData", auth, getStatisticalData);
+
+// Get Dashboard Data Route
+router.get("/getDashboardData", auth, getDashboardData);
+
+// Get Recent Activities Route
+router.get("/getRecentActivity", auth, getRecentActivities);
 
 export default router;

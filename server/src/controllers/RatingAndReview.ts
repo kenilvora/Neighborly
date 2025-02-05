@@ -193,27 +193,196 @@ export const getRatingAndReviewsOfAUser = async (
       return;
     }
 
-    const ratingAndReviews = (await User.findById(id)
-      .select("ratingAndReviews")
-      .populate({
-        path: "ratingAndReviews",
-        populate: {
-          path: "reviewer",
-          select: "firstName lastName profileImage",
+    const data = await User.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id as string),
         },
-        select: "-toWhom -type",
-      })) as unknown as IRatingAndReview[];
-
-    const avgRating = getAvgRating(ratingAndReviews);
-
-    const updatedRatingAndReviews: IGeneralRatingAndReview = {
-      ratingAndReviews,
-      avgRating,
-    };
+      },
+      {
+        $lookup: {
+          from: "ratingandreviews",
+          localField: "ratingAndReviews",
+          foreignField: "_id",
+          as: "ratingAndReviews",
+        },
+      },
+      {
+        $unwind: {
+          path: "$ratingAndReviews",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "ratingAndReviews.reviewer",
+          foreignField: "_id",
+          as: "ratingAndReviews.reviewerDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$ratingAndReviews.reviewerDetails",
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          fistName: { $first: "$firstName" },
+          lastName: { $first: "$lastName" },
+          ratingAndReviews: {
+            $push: {
+              _id: "$ratingAndReviews._id",
+              rating: "$ratingAndReviews.rating",
+              review: "$ratingAndReviews.review",
+              reviewer: {
+                _id: "$ratingAndReviews.reviewerDetails._id",
+                firstName: "$ratingAndReviews.reviewerDetails.firstName",
+                lastName: "$ratingAndReviews.reviewerDetails.lastName",
+                email: "$ratingAndReviews.reviewerDetails.email",
+                image: "$ratingAndReviews.reviewerDetails.profileImage",
+              },
+              createdAt: "$ratingAndReviews.createdAt",
+              updatedAt: "$ratingAndReviews.updatedAt",
+            },
+          },
+          AvgRating: { $avg: "$ratingAndReviews.rating" },
+        },
+      },
+      {
+        $addFields: {
+          avgRating: {
+            $multiply: [{ $round: { $divide: ["$AvgRating", 0.5] } }, 0.5],
+          },
+          name: {
+            $concat: ["$fistName", " ", "$lastName"],
+          },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          ratingAndReviews: 1,
+          avgRating: 1,
+        },
+      },
+    ]);
 
     res.status(200).json({
       success: true,
-      data: updatedRatingAndReviews,
+      data: data,
+    });
+  } catch (error) {
+    console.log("Error : ", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getRatingAndReviewsOfItemsOfAUser = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id.toString();
+
+    const data = await User.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "lendItems",
+          foreignField: "_id",
+          as: "lendItems",
+        },
+      },
+      {
+        $unwind: {
+          path: "$lendItems",
+          preserveNullAndEmptyArrays: true, // Ensure it doesn't break if there are no items
+        },
+      },
+      {
+        $lookup: {
+          from: "ratingandreviews",
+          localField: "lendItems.ratingAndReviews",
+          foreignField: "_id",
+          as: "lendItems.ratingAndReviews",
+        },
+      },
+      {
+        $unwind: {
+          path: "$lendItems.ratingAndReviews",
+          preserveNullAndEmptyArrays: true, // Include items even if they have no reviews
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "lendItems.ratingAndReviews.reviewer",
+          foreignField: "_id",
+          as: "lendItems.ratingAndReviews.reviewerDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$lendItems.ratingAndReviews.reviewerDetails",
+          preserveNullAndEmptyArrays: true, // Include reviews without valid reviewers
+        },
+      },
+      {
+        $group: {
+          _id: {
+            itemId: "$lendItems._id",
+            itemName: "$lendItems.name",
+          },
+          itemReviews: {
+            $push: {
+              _id: "$lendItems.ratingAndReviews._id",
+              rating: "$lendItems.ratingAndReviews.rating",
+              review: "$lendItems.ratingAndReviews.review",
+              reviewer: {
+                _id: "$lendItems.ratingAndReviews.reviewerDetails._id",
+                firstName:
+                  "$lendItems.ratingAndReviews.reviewerDetails.firstName",
+                lastName:
+                  "$lendItems.ratingAndReviews.reviewerDetails.lastName",
+                email: "$lendItems.ratingAndReviews.reviewerDetails.email",
+                image:
+                  "$lendItems.ratingAndReviews.reviewerDetails.profileImage",
+              },
+              createdAt: "$lendItems.ratingAndReviews.createdAt",
+            },
+          },
+          AvgRating: { $avg: "$lendItems.ratingAndReviews.rating" }, // Calculate avg rating per item
+        },
+      },
+      {
+        $addFields: {
+          avgRating: {
+            $multiply: [{ $round: { $divide: ["$AvgRating", 0.5] } }, 0.5],
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          itemId: "$_id.itemId",
+          itemName: "$_id.itemName",
+          avgRating: 1,
+          itemReviews: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: data,
     });
   } catch (error) {
     res.status(500).json({
@@ -248,27 +417,82 @@ export const getRatingAndReviewsOfAnItem = async (
       return;
     }
 
-    const ratingAndReviews = (await Item.findById(id)
-      .select("ratingAndReviews")
-      .populate({
-        path: "ratingAndReviews",
-        populate: {
-          path: "reviewer",
-          select: "firstName lastName profileImage",
+    const data = await Item.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id as string),
         },
-        select: "-toWhom -type",
-      })) as unknown as IRatingAndReview[];
-
-    const avgRating = getAvgRating(ratingAndReviews);
-
-    const updatedRatingAndReviews: IGeneralRatingAndReview = {
-      ratingAndReviews,
-      avgRating,
-    };
+      },
+      {
+        $lookup: {
+          from: "ratingandreviews",
+          localField: "ratingAndReviews",
+          foreignField: "_id",
+          as: "ratingAndReviews",
+        },
+      },
+      {
+        $unwind: {
+          path: "$ratingAndReviews",
+          preserveNullAndEmptyArrays: true, // To include items without reviews
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "ratingAndReviews.reviewer",
+          foreignField: "_id",
+          as: "ratingAndReviews.reviewerDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$ratingAndReviews.reviewerDetails",
+          preserveNullAndEmptyArrays: true, // To include reviews without a valid reviewer
+        },
+      },
+      {
+        $group: {
+          _id: "$_id",
+          name: { $first: "$name" },
+          ratingAndReviews: {
+            $push: {
+              _id: "$ratingAndReviews._id",
+              rating: "$ratingAndReviews.rating",
+              review: "$ratingAndReviews.review",
+              reviewer: {
+                _id: "$ratingAndReviews.reviewerDetails._id",
+                firstName: "$ratingAndReviews.reviewerDetails.firstName",
+                lastName: "$ratingAndReviews.reviewerDetails.lastName",
+                email: "$ratingAndReviews.reviewerDetails.email",
+                image: "$ratingAndReviews.reviewerDetails.profileImage",
+              },
+              createdAt: "$ratingAndReviews.createdAt",
+              updatedAt: "$ratingAndReviews.updatedAt",
+            },
+          },
+          AvgRating: { $avg: "$ratingAndReviews.rating" },
+        },
+      },
+      {
+        $addFields: {
+          avgRating: {
+            $multiply: [{ $round: { $divide: ["$AvgRating", 0.5] } }, 0.5],
+          },
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          ratingAndReviews: 1,
+          avgRating: 1, // Include computed avgRating
+        },
+      },
+    ]);
 
     res.status(200).json({
       success: true,
-      data: updatedRatingAndReviews,
+      data: data,
     });
   } catch (error) {
     res.status(500).json({

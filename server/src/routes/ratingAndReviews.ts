@@ -4,6 +4,7 @@ import {
   createRatingAndReview,
   getRatingAndReviewsOfAnItem,
   getRatingAndReviewsOfAUser,
+  getRatingAndReviewsOfItemsOfAUser,
 } from "../controllers/RatingAndReview";
 
 const router = express.Router();
@@ -13,6 +14,9 @@ router.post("/create", auth, isUser, createRatingAndReview);
 
 // Get Rating and Reviews of a User Route
 router.get("/getOfUser", auth, isUser, getRatingAndReviewsOfAUser);
+
+// Get Rating and Reviews of All Items of a User Route
+router.get("/getOfItemOfUser", auth, isUser, getRatingAndReviewsOfItemsOfAUser);
 
 // Get Rating and Reviews of an Item Route
 router.get("/getOfItem", auth, isUser, getRatingAndReviewsOfAnItem);

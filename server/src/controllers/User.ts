@@ -26,6 +26,8 @@ import {
   IStatisticalDataWithAvgRating,
   IUserDetails,
 } from "@kenil_vora/neighborly";
+import BorrowItem from "../models/BorrowItem";
+import RecentActivity from "../models/RecentActivity";
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -868,12 +870,12 @@ export const getDashboardData = async (
   res: Response
 ): Promise<void> => {
   try {
-    const id = req.user?.id;
+    const id = req.user?.id.toString();
 
-    const data = await User.aggregate([
+    const data1 = await User.aggregate([
       {
         $match: {
-          _id: id,
+          _id: new mongoose.Types.ObjectId(id),
         },
       },
       {
@@ -887,7 +889,7 @@ export const getDashboardData = async (
       {
         $lookup: {
           from: "items",
-          localField: "borrowItems",
+          localField: "lendItems",
           foreignField: "_id",
           as: "lentItems",
         },
@@ -909,9 +911,54 @@ export const getDashboardData = async (
       },
     ]);
 
+    const data2 = await BorrowItem.aggregate([
+      {
+        $match: {
+          borrower: new mongoose.Types.ObjectId(id as string),
+          isReturned: false,
+        },
+      },
+    ]);
+
+    const data = {
+      borrowedItemsCount: data1[0].borrowedItemsCount,
+      lentItemsCount: data1[0].lentItemsCount,
+      totalProfit: data1[0].totalProfit,
+      pendingReturns: data2.length,
+    };
+
     res.status(200).json({
       success: true,
-      data: data[0],
+      data: data,
+    });
+  } catch (error) {
+    console.log("Error : ", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getRecentActivities = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+
+    const page = req.query.page ? parseInt(req.query.page as string) : 1;
+
+    const recentActivities = await RecentActivity.find({ userId: id })
+      .sort({
+        createdAt: -1,
+      })
+      .skip((page - 1) * 15)
+      .limit(15);
+
+    res.status(200).json({
+      success: true,
+      recentActivities: recentActivities,
     });
   } catch (error) {
     res.status(500).json({
