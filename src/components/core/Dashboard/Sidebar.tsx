@@ -20,7 +20,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         <span
           className={` transition-all duration-300 ease-in-out
             ${isSidebarOpen ? "flex" : "hidden"}
-            `}
+          `}
         >
           Menu
         </span>
@@ -42,7 +42,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
             to={link.path}
             key={link.id}
             title={link.name}
-            className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 px-2 py-2 rounded-lg"
+            className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
+                      px-2 py-2 rounded-lg"
           >
             <link.icon size={24} />
             <span
@@ -60,7 +61,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         ))}
         <button
           title={"Logout"}
-          className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 px-2 py-2 rounded-lg"
+          className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
+                    px-2 py-2 rounded-lg"
         >
           <LuLogOut size={24} />
           <span
