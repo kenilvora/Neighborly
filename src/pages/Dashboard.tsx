@@ -23,14 +23,14 @@ const Dashboard = () => {
       {userLoading || itemLoading ? (
         <Loader />
       ) : (
-        <div className="h-[calc(100vh-75px)] overflow-hidden relative flex bg-neutral-100">
+        <div className="h-[calc(100vh-73px)] overflow-hidden relative flex bg-neutral-100">
           <Sidebar
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
           />
 
           <div
-            className={`w-11/12 mx-auto px-5 py-6 min-h-[calc(100vh-75px)] grow overflow-hidden
+            className={`w-11/12 mx-auto px-5 py-6 min-h-[calc(100vh-73px)] grow overflow-hidden
                     ${
                       isSidebarOpen ? "max-w-[1100px]" : "max-w-[1300px]"
                     } transition-all duration-300 ease-in-out
