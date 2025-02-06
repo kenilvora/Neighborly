@@ -30,18 +30,21 @@ const Dashboard = () => {
           />
 
           <div
-            className={`w-11/12 mx-auto px-5 py-6 min-h-[calc(100vh-73px)] grow overflow-hidden
-                    ${
-                      isSidebarOpen ? "max-w-[1100px]" : "max-w-[1300px]"
-                    } transition-all duration-300 ease-in-out
-            `}
+            className={`w-full mx-auto px-5 py-6 min-h-[calc(100vh-73px)] grow overflow-y-auto`}
           >
-            {
+            <div
+              className={`
+                ${
+                  isSidebarOpen ? "max-w-[1100px]" : "max-w-[1300px]"
+                } transition-all duration-300 ease-in-out mx-auto
+              `}
+            >
               <h1 className="text-3xl font-semibold text-neutral-700">
                 {currentPage?.name}
               </h1>
-            }
-            <Outlet />
+
+              <Outlet />
+            </div>
           </div>
         </div>
       )}
