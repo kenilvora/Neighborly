@@ -421,17 +421,21 @@ const SignUp = () => {
                   type="number"
                   errors={errors.pincode}
                 />
-                <div className="flex items-center justify-end gap-3 w-[50%] max-[800px]:w-full">
-                  <input
-                    type="checkbox"
-                    {...register("isPrimary")}
-                    id="isPrimary"
-                    className="h-6 w-6 max-[450px]:w-4 max-[450px]:h-4 cursor-pointer"
-                    autoComplete="off"
-                  />
+                <div className="flex items-center gap-3 w-[50%] max-[800px]:w-full">
+                  <div className="container">
+                    <input
+                      type="checkbox"
+                      className="checkbox"
+                      id="isPrimary"
+                      {...register("isPrimary")}
+                    />
+                    <label className="switch" htmlFor="isPrimary">
+                      <span className="isAvailable"></span>
+                    </label>
+                  </div>
                   <label htmlFor="isPrimary">
-                    <span className="text-xl max-[450px]:text-base font-semibold text-neutral-700">
-                      Set as Primary Address
+                    <span className="text-xl max-[450px]:text-base font-semibold">
+                      Primary Address
                     </span>
                   </label>
                 </div>

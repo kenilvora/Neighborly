@@ -1,0 +1,239 @@
+import { useForm } from "react-hook-form";
+import CustomInput from "../../../common/CustomInput";
+import { RiUserFill } from "react-icons/ri";
+import { UpdateUserDetailsInput } from "@kenil_vora/neighborly";
+import PhoneInput, { CountryData } from "react-phone-input-2";
+import { IoMdHome } from "react-icons/io";
+import CustomDropdown from "../../../common/CustomDropdown";
+import data from "../../../../data/Country-State-City.json";
+import { useEffect, useState } from "react";
+import { TbMapPinCode } from "react-icons/tb";
+
+const countryData = data as Country[];
+
+interface Country {
+  value: string;
+  label: string;
+  children: State[];
+}
+
+interface State {
+  value: string;
+  label: string;
+  children: City[];
+}
+
+interface City {
+  value: string;
+  label: string;
+}
+
+const UserInfo = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitSuccessful },
+    setValue,
+    getValues,
+  } = useForm<UpdateUserDetailsInput>();
+
+  const [addressData, setAddressData] = useState({
+    country: "",
+    state: "",
+    city: "",
+  });
+
+  const [stateData, setStateData] = useState([] as State[]);
+  const [cityData, setCityData] = useState([] as City[]);
+
+  const { country, state, city } = addressData;
+
+  // Fetching states based on selected country
+  useEffect(() => {
+    if (country === "" || country === null || country === undefined) {
+      setStateData([]);
+      return;
+    }
+    const selectedCountry = countryData.find((c) => c.value === country);
+
+    if (selectedCountry) {
+      setStateData(selectedCountry.children);
+    }
+  }, [country]);
+
+  // Fetching cities based on selected state
+  useEffect(() => {
+    if (state === "" || state === null || state === undefined) {
+      setCityData([]);
+      return;
+    }
+    const selectedState = stateData.find((s) => s.value === state);
+
+    if (selectedState) {
+      setCityData(selectedState.children);
+    }
+  }, [state]);
+
+  const formatPhoneNumber = (value: string, countryCode: string) => {
+    if (!value) return "";
+
+    const cleanValue = value.replace(/\D/g, "");
+
+    return `+${countryCode} ${cleanValue.slice(countryCode.length)}`;
+  };
+
+  return (
+    <div className="flex flex-col gap-3 px-7 py-5 rounded-lg shadow-md border border-neutral-300">
+      <div className="text-2xl font-semibold">User Information</div>
+
+      <form action="" className="flex flex-col gap-5 w-full self-center my-4">
+        <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+          <CustomInput
+            icon={RiUserFill}
+            id="firstName"
+            name="firstName"
+            placeholder="Enter your FirstName"
+            register={register}
+            type="text"
+            errors={errors.firstName}
+          />
+          <CustomInput
+            icon={RiUserFill}
+            id="lastName"
+            name="lastName"
+            placeholder="Enter your LastName"
+            register={register}
+            type="text"
+            errors={errors.lastName}
+          />
+        </div>
+        <div className="flex w-full">
+          <PhoneInput
+            country={"in"}
+            onChange={(value, countryData: CountryData) => {
+              const formattedValue = formatPhoneNumber(
+                value,
+                countryData.dialCode
+              );
+              setValue("contactNumber", formattedValue, {
+                shouldValidate: true,
+              }); // Manually set value
+            }}
+            autoFormat={true}
+            enableAreaCodes={true}
+            enableSearch={true}
+            inputStyle={{
+              border: "1px solid #d4d4d8",
+              borderRadius: "6px",
+              padding: "21px 0px 21px 52px",
+              fontSize: "1rem",
+              outlineColor: "#3b82f6",
+              width: "100%",
+              backgroundColor: "#f5f5f5",
+            }}
+            buttonStyle={{
+              borderRadius: "6px 0px 0px 6px",
+              paddingLeft: "4px",
+            }}
+            inputProps={{
+              id: "contactNumber",
+              name: "contactNumber",
+              required: true,
+              autoComplete: "on",
+              ref: register("contactNumber", { required: true }).ref, // Assign ref manually
+            }}
+            value={getValues("contactNumber")}
+          />
+          {errors.contactNumber && (
+            <span className="text-neutral-800 font-semibold opacity-70">
+              Please enter your contact number
+            </span>
+          )}
+        </div>
+        <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+          <CustomInput
+            icon={IoMdHome}
+            id="addressLine1"
+            name="addressLine1"
+            placeholder="Enter your Address Line 1"
+            register={register}
+            type="text"
+            errors={errors.addressLine1}
+          />
+          <CustomInput
+            icon={IoMdHome}
+            id="addressLine2"
+            name="addressLine2"
+            placeholder="Enter your Address Line 2"
+            register={register}
+            type="text"
+            errors={errors.addressLine2}
+            required={false}
+          />
+        </div>
+        <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+          <CustomDropdown
+            data={countryData}
+            label="Country"
+            fn={setAddressData}
+            value={country}
+            name="country"
+            required={true}
+          />
+
+          <CustomDropdown
+            data={stateData}
+            label="State"
+            fn={setAddressData}
+            value={state}
+            name="state"
+            required={true}
+          />
+
+          <CustomDropdown
+            data={cityData}
+            label="City"
+            fn={setAddressData}
+            value={city}
+            name="city"
+            required={true}
+          />
+        </div>
+        <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+          <CustomInput
+            icon={TbMapPinCode}
+            id="pincode"
+            name="pincode"
+            placeholder="Enter your Pincode"
+            register={register}
+            type="number"
+            errors={errors.pincode}
+          />
+          <div className="flex items-center gap-3 w-[50%] max-[800px]:w-full">
+            <div className="container">
+              <input
+                type="checkbox"
+                className="checkbox"
+                id="isPrimary"
+                {...register("isPrimary")}
+              />
+              <label className="switch" htmlFor="isPrimary">
+                <span className="isAvailable"></span>
+              </label>
+            </div>
+            <label htmlFor="isPrimary">
+              <span className="text-xl max-[450px]:text-base font-semibold">
+                Primary Address
+              </span>
+            </label>
+          </div>
+        </div>
+        <button className="bg-blue-500 cursor-pointer text-white font-semibold py-2 rounded-lg text-lg w-fit px-4">
+          Update Profile
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default UserInfo;

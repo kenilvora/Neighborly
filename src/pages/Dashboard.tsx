@@ -30,7 +30,7 @@ const Dashboard = () => {
           />
 
           <div
-            className={`w-full mx-auto px-5 py-6 min-h-[calc(100vh-73px)] grow overflow-y-auto`}
+            className={`w-full mx-auto px-5 py-6 min-h-[calc(100vh-73px)] grow overflow-y-auto overflow-x-hidden`}
           >
             <div
               className={`
@@ -39,7 +39,7 @@ const Dashboard = () => {
                 } transition-all duration-300 ease-in-out mx-auto
               `}
             >
-              <h1 className="text-3xl font-semibold text-neutral-700">
+              <h1 className="text-3xl font-semibold">
                 {currentPage?.name}
               </h1>
 

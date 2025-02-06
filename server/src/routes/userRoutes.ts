@@ -5,7 +5,6 @@ import {
   changeTwoFactorAuth,
   getDashboardData,
   getMe,
-  getRecentActivities,
   getStatisticalData,
   getUserById,
   login,
@@ -57,8 +56,5 @@ router.get("/getStatisticalData", auth, getStatisticalData);
 
 // Get Dashboard Data Route
 router.get("/getDashboardData", auth, getDashboardData);
-
-// Get Recent Activities Route
-router.get("/getRecentActivity", auth, getRecentActivities);
 
 export default router;

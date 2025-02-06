@@ -7,11 +7,24 @@ import { userEndpoints } from "../apis";
 import Cookies from "js-cookie";
 import { LoginInput, SignUpInput } from "@kenil_vora/neighborly";
 
-interface DashboardData {
+export interface DashboardData {
   borrowedItemsCount: number;
   lentItemsCount: number;
   totalProfit: number;
   pendingReturns: number;
+  recentActivities: RecentActivity[];
+}
+
+export interface RecentActivity {
+  _id: string;
+  itemID: {
+    name: string;
+    description: string;
+    price: number;
+  };
+  type: string;
+  status: string;
+  createdAt: Date;
 }
 
 export function signUp(data: SignUpInput, navigate: NavigateFunction | null) {

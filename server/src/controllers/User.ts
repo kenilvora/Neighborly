@@ -920,11 +920,22 @@ export const getDashboardData = async (
       },
     ]);
 
+    const recentActivities = await RecentActivity.find({ userId: id })
+      .select("-userId")
+      .populate({
+        path: "itemID",
+        select: "name description price",
+      })
+      .sort({
+        createdAt: -1,
+      });
+
     const data = {
       borrowedItemsCount: data1[0].borrowedItemsCount,
       lentItemsCount: data1[0].lentItemsCount,
       totalProfit: data1[0].totalProfit,
       pendingReturns: data2.length,
+      recentActivities: recentActivities,
     };
 
     res.status(200).json({
@@ -933,34 +944,6 @@ export const getDashboardData = async (
     });
   } catch (error) {
     console.log("Error : ", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
-
-export const getRecentActivities = async (
-  req: AuthRequest,
-  res: Response
-): Promise<void> => {
-  try {
-    const id = req.user?.id;
-
-    const page = req.query.page ? parseInt(req.query.page as string) : 1;
-
-    const recentActivities = await RecentActivity.find({ userId: id })
-      .sort({
-        createdAt: -1,
-      })
-      .skip((page - 1) * 15)
-      .limit(15);
-
-    res.status(200).json({
-      success: true,
-      recentActivities: recentActivities,
-    });
-  } catch (error) {
     res.status(500).json({
       success: false,
       message: "Internal server error",

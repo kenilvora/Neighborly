@@ -54,7 +54,7 @@ const Navbar = () => {
 
   return (
     <div className="w-full border-b-1 px-2 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
-      <div className="w-[97%] max-w-[1480px] flex justify-between py-4 items-center">
+      <div className="w-[97%] flex justify-between py-4 items-center">
         <div
           className={`w-[160px] max-[1000px]:w-[130px] max-[420px]:w-[115px]
               ${isSearchBarOpen ? "hidden" : "flex"}
@@ -65,7 +65,7 @@ const Navbar = () => {
           </NavLink>
         </div>
 
-        <div className="max-w-lg max-[1000px]:max-w-md max-[855px]:max-w-xs max-[720px]:max-w-3xs flex grow relative font-serif items-center max-[630px]:hidden">
+        <div className="max-w-6xl max-[1650px]:max-w-3xl max-[1210px]:max-w-xl max-[1000px]:max-w-md max-[855px]:max-w-xs max-[720px]:max-w-3xs flex grow relative font-serif items-center max-[630px]:hidden">
           <IoIosSearch className="absolute text-3xl top-1/2 -translate-y-1/2 left-2 text-neutral-500" />
           <input
             type="search"

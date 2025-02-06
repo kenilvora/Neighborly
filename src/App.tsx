@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import PrivateRoute from "./components/common/PrivateRoute";
 import Dashboard from "./pages/Dashboard";
 import DashboardComponent from "./components/core/Dashboard/Dashboard";
-import Profile from "./components/core/Dashboard/Profile";
+import Profile from "./components/core/Dashboard/Profile/Profile";
 import RatingsReviews from "./components/core/Dashboard/RatingsReviews";
 import BorrowedItems from "./components/core/Dashboard/BorrowedItems";
 import LendingItemsStats from "./components/core/Dashboard/LendingItemsStats";

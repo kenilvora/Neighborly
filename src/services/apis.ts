@@ -14,7 +14,6 @@ export const userEndpoints = {
   GET_USER: `${BACKEND_URL}/user/getUser`,
   GET_STATISTICAL_DATA: `${BACKEND_URL}/user/getStatisticalData`,
   GET_DASHBOARD_DATA: `${BACKEND_URL}/user/getDashboardData`,
-  GET_RECENT_ACTIVITY: `${BACKEND_URL}/user/getRecentActivity`,
 };
 
 export const itemEndpoints = {
