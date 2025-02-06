@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { getDashboardData } from "../../../services/operations/userAPI";
-import Loader from "../../common/Loader";
 import { FaBoxOpen } from "react-icons/fa6";
 import { FaRupeeSign } from "react-icons/fa";
 import { LuTriangleAlert } from "react-icons/lu";
+import Loader from "../../common/Loader";
 import { RootState } from "../../../reducer/store";
 import { useSelector } from "react-redux";
 
@@ -15,34 +15,37 @@ interface DashboardData {
 }
 
 const Dashboard = () => {
-  const userLoading = useSelector((state: RootState) => state.user.isLoading);
-  const itemLoading = useSelector((state: RootState) => state.item.isLoading);
-
   const [dashboardData, setDashboardData] = useState<DashboardData>(
     {} as DashboardData
   );
 
+  const { token } = useSelector((state: RootState) => state.user);
+
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const fetchData = async () => {
+    if (!token) {
+      return;
+    }
+
+    const getDashboard = async () => {
       try {
-        const data = await getDashboardData();
-        setDashboardData(data);
+        const res = await getDashboardData();
+
+        setDashboardData(res);
       } catch (error) {
-        console.log("Error in fetching data : ", error);
+        console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    console.log("User Loading : ", userLoading);
-    console.log("Item Loading : ", itemLoading);
-
-    if (!userLoading && !itemLoading) {
-      fetchData();
-    }
-  }, [userLoading, itemLoading]);
+    getDashboard();
+  }, []);
 
   return (
     <>
-      {userLoading || itemLoading ? (
+      {loading ? (
         <Loader />
       ) : (
         <div className="flex flex-col mt-5">

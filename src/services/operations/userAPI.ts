@@ -132,7 +132,7 @@ export function logOut(navigate: NavigateFunction | null) {
         throw new Error(res.data.message);
       }
 
-      dispatch(setToken(""));
+      dispatch(setToken(null));
       dispatch(setUser(null));
       Cookies.remove("user", {
         secure: true,
@@ -140,6 +140,7 @@ export function logOut(navigate: NavigateFunction | null) {
       });
       localStorage.clear();
       if (navigate) {
+        toast.success("Logged Out Successfully");
         navigate("/login");
       }
     } catch (error) {
@@ -162,7 +163,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     result = res.data.data;
   } catch (error) {
     toast.error((error as any).response.data.message);
-  } finally {
-    return result;
   }
+  return result;
 }

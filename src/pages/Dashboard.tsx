@@ -30,7 +30,7 @@ const Dashboard = () => {
           />
 
           <div
-            className={`w-11/12 mx-auto px-5 py-6 min-h-[calc(100vh-75px)] overflow-auto grow overflow-x-hidden overflow-y-auto
+            className={`w-11/12 mx-auto px-5 py-6 min-h-[calc(100vh-75px)] grow overflow-hidden
                     ${
                       isSidebarOpen ? "max-w-[1100px]" : "max-w-[1300px]"
                     } transition-all duration-300 ease-in-out

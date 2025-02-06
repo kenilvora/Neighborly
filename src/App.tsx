@@ -19,6 +19,7 @@ import LendingItemsStats from "./components/core/Dashboard/LendingItemsStats";
 import Transactions from "./components/core/Dashboard/Transactions";
 import AddItem from "./components/core/Dashboard/AddItem";
 import Disputes from "./components/core/Dashboard/Disputes";
+import Loader from "./components/common/Loader";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -101,6 +102,8 @@ function App() {
 
             <Route path="/dashboard/addItem" element={<AddItem />} />
           </Route>
+
+          <Route path="/load" element={<Loader />} />
 
           <Route path="*" element={<ErrorPage />} />
         </Routes>

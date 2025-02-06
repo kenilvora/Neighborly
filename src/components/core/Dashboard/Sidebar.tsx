@@ -13,12 +13,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  function handleLogout(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    dispatch(logOut(navigate) as any);
-  }
-
   return (
     <div
       className={`bg-white px-3 max-[600px]:px-2 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
@@ -74,7 +68,9 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
           title={"Logout"}
           className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
                     px-2 py-2 rounded-lg"
-          onClick={handleLogout}
+          onClick={() => {
+            dispatch(logOut(navigate) as any);
+          }}
         >
           <LuLogOut size={24} />
           <span

@@ -52,12 +52,6 @@ const Navbar = () => {
     }
   }, [location, location.pathname]);
 
-  function handleLogout(event: React.MouseEvent<HTMLButtonElement>) {
-    event.preventDefault();
-
-    dispatch(logOut(navigate) as any);
-  }
-
   return (
     <div className="w-full border-b-1 px-2 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
       <div className="w-[97%] max-w-[1480px] flex justify-between py-4 items-center">
@@ -187,7 +181,9 @@ const Navbar = () => {
                   </NavLink>
                   <button
                     className="text-neutral-800 font-medium cursor-pointer px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
-                    onClick={handleLogout}
+                    onClick={() => {
+                      dispatch(logOut(navigate) as any);
+                    }}
                   >
                     <IoLogOutOutline className="text-xl" />
                     Logout
