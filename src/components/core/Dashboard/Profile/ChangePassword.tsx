@@ -1,14 +1,12 @@
+import { ChangePasswordInput } from "@kenil_vora/neighborly";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { IoMdLock } from "react-icons/io";
-
-type ChangePassword = {
-  oldPassword: string;
-  password: string;
-  confirmPassword: string;
-};
+import { useDispatch } from "react-redux";
+import { changePassword } from "../../../../services/operations/userAPI";
 
 const ChangePassword = () => {
   const {
@@ -16,9 +14,12 @@ const ChangePassword = () => {
     handleSubmit,
     formState: { errors, isSubmitSuccessful },
     watch,
-  } = useForm<ChangePassword>();
+    reset,
+  } = useForm<ChangePasswordInput>();
 
-  const password = watch("password");
+  const dispatch = useDispatch();
+
+  const password = watch("newPassword");
   const confirmPassword = watch("confirmPassword");
 
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -63,10 +64,46 @@ const ChangePassword = () => {
     });
   }, [password, confirmPassword]);
 
+  const onSubmit: SubmitHandler<ChangePasswordInput> = (data) => {
+    if (!passwordCriteria.length) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+    if (!passwordCriteria.uppercase) {
+      toast.error("Password must contain at least one uppercase letter");
+      return;
+    }
+    if (!passwordCriteria.lowercase) {
+      toast.error("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!passwordCriteria.number) {
+      toast.error("Password must contain at least one number");
+      return;
+    }
+    if (!passwordCriteria.special) {
+      toast.error("Password must contain at least one special character");
+      return;
+    }
+    if (!passwordCriteria.passwordMatch) {
+      toast.error("Password & Confirm Password must match");
+      return;
+    }
+
+    dispatch(changePassword(data) as any);
+
+    if (isSubmitSuccessful) {
+      reset();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3 px-7 py-5 rounded-lg shadow-md border border-neutral-300">
       <div className="text-2xl font-semibold">Change Password</div>
-      <form className="flex flex-col w-full gap-5">
+      <form
+        className="flex flex-col w-full gap-5"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="w-full flex flex-col gap-1 relative">
           <div className="absolute text-xl top-[11px] left-3 text-neutral-500">
             <IoMdLock />
@@ -83,6 +120,7 @@ const ChangePassword = () => {
             onCopy={(e) => e.preventDefault()}
             onCut={(e) => e.preventDefault()}
             onPaste={(e) => e.preventDefault()}
+            minLength={8}
           />
           <span
             className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
@@ -107,11 +145,12 @@ const ChangePassword = () => {
             className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] 
             outline-blue-500 pl-9 pr-[39px]"
             autoComplete="off"
-            {...register("password", { required: true })}
+            {...register("newPassword", { required: true })}
             required
             onCopy={(e) => e.preventDefault()}
             onCut={(e) => e.preventDefault()}
             onPaste={(e) => e.preventDefault()}
+            minLength={8}
           />
           <span
             className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
@@ -119,7 +158,7 @@ const ChangePassword = () => {
           >
             {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
           </span>
-          {errors.password && (
+          {errors.newPassword && (
             <span className="text-neutral-800 font-semibold opacity-70">
               Please enter your password
             </span>
@@ -139,6 +178,7 @@ const ChangePassword = () => {
             onCopy={(e) => e.preventDefault()}
             onCut={(e) => e.preventDefault()}
             onPaste={(e) => e.preventDefault()}
+            minLength={8}
           />
           <span
             className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"

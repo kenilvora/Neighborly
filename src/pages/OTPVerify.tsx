@@ -3,7 +3,12 @@ import OTPInput from "react-otp-input";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
-import { sendOtp, signUp } from "../services/operations/userAPI";
+import {
+  changeTwoFactorAuth,
+  login,
+  sendOtp,
+  signUp,
+} from "../services/operations/userAPI";
 import { useNavigate } from "react-router-dom";
 
 const OTPVerify = () => {
@@ -19,6 +24,10 @@ const OTPVerify = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!otpType) {
+      navigate("/signup");
+    }
+
     if (otpType === "signup" && !signUpData) {
       navigate("/signup");
     }
@@ -47,25 +56,43 @@ const OTPVerify = () => {
   }, [countDown, isTimerOn]);
 
   const resendOTP = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!signUpData) {
-      navigate("/signup");
-      return;
-    }
     event.preventDefault();
     if (isTimerOn) return;
-    dispatch(sendOtp(signUpData?.email, null, otpType) as any);
-    setCountDown(60);
-    setIsTimerOn(true);
+    if (otpType === "signup" && signUpData) {
+      dispatch(sendOtp(signUpData?.email, null, otpType) as any);
+      setCountDown(60);
+      setIsTimerOn(true);
+    } else if (otpType === "login" && loginData) {
+      dispatch(sendOtp(loginData?.email, null, otpType) as any);
+      setCountDown(60);
+      setIsTimerOn(true);
+    } else if (otpType === "twoFactorAuth" && twoFactorAuthData) {
+      dispatch(sendOtp(twoFactorAuthData?.email, null, otpType) as any);
+      setCountDown(60);
+      setIsTimerOn(true);
+    }
   };
 
   const SubmitHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (otpType === "signup" && signUpData) {
-      console.log(signUpData);
       const updatedData = { ...signUpData };
       updatedData.otp = parseInt(otp);
-      console.log(updatedData);
       dispatch(signUp(updatedData, navigate) as any);
+    } else if (otpType === "login" && loginData) {
+      const data = {
+        otp: parseInt(otp),
+        email: loginData.email,
+        password: loginData.password,
+      };
+      dispatch(login(data, navigate) as any);
+    } else if (otpType === "twoFactorAuth" && twoFactorAuthData) {
+      const twoFactorAuth = twoFactorAuthData.twoFactorAuth;
+      const data = {
+        otp: parseInt(otp),
+        twoFactorAuth: twoFactorAuth,
+      };
+      dispatch(changeTwoFactorAuth(data, navigate) as any);
     }
   };
 
@@ -79,9 +106,16 @@ const OTPVerify = () => {
       ) : (
         <div className="w-full h-[calc(100vh-74.8px)] flex justify-center items-center px-5">
           <div className="flex flex-col justify-center rounded-lg gap-3 text-center">
-            <h1 className="font-bold text-2xl">Verify Your OTP</h1>
+            <h1 className="font-bold text-2xl">
+              Verify Your OTP
+              {otpType === "signup"
+                ? " for Sign Up"
+                : otpType === "login"
+                ? " for Login"
+                : " for changing 2FA"}
+            </h1>
             <p className="text-neutral-600 text-lg max-[500px]:text-base max-[390px]:text-sm">
-              One Step Away from Borrowing & Lending!
+              Enter the 6-digit OTP sent to your email address.
             </p>
 
             <form

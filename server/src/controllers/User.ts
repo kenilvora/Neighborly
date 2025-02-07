@@ -79,6 +79,52 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g.test(password);
+
+    if (!hasLength) {
+      res.status(400).json({
+        success: false,
+        message: "Password must be atleast 8 characters long",
+      });
+      return;
+    }
+
+    if (!hasUppercase) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one uppercase letter",
+      });
+      return;
+    }
+
+    if (!hasLowercase) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one lowercase letter",
+      });
+      return;
+    }
+
+    if (!hasNumber) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one number",
+      });
+      return;
+    }
+
+    if (!hasSpecial) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one special character",
+      });
+      return;
+    }
+
     const recentOtp = await Otp.findOne({ email, type: "signup" })
       .sort({ createdAt: -1 })
       .limit(1);
@@ -405,7 +451,7 @@ export const changePassword = async (
       return;
     }
 
-    const { oldPassword, newPassword } = parsedData.data;
+    const { oldPassword, newPassword, confirmPassword } = parsedData.data;
 
     const user = await User.findById(id);
 
@@ -417,10 +463,66 @@ export const changePassword = async (
       return;
     }
 
+    const hasLength = newPassword.length >= 8;
+    const hasUppercase = /[A-Z]/.test(newPassword);
+    const hasLowercase = /[a-z]/.test(newPassword);
+    const hasNumber = /\d/.test(newPassword);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g.test(
+      newPassword
+    );
+
+    if (!hasLength) {
+      res.status(400).json({
+        success: false,
+        message: "Password must be atleast 8 characters long",
+      });
+      return;
+    }
+
+    if (!hasUppercase) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one uppercase letter",
+      });
+      return;
+    }
+
+    if (!hasLowercase) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one lowercase letter",
+      });
+      return;
+    }
+
+    if (!hasNumber) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one number",
+      });
+      return;
+    }
+
+    if (!hasSpecial) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one special character",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      res.status(400).json({
+        success: false,
+        message: "Password and Confirm Password do not match",
+      });
+      return;
+    }
+
     if (!(await bcrypt.compare(oldPassword, user.password))) {
       res.status(400).json({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid Old Password",
       });
       return;
     }
@@ -538,7 +640,7 @@ export const resetPassword = async (
     if (password !== confirmPassword) {
       res.status(400).json({
         success: false,
-        message: "Passwords do not match",
+        message: "Password and Confirm Password do not match",
       });
       return;
     }
@@ -625,17 +727,95 @@ export const changeTwoFactorAuth = async (
 
     await user.save();
 
+    const updatedUser = (await User.findById(id)
+      .select(
+        "firstName lastName email contactNumber address profileImage ratingAndReviews upiId upiIdVerified accountBalance twoFactorAuth"
+      )
+      .populate({
+        path: "address",
+        select: "-userId",
+      })
+      .populate<{ ratingAndReviews: IRatings[] }>({
+        path: "ratingAndReviews",
+        select: "rating",
+      })) as unknown as IUserDetails;
+
+    if (updatedUser?.ratingAndReviews.length === 0) {
+      updatedUser.avgRating = getAvgRating(updatedUser?.ratingAndReviews);
+    }
+
     if (twoFactorAuth) {
       res.status(200).json({
         success: true,
-        message: "Two Factor Authentication enabled successfully",
+        message: "Two Factor Authentication Enabled",
+        user: updatedUser,
       });
     } else {
       res.status(200).json({
         success: true,
-        message: "Two Factor Authentication disabled successfully",
+        message: "Two Factor Authentication Disabled",
+        user: updatedUser,
       });
     }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getTwoFactorAuthStatus = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const isValid = await emailValidator(email);
+
+    if (!isValid) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid email",
+      });
+      return;
+    }
+
+    const user = await User.findOne({
+      email: email,
+    }).select("twoFactorAuth password");
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "User does not exist",
+      });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid password",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      twoFactorAuth: user?.twoFactorAuth,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -709,9 +889,27 @@ export const updateUserDetails = async (
 
     await address.save();
 
+    const updatedUser = (await User.findById(id)
+      .select(
+        "firstName lastName email contactNumber address profileImage ratingAndReviews upiId upiIdVerified accountBalance twoFactorAuth"
+      )
+      .populate({
+        path: "address",
+        select: "-userId",
+      })
+      .populate<{ ratingAndReviews: IRatings[] }>({
+        path: "ratingAndReviews",
+        select: "rating",
+      })) as unknown as IUserDetails;
+
+    if (updatedUser?.ratingAndReviews.length === 0) {
+      updatedUser.avgRating = getAvgRating(updatedUser?.ratingAndReviews);
+    }
+
     res.status(200).json({
       success: true,
       message: "User details updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
     res.status(500).json({

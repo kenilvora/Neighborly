@@ -23,7 +23,7 @@ const Dashboard = () => {
       {userLoading || itemLoading ? (
         <Loader />
       ) : (
-        <div className="h-[calc(100vh-73px)] overflow-hidden relative flex bg-neutral-100">
+        <div className="h-[calc(100vh-73px)] overflow-hidden relative flex">
           <Sidebar
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}

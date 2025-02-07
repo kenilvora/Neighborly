@@ -6,6 +6,7 @@ import {
   getDashboardData,
   getMe,
   getStatisticalData,
+  getTwoFactorAuthStatus,
   getUserById,
   login,
   logout,
@@ -44,6 +45,9 @@ router.put("/resetPassword/:token", resetPassword);
 
 // Enable Two Factor Authentication Route
 router.put("/changeTwoFactorAuth", auth, changeTwoFactorAuth);
+
+// Get Two Factor Authentication Route
+router.post("/getTwoFactorAuth", getTwoFactorAuthStatus);
 
 // Update User Details Route
 router.put("/updateProfile", auth, updateUserDetails);

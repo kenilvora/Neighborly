@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@kenil_vora/neighborly": "^1.0.6",
+    "@kenil_vora/neighborly": "^1.0.9",
     "@reduxjs/toolkit": "^2.5.0",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.7.9",

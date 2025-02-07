@@ -8,12 +8,15 @@ type OtpType = "signup" | "login" | "twoFactorAuth";
 const initialState = {
   signUpData: null as SignUpInput | null,
   loginData: null as LoginInput | null,
-  twoFactorAuthData: false,
+  twoFactorAuthData: {
+    email: "",
+    twoFactorAuth: false,
+  },
   user: Cookies.get("user")
     ? (JSON.parse(Cookies.get("user") as string) as IUserDetails)
     : null,
   token: Cookies.get("token") ? Cookies.get("token") : null,
-  otpType: "signup" as OtpType,
+  otpType: "" as OtpType,
   isLoading: false,
 };
 

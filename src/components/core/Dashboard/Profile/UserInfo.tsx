@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import CustomInput from "../../../common/CustomInput";
 import { RiUserFill } from "react-icons/ri";
 import { UpdateUserDetailsInput } from "@kenil_vora/neighborly";
@@ -8,6 +8,9 @@ import CustomDropdown from "../../../common/CustomDropdown";
 import data from "../../../../data/Country-State-City.json";
 import { useEffect, useState } from "react";
 import { TbMapPinCode } from "react-icons/tb";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../../../reducer/store";
+import { updateProfile } from "../../../../services/operations/userAPI";
 
 const countryData = data as Country[];
 
@@ -29,18 +32,30 @@ interface City {
 }
 
 const UserInfo = () => {
+  const { user } = useSelector((state: RootState) => state.user);
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitSuccessful },
+    formState: { errors },
     setValue,
     getValues,
-  } = useForm<UpdateUserDetailsInput>();
+  } = useForm<UpdateUserDetailsInput>({
+    defaultValues: {
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      contactNumber: user?.contactNumber,
+      addressLine1: user?.address?.addressLine1,
+      addressLine2: user?.address?.addressLine2,
+      pincode: user?.address?.pincode,
+      isPrimary: user?.address?.isPrimary,
+    },
+  });
 
   const [addressData, setAddressData] = useState({
-    country: "",
-    state: "",
-    city: "",
+    country: user?.address?.country || "",
+    state: user?.address?.state || "",
+    city: user?.address?.city || "",
   });
 
   const [stateData, setStateData] = useState([] as State[]);
@@ -48,12 +63,15 @@ const UserInfo = () => {
 
   const { country, state, city } = addressData;
 
+  const dispatch = useDispatch();
+
   // Fetching states based on selected country
   useEffect(() => {
     if (country === "" || country === null || country === undefined) {
       setStateData([]);
       return;
     }
+
     const selectedCountry = countryData.find((c) => c.value === country);
 
     if (selectedCountry) {
@@ -67,12 +85,13 @@ const UserInfo = () => {
       setCityData([]);
       return;
     }
+
     const selectedState = stateData.find((s) => s.value === state);
 
     if (selectedState) {
       setCityData(selectedState.children);
     }
-  }, [state]);
+  }, [state, stateData]);
 
   const formatPhoneNumber = (value: string, countryCode: string) => {
     if (!value) return "";
@@ -82,11 +101,26 @@ const UserInfo = () => {
     return `+${countryCode} ${cleanValue.slice(countryCode.length)}`;
   };
 
+  const onSubmit: SubmitHandler<UpdateUserDetailsInput> = (data) => {
+    const updatedData = {
+      ...data,
+      country: addressData.country,
+      state: addressData.state,
+      city: addressData.city,
+    } as UpdateUserDetailsInput;
+
+    dispatch(updateProfile(updatedData) as any);
+  };
+
   return (
     <div className="flex flex-col gap-3 px-7 py-5 rounded-lg shadow-md border border-neutral-300">
       <div className="text-2xl font-semibold">User Information</div>
 
-      <form action="" className="flex flex-col gap-5 w-full self-center my-4">
+      <form
+        action=""
+        className="flex flex-col gap-5 w-full self-center my-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
           <CustomInput
             icon={RiUserFill}
@@ -129,11 +163,11 @@ const UserInfo = () => {
               fontSize: "1rem",
               outlineColor: "#3b82f6",
               width: "100%",
-              backgroundColor: "#f5f5f5",
             }}
             buttonStyle={{
               borderRadius: "6px 0px 0px 6px",
               paddingLeft: "4px",
+              backgroundColor: "white",
             }}
             inputProps={{
               id: "contactNumber",

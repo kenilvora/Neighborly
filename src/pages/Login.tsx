@@ -6,9 +6,13 @@ import { IoMdLock } from "react-icons/io";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../services/operations/userAPI";
+import {
+  getTwoFactorAuth,
+  login,
+  sendOtp,
+} from "../services/operations/userAPI";
 import { useNavigate } from "react-router-dom";
-import { setLoginData } from "../slices/userSlice";
+import { setLoginData, setOtpType } from "../slices/userSlice";
 import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
 
@@ -27,18 +31,38 @@ const Login = () => {
 
   const { isLoading } = useSelector((state: RootState) => state.user);
 
-  const SubmitHandler: SubmitHandler<LoginInput> = (data) => {
-    dispatch(setLoginData(data));
-    dispatch(login(data, navigate) as any);
+  const [loading, setLoading] = useState(false);
 
-    if (isSubmitSuccessful) {
-      reset();
+  const SubmitHandler: SubmitHandler<LoginInput> = async (data) => {
+    dispatch(setLoginData(data));
+
+    try {
+      setLoading(true);
+      const TwoFAStatus = await getTwoFactorAuth(data.email, data.password);
+
+      if (TwoFAStatus === null) {
+        setLoading(false);
+        return;
+      }
+      setLoading(false);
+      if (TwoFAStatus) {
+        dispatch(setOtpType("login"));
+        dispatch(sendOtp(data.email, navigate, "login") as any);
+      } else if (!TwoFAStatus) {
+        dispatch(login(data, navigate) as any);
+      }
+
+      if (isSubmitSuccessful) {
+        reset();
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return (
     <>
-      {isLoading ? (
+      {isLoading || loading ? (
         <Loader />
       ) : (
         <div className="w-full min-h-[calc(100vh-74.8px)] overflow-hidden flex justify-center items-center">
@@ -82,6 +106,7 @@ const Login = () => {
                   onCopy={(e) => e.preventDefault()}
                   onCut={(e) => e.preventDefault()}
                   onPaste={(e) => e.preventDefault()}
+                  minLength={8}
                 />
                 <span
                   className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"

@@ -5,7 +5,12 @@ import { setIsLoading, setToken, setUser } from "../../slices/userSlice";
 import { apiConnector } from "../apiConnector";
 import { userEndpoints } from "../apis";
 import Cookies from "js-cookie";
-import { LoginInput, SignUpInput } from "@kenil_vora/neighborly";
+import {
+  ChangePasswordInput,
+  LoginInput,
+  SignUpInput,
+  UpdateUserDetailsInput,
+} from "@kenil_vora/neighborly";
 
 export interface DashboardData {
   borrowedItemsCount: number;
@@ -87,7 +92,6 @@ export function sendOtp(
     const toastId = toast.loading("Sending OTP...");
     dispatch(setIsLoading(true));
     try {
-      console.log("Sending OTP");
       const res = await apiConnector("POST", userEndpoints.SEND_OTP, {
         email,
         type,
@@ -178,4 +182,120 @@ export async function getDashboardData(): Promise<DashboardData> {
     toast.error((error as any).response.data.message);
   }
   return result;
+}
+
+export function updateProfile(data: UpdateUserDetailsInput) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    const toastId = toast.loading("Updating Profile...");
+    try {
+      dispatch(setIsLoading(true));
+      const res = await apiConnector("PUT", userEndpoints.UPDATE_PROFILE, data);
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      dispatch(setUser(res.data.user));
+      Cookies.set("user", JSON.stringify(res.data.user), {
+        secure: true,
+        sameSite: "lax",
+        expires: 365,
+      });
+      toast.success("Profile Updated Successfully.");
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(setIsLoading(false));
+      toast.dismiss(toastId);
+    }
+  };
+}
+
+export function changePassword(data: ChangePasswordInput) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    const toastId = toast.loading("Changing Password...");
+    try {
+      dispatch(setIsLoading(true));
+      const res = await apiConnector(
+        "PUT",
+        userEndpoints.CHANGE_PASSWORD,
+        data
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success("Password Changed Successfully");
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(setIsLoading(false));
+      toast.dismiss(toastId);
+    }
+  };
+}
+
+export function changeTwoFactorAuth(
+  data: {
+    otp: number;
+    twoFactorAuth: boolean;
+  },
+  navigate: NavigateFunction | null
+) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    const toastId = toast.loading("Changing Two Factor Authentication...");
+    try {
+      dispatch(setIsLoading(true));
+      const res = await apiConnector(
+        "PUT",
+        userEndpoints.CHANGE_TWO_FACTOR_AUTH,
+        data
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      dispatch(setUser(res.data.user));
+      Cookies.set("user", JSON.stringify(res.data.user), {
+        secure: true,
+        sameSite: "lax",
+        expires: 365,
+      });
+      toast.success(res.data.message);
+      if (navigate) {
+        navigate("/dashboard/profile");
+      }
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(setIsLoading(false));
+      toast.dismiss(toastId);
+    }
+  };
+}
+
+export async function getTwoFactorAuth(
+  email: string,
+  password: string
+): Promise<boolean | null> {
+  const toastId = toast.loading("Checking 2FA Status...");
+  try {
+    const res = await apiConnector("POST", userEndpoints.GET_TWO_FACTOR_AUTH, {
+      email,
+      password,
+    });
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    return res.data.twoFactorAuth;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+    return null;
+  } finally {
+    toast.dismiss(toastId);
+  }
 }

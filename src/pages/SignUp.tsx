@@ -314,6 +314,7 @@ const SignUp = () => {
                     onCopy={(e) => e.preventDefault()}
                     onCut={(e) => e.preventDefault()}
                     onPaste={(e) => e.preventDefault()}
+                    minLength={8}
                   />
                   <span
                     className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
@@ -349,6 +350,7 @@ const SignUp = () => {
                     onCopy={(e) => e.preventDefault()}
                     onCut={(e) => e.preventDefault()}
                     onPaste={(e) => e.preventDefault()}
+                    minLength={8}
                   />
                   <span
                     className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"

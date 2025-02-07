@@ -10,6 +10,7 @@ export const userEndpoints = {
   RESET_PASSWORD_TOKEN: `${BACKEND_URL}/user/resetPasswordToken`,
   RESET_PASSWORD: `${BACKEND_URL}/user/resetPassword`,
   CHANGE_TWO_FACTOR_AUTH: `${BACKEND_URL}/user/changeTwoFactorAuth`,
+  GET_TWO_FACTOR_AUTH: `${BACKEND_URL}/user/getTwoFactorAuth`,
   UPDATE_PROFILE: `${BACKEND_URL}/user/updateProfile`,
   GET_USER: `${BACKEND_URL}/user/getUser`,
   GET_STATISTICAL_DATA: `${BACKEND_URL}/user/getStatisticalData`,
