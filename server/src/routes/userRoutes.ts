@@ -46,7 +46,7 @@ router.put("/resetPassword/:token", resetPassword);
 // Enable Two Factor Authentication Route
 router.put("/changeTwoFactorAuth", auth, changeTwoFactorAuth);
 
-// Get Two Factor Authentication Route
+// Get Two Factor Authentication Status Route
 router.post("/getTwoFactorAuth", getTwoFactorAuthStatus);
 
 // Update User Details Route
