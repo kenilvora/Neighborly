@@ -23,7 +23,6 @@ import {
   updateUserDetailsSchema,
   IRatings,
   IStatisticalData,
-  IStatisticalDataWithAvgRating,
   IUserDetails,
 } from "@kenil_vora/neighborly";
 import BorrowItem from "../models/BorrowItem";
@@ -877,7 +876,7 @@ export const updateUserDetails = async (
     user.lastName = lastName;
     user.contactNumber = contactNumber;
     user.profileImage = `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`;
-    
+
     address.addressLine1 = addressLine1;
     address.addressLine2 = addressLine2;
     address.city = city;
@@ -1014,26 +1013,70 @@ export const getStatisticalData = async (
       return;
     }
 
-    const statsData = (await User.findById(id)
-      .select("statisticalData")
-      .populate({
-        path: "statisticalData",
-        select: "-userId",
-        populate: {
-          path: "itemId",
-          select: "name description price category images ratingAndReviews",
-          populate: [
-            {
-              path: "ratingAndReviews",
-              select: "rating",
-            },
-            {
-              path: "category",
-              select: "name",
-            },
-          ],
+    const statsData = await User.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
         },
-      })) as unknown as IStatisticalData[];
+      },
+      {
+        $lookup: {
+          from: "itemstats",
+          localField: "statisticalData",
+          foreignField: "_id",
+          as: "stats",
+        },
+      },
+      {
+        $unwind: "$stats",
+      },
+      {
+        $lookup: {
+          from: "items",
+          localField: "stats.itemId",
+          foreignField: "_id",
+          as: "item",
+        }
+      },
+      {
+        $unwind: "$item",
+      },
+      {
+        $lookup: {
+          from:"categories",
+          localField: "item.category",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
+      {
+        $unwind: "$category"
+      },
+      {
+        $group: {
+          _id: {
+            categoryID: "$category._id",
+            categoryName: "$category.name"
+          },
+          items: { 
+            $push: {
+              itemId: "$item._id",
+              itemName: "$item.name",
+              borrowCount: "$stats.borrowCount",
+              totalProfit: "$stats.totalProfit"
+            }
+          },
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          items: 1,
+          categoryId: "$_id.categoryID",
+          categoryName: "$_id.categoryName"
+        },
+      },
+    ]) as IStatisticalData[];
 
     if (!statsData) {
       res.status(400).json({
@@ -1043,18 +1086,9 @@ export const getStatisticalData = async (
       return;
     }
 
-    let updatedStatsData: IStatisticalDataWithAvgRating[] = [];
-
-    updatedStatsData = statsData.map((data) => {
-      return {
-        statData: data,
-        avgRating: getAvgRating(data.itemId.ratingAndReviews),
-      };
-    });
-
     res.status(200).json({
       success: true,
-      statsData,
+      data: statsData,
     });
   } catch (error) {
     res.status(500).json({

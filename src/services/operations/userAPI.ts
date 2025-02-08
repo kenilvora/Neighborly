@@ -7,6 +7,7 @@ import { userEndpoints } from "../apis";
 import Cookies from "js-cookie";
 import {
   ChangePasswordInput,
+  IStatisticalData,
   LoginInput,
   SignUpInput,
   UpdateUserDetailsInput,
@@ -297,5 +298,22 @@ export async function getTwoFactorAuth(
     return null;
   } finally {
     toast.dismiss(toastId);
+  }
+}
+
+export async function getStatisticalData(): Promise<IStatisticalData[]> {
+  let result: IStatisticalData[] = [] as IStatisticalData[];
+  try {
+    const res = await apiConnector("GET", userEndpoints.GET_STATISTICAL_DATA);
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    result = res.data.data;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+  } finally {
+    return result;
   }
 }
