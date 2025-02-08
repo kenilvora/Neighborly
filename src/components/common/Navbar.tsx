@@ -3,7 +3,7 @@ import navImage from "../../assets/navbarImage.jpeg";
 import { IoIosSearch } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../reducer/store";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import { MdOutlineArrowDropDown, MdOutlineArrowDropUp } from "react-icons/md";
 import { setSearchQuery } from "../../slices/itemSlice";
@@ -25,7 +25,7 @@ const Navbar = () => {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const [query, setQuery] = useState("");
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
 
   useOnClickOutside(ref, () => setIsMenuOpen(false));
@@ -52,6 +52,23 @@ const Navbar = () => {
     }
   }, [location, location.pathname]);
 
+  const handler = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (handler.current) {
+      clearTimeout(handler.current);
+    }
+    handler.current = setTimeout(() => {
+      dispatch(setSearchQuery(query));
+    }, 500);
+
+    return () => {
+      if (handler.current) {
+        clearTimeout(handler.current);
+      }
+    };
+  }, [query, dispatch]);
+
   return (
     <div className="w-full border-b-1 px-2 border-neutral-300 flex justify-center items-center fixed bg-white z-50 shadow-lg">
       <div className="w-[97%] flex justify-between py-4 items-center">
@@ -73,12 +90,12 @@ const Navbar = () => {
             placeholder="Search for Items..."
             className="py-2 text-neutral-800 border border-neutral-300 rounded-lg px-4 pl-10 
                     outline-blue-500 w-full font-medium"
-            value={searchQuery}
+            value={query}
             onChange={(e) => {
               if (window.location.pathname !== "/") {
                 navigate("/");
               }
-              dispatch(setSearchQuery(e.target.value));
+              setQuery(e.target.value);
             }}
           />
         </div>

@@ -1,7 +1,6 @@
-import { LoginInput, SignUpInput } from "@kenil_vora/neighborly";
+import { LoginInput, SignUpInput, IUserDetails } from "@kenil_vora/neighborly";
 import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
-import { IUserDetails } from "@kenil_vora/neighborly";
 
 type OtpType = "signup" | "login" | "twoFactorAuth";
 
