@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 interface INotification extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   message: string;
-  recipient: mongoose.Schema.Types.ObjectId;
+  recipient: mongoose.Types.ObjectId;
   isRead: boolean;
   type: "System" | "User" | "Transaction";
   createdAt: Date;

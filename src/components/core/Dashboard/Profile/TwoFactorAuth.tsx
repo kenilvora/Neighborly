@@ -22,8 +22,8 @@ const TwoFactorAuth = () => {
     >
       <div className="text-2xl font-semibold">Two Factor Authentication</div>
 
-      <form className="flex items-center gap-3 w-[50%] max-[800px]:w-full">
-        <div className="container min-w-[50px]">
+      <form className="flex items-center gap-3 w-full">
+        <div className="container">
           <input
             type="checkbox"
             className="checkbox"

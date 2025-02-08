@@ -219,6 +219,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid password",
+      });
+      return;
+    }
+
     if (user.twoFactorAuth && !otp) {
       res.status(400).json({
         success: false,
@@ -241,16 +251,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         });
         return;
       }
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid password",
-      });
-      return;
     }
 
     const payload = {
@@ -876,7 +876,8 @@ export const updateUserDetails = async (
     user.firstName = firstName;
     user.lastName = lastName;
     user.contactNumber = contactNumber;
-
+    user.profileImage = `https://api.dicebear.com/5.x/initials/svg?seed=${firstName}%20${lastName}`;
+    
     address.addressLine1 = addressLine1;
     address.addressLine2 = addressLine2;
     address.city = city;

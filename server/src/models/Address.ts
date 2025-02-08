@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 interface IAddress extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   addressLine1: string;
   addressLine2: string;
   city: string;

@@ -140,7 +140,7 @@ export const addItem = async (
       itemLocation: user?.address,
     });
 
-    user.lendItems.push(item._id as mongoose.Schema.Types.ObjectId);
+    user.lendItems.push(item._id);
 
     const recentActivity = await RecentActivity.create({
       userId: id,

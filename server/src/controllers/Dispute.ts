@@ -387,7 +387,7 @@ export const getDisputeById = async (
       return;
     }
 
-    const uuid = new mongoose.Schema.Types.ObjectId(disputeId);
+    const uuid = new mongoose.Types.ObjectId(disputeId);
 
     if (
       !user.disputesCreatedByMe?.includes(uuid) &&

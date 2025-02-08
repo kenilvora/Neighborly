@@ -4,12 +4,7 @@ import User from "../models/User";
 import mongoose from "mongoose";
 import RatingAndReview from "../models/RatingAndReview";
 import Item from "../models/Item";
-import getAvgRating from "../utils/getAverageRating";
-import {
-  createRatingAndReviewSchema,
-  IRatingAndReview,
-  IGeneralRatingAndReview,
-} from "@kenil_vora/neighborly";
+import { createRatingAndReviewSchema } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
 
 export const createRatingAndReview = async (
@@ -136,15 +131,11 @@ export const createRatingAndReview = async (
     });
 
     if (type === "User") {
-      toWhomUser?.ratingAndReviews.push(
-        newRatingAndReview._id as mongoose.Schema.Types.ObjectId
-      );
+      toWhomUser?.ratingAndReviews.push(newRatingAndReview._id);
       toWhomUser?.recentActivities?.push(recentActivity2._id);
       await toWhomUser?.save();
     } else {
-      toWhomItem?.ratingAndReviews.push(
-        newRatingAndReview._id as mongoose.Schema.Types.ObjectId
-      );
+      toWhomItem?.ratingAndReviews.push(newRatingAndReview._id);
       const toWhomUser = await User.findById(toWhomItem?.lenderId);
       toWhomUser?.recentActivities?.push(recentActivity2._id);
       await toWhomUser?.save();
@@ -210,7 +201,6 @@ export const getRatingAndReviewsOfAUser = async (
       {
         $unwind: {
           path: "$ratingAndReviews",
-          preserveNullAndEmptyArrays: true,
         },
       },
       {
@@ -304,7 +294,6 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
       {
         $unwind: {
           path: "$lendItems",
-          preserveNullAndEmptyArrays: true, // Ensure it doesn't break if there are no items
         },
       },
       {
@@ -318,7 +307,6 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
       {
         $unwind: {
           path: "$lendItems.ratingAndReviews",
-          preserveNullAndEmptyArrays: true, // Include items even if they have no reviews
         },
       },
       {
@@ -332,7 +320,6 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
       {
         $unwind: {
           path: "$lendItems.ratingAndReviews.reviewerDetails",
-          preserveNullAndEmptyArrays: true, // Include reviews without valid reviewers
         },
       },
       {
@@ -347,7 +334,6 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
               rating: "$lendItems.ratingAndReviews.rating",
               review: "$lendItems.ratingAndReviews.review",
               reviewer: {
-                _id: "$lendItems.ratingAndReviews.reviewerDetails._id",
                 firstName:
                   "$lendItems.ratingAndReviews.reviewerDetails.firstName",
                 lastName:
@@ -434,7 +420,6 @@ export const getRatingAndReviewsOfAnItem = async (
       {
         $unwind: {
           path: "$ratingAndReviews",
-          preserveNullAndEmptyArrays: true, // To include items without reviews
         },
       },
       {
@@ -448,27 +433,26 @@ export const getRatingAndReviewsOfAnItem = async (
       {
         $unwind: {
           path: "$ratingAndReviews.reviewerDetails",
-          preserveNullAndEmptyArrays: true, // To include reviews without a valid reviewer
         },
       },
       {
         $group: {
-          _id: "$_id",
-          name: { $first: "$name" },
-          ratingAndReviews: {
+          _id: {
+            itemId: "$_id",
+            itemName: "$name",
+          },
+          itemReviews: {
             $push: {
               _id: "$ratingAndReviews._id",
               rating: "$ratingAndReviews.rating",
               review: "$ratingAndReviews.review",
               reviewer: {
-                _id: "$ratingAndReviews.reviewerDetails._id",
                 firstName: "$ratingAndReviews.reviewerDetails.firstName",
                 lastName: "$ratingAndReviews.reviewerDetails.lastName",
                 email: "$ratingAndReviews.reviewerDetails.email",
                 image: "$ratingAndReviews.reviewerDetails.profileImage",
               },
               createdAt: "$ratingAndReviews.createdAt",
-              updatedAt: "$ratingAndReviews.updatedAt",
             },
           },
           AvgRating: { $avg: "$ratingAndReviews.rating" },
@@ -483,8 +467,10 @@ export const getRatingAndReviewsOfAnItem = async (
       },
       {
         $project: {
-          name: 1,
-          ratingAndReviews: 1,
+          _id: 0,
+          itemId: "$_id.itemId",
+          itemName: "$_id.itemName",
+          itemReviews: 1,
           avgRating: 1, // Include computed avgRating
         },
       },
@@ -492,7 +478,7 @@ export const getRatingAndReviewsOfAnItem = async (
 
     res.status(200).json({
       success: true,
-      data: data,
+      data: data[0],
     });
   } catch (error) {
     res.status(500).json({

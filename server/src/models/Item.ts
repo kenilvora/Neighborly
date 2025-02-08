@@ -3,25 +3,25 @@ import mailSender from "../utils/mailSender";
 import { itemAddedTemplate } from "../mails/itemAddedTemplate";
 
 interface IItem extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   name: string;
   description: string;
   price: number;
   depositAmount: number;
-  category: mongoose.Schema.Types.ObjectId;
+  category: mongoose.Types.ObjectId;
   tags: string[];
-  lenderId: mongoose.Schema.Types.ObjectId;
-  borrowers: mongoose.Schema.Types.ObjectId[];
-  ratingAndReviews: mongoose.Schema.Types.ObjectId[];
+  lenderId: mongoose.Types.ObjectId;
+  borrowers: mongoose.Types.ObjectId[];
+  ratingAndReviews: mongoose.Types.ObjectId[];
   isAvailable: boolean;
   images: string[];
   condition: "New" | "Like New" | "Good" | "Average" | "Poor";
-  currentBorrowerId?: mongoose.Schema.Types.ObjectId;
+  currentBorrowerId?: mongoose.Types.ObjectId;
   availableFrom: Date;
   deliveryCharges?: number;
   deliveryType?: "Pickup" | "Delivery" | "Both (Pickup & Delivery)";
   deliveryRadius?: number;
-  itemLocation: mongoose.Schema.Types.ObjectId;
+  itemLocation: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

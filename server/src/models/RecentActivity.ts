@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 interface IRecentActivity extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
-  userId: mongoose.Schema.Types.ObjectId;
-  itemID?: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  itemID?: mongoose.Types.ObjectId;
   type:
     | "Borrowed"
     | "Lent"

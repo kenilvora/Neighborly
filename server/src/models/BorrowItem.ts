@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 interface IBorrowItem extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
-  item: mongoose.Schema.Types.ObjectId;
-  borrower: mongoose.Schema.Types.ObjectId;
-  lender: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
+  item: mongoose.Types.ObjectId;
+  borrower: mongoose.Types.ObjectId;
+  lender: mongoose.Types.ObjectId;
   startDate: Date;
   endDate: Date;
   paymentMode: "Cash" | "Online" | "Wallet";
@@ -12,7 +12,7 @@ interface IBorrowItem extends mongoose.Document {
   deliveryType: "Pickup" | "Delivery";
   deliveryCharges?: number;
   deliveryStatus?: "Pending" | "Accepted" | "Rejected";
-  transactionId?: mongoose.Schema.Types.ObjectId;
+  transactionId?: mongoose.Types.ObjectId;
   isReturned: boolean;
   type?: "Currently Borrowed" | "Previously Borrowed";
   createdAt: Date;

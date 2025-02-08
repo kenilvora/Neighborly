@@ -3,7 +3,7 @@ import mailSender from "../utils/mailSender";
 import { otpTemplate } from "../mails/otpTemplate";
 
 interface IOtp extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   email: string;
   otp: number;
   type: "signup" | "login" | "twoFactorAuth";

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 interface ITransaction extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
-  borrowerId: mongoose.Schema.Types.ObjectId;
-  lenderId: mongoose.Schema.Types.ObjectId;
-  borrowItemId: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
+  borrowerId: mongoose.Types.ObjectId;
+  lenderId: mongoose.Types.ObjectId;
+  borrowItemId: mongoose.Types.ObjectId;
   transactionType: "Deposit" | "Withdraw" | "Refund" | "Penalty";
   amount: number;
   paymentId: string;

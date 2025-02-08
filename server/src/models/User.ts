@@ -1,30 +1,30 @@
 import mongoose from "mongoose";
 
 interface IUser extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   contactNumber: string;
-  address: mongoose.Schema.Types.ObjectId;
+  address: mongoose.Types.ObjectId;
   role: "User" | "Admin";
   profileImage: string;
-  transactions: mongoose.Schema.Types.ObjectId[];
-  ratingAndReviews: mongoose.Schema.Types.ObjectId[];
-  borrowItems: mongoose.Schema.Types.ObjectId[];
-  lendItems: mongoose.Schema.Types.ObjectId[];
+  transactions: mongoose.Types.ObjectId[];
+  ratingAndReviews: mongoose.Types.ObjectId[];
+  borrowItems: mongoose.Types.ObjectId[];
+  lendItems: mongoose.Types.ObjectId[];
   upiId?: string;
   upiIdVerified?: boolean;
   accountBalance: number;
-  notofications: mongoose.Schema.Types.ObjectId[];
+  notofications: mongoose.Types.ObjectId[];
   twoFactorAuth?: boolean;
-  statisticalData?: mongoose.Schema.Types.ObjectId[];
-  disputesCreatedByMe?: mongoose.Schema.Types.ObjectId[];
-  disputesCreatedAgainstMe?: mongoose.Schema.Types.ObjectId[];
+  statisticalData?: mongoose.Types.ObjectId[];
+  disputesCreatedByMe?: mongoose.Types.ObjectId[];
+  disputesCreatedAgainstMe?: mongoose.Types.ObjectId[];
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
-  recentActivities?: mongoose.Schema.Types.ObjectId[];
+  recentActivities?: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }

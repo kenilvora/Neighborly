@@ -11,6 +11,7 @@ import { TbMapPinCode } from "react-icons/tb";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../../reducer/store";
 import { updateProfile } from "../../../../services/operations/userAPI";
+import { MdEmail } from "react-icons/md";
 
 const countryData = data as Country[];
 
@@ -141,48 +142,61 @@ const UserInfo = () => {
             errors={errors.lastName}
           />
         </div>
-        <div className="flex w-full">
-          <PhoneInput
-            country={"in"}
-            onChange={(value, countryData: CountryData) => {
-              const formattedValue = formatPhoneNumber(
-                value,
-                countryData.dialCode
-              );
-              setValue("contactNumber", formattedValue, {
-                shouldValidate: true,
-              }); // Manually set value
-            }}
-            autoFormat={true}
-            enableAreaCodes={true}
-            enableSearch={true}
-            inputStyle={{
-              border: "1px solid #d4d4d8",
-              borderRadius: "6px",
-              padding: "21px 0px 21px 52px",
-              fontSize: "1rem",
-              outlineColor: "#3b82f6",
-              width: "100%",
-            }}
-            buttonStyle={{
-              borderRadius: "6px 0px 0px 6px",
-              paddingLeft: "4px",
-              backgroundColor: "white",
-            }}
-            inputProps={{
-              id: "contactNumber",
-              name: "contactNumber",
-              required: true,
-              autoComplete: "on",
-              ref: register("contactNumber", { required: true }).ref, // Assign ref manually
-            }}
-            value={getValues("contactNumber")}
-          />
-          {errors.contactNumber && (
-            <span className="text-neutral-800 font-semibold opacity-70">
-              Please enter your contact number
-            </span>
-          )}
+        <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+          <div className="w-[50%] max-[800px]:w-full flex relative flex-col gap-1">
+            <div className="absolute text-lg top-[13px] left-3 text-neutral-500">
+              <MdEmail />
+            </div>
+            <input
+              value={user?.email}
+              disabled
+              className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500 pl-9 hover:cursor-not-allowed font-semibold text-neutral-500"
+            />
+          </div>
+          <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1">
+            <PhoneInput
+              country={"in"}
+              onChange={(value, countryData: CountryData) => {
+                const formattedValue = formatPhoneNumber(
+                  value,
+                  countryData.dialCode
+                );
+                setValue("contactNumber", formattedValue, {
+                  shouldValidate: true,
+                }); // Manually set value
+              }}
+              autoFormat={true}
+              enableAreaCodes={true}
+              enableSearch={true}
+              inputStyle={{
+                border: "1px solid #d4d4d8",
+                borderRadius: "6px",
+                padding: "21px 0px 21px 52px",
+                fontSize: "1rem",
+                outlineColor: "#3b82f6",
+                width: "100%",
+              }}
+              buttonStyle={{
+                borderRadius: "6px 0px 0px 6px",
+                paddingLeft: "4px",
+                backgroundColor: "white",
+              }}
+              inputProps={{
+                id: "contactNumber",
+                name: "contactNumber",
+                required: true,
+                autoComplete: "on",
+                ref: register("contactNumber", { required: true }).ref, // Assign ref manually
+              }}
+              value={getValues("contactNumber")}
+              dropdownStyle={{}}
+            />
+            {errors.contactNumber && (
+              <span className="text-neutral-800 font-semibold opacity-70">
+                Please enter your contact number
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
           <CustomInput

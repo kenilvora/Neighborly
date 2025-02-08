@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 
 interface ICategory extends mongoose.Document {
-  _id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   name: string;
   itemCount: number;
-  items: mongoose.Schema.Types.ObjectId[];
+  items: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }

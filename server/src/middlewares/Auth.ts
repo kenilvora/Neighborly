@@ -4,7 +4,7 @@ import User from "../models/User";
 import mongoose from "mongoose";
 
 type UserPayload = {
-  id: mongoose.Schema.Types.ObjectId;
+  id: mongoose.Types.ObjectId;
   email: string;
   role: "User" | "Admin";
 };
