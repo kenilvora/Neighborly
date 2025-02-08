@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@kenil_vora/neighborly": "^1.0.10",
+    "@kenil_vora/neighborly": "^1.0.12",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.7",

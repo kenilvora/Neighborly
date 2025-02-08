@@ -1,6 +1,6 @@
 import { LuChevronLeft, LuChevronRight, LuLogOut } from "react-icons/lu";
 import { SidebarLink } from "../../../data/SidebarLink";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logOut } from "../../../services/operations/userAPI";
 
@@ -12,6 +12,12 @@ type SidebarProps = {
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const currentPage = SidebarLink.find(
+    (link) => link.path === location.pathname
+  );
 
   return (
     <div
@@ -41,14 +47,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center">
+      <div className="flex flex-col justify-center gap-1">
         {SidebarLink.map((link) => (
           <NavLink
             to={link.path}
             key={link.id}
             title={link.name}
-            className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
-                      px-2 py-2 rounded-lg"
+            className={`flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
+                      px-2 py-2 rounded-lg
+                        ${currentPage?.id === link.id ? "bg-neutral-200" : ""}
+                      `}
           >
             <link.icon size={24} />
             <span

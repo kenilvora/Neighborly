@@ -4,7 +4,11 @@ import User from "../models/User";
 import mongoose from "mongoose";
 import RatingAndReview from "../models/RatingAndReview";
 import Item from "../models/Item";
-import { createRatingAndReviewSchema } from "@kenil_vora/neighborly";
+import {
+  createRatingAndReviewSchema,
+  IRatingsAndReviewsOfItemInDetail,
+  IRatingsAndReviewsOfUserInDetail,
+} from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
 
 export const createRatingAndReview = async (
@@ -184,7 +188,7 @@ export const getRatingAndReviewsOfAUser = async (
       return;
     }
 
-    const data = await User.aggregate([
+    const data = (await User.aggregate([
       {
         $match: {
           _id: new mongoose.Types.ObjectId(id as string),
@@ -218,7 +222,6 @@ export const getRatingAndReviewsOfAUser = async (
       },
       {
         $group: {
-          _id: "$_id",
           fistName: { $first: "$firstName" },
           lastName: { $first: "$lastName" },
           ratingAndReviews: {
@@ -227,11 +230,10 @@ export const getRatingAndReviewsOfAUser = async (
               rating: "$ratingAndReviews.rating",
               review: "$ratingAndReviews.review",
               reviewer: {
-                _id: "$ratingAndReviews.reviewerDetails._id",
                 firstName: "$ratingAndReviews.reviewerDetails.firstName",
                 lastName: "$ratingAndReviews.reviewerDetails.lastName",
                 email: "$ratingAndReviews.reviewerDetails.email",
-                image: "$ratingAndReviews.reviewerDetails.profileImage",
+                profileImage: "$ratingAndReviews.reviewerDetails.profileImage",
               },
               createdAt: "$ratingAndReviews.createdAt",
               updatedAt: "$ratingAndReviews.updatedAt",
@@ -252,16 +254,17 @@ export const getRatingAndReviewsOfAUser = async (
       },
       {
         $project: {
-          name: 1,
+          fistName: 1,
+          lastName: 1,
           ratingAndReviews: 1,
           avgRating: 1,
         },
       },
-    ]);
+    ])) as IRatingsAndReviewsOfUserInDetail[];
 
     res.status(200).json({
       success: true,
-      data: data,
+      data: data[0],
     });
   } catch (error) {
     console.log("Error : ", error);
@@ -279,7 +282,7 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
   try {
     const id = req.user?.id.toString();
 
-    const data = await User.aggregate([
+    const data = (await User.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(id) },
       },
@@ -339,7 +342,7 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
                 lastName:
                   "$lendItems.ratingAndReviews.reviewerDetails.lastName",
                 email: "$lendItems.ratingAndReviews.reviewerDetails.email",
-                image:
+                profileImage:
                   "$lendItems.ratingAndReviews.reviewerDetails.profileImage",
               },
               createdAt: "$lendItems.ratingAndReviews.createdAt",
@@ -364,7 +367,7 @@ export const getRatingAndReviewsOfItemsOfAUser = async (
           itemReviews: 1,
         },
       },
-    ]);
+    ])) as IRatingsAndReviewsOfItemInDetail[];
 
     res.status(200).json({
       success: true,
@@ -403,7 +406,7 @@ export const getRatingAndReviewsOfAnItem = async (
       return;
     }
 
-    const data = await Item.aggregate([
+    const data = (await Item.aggregate([
       {
         $match: {
           _id: new mongoose.Types.ObjectId(id as string),
@@ -450,7 +453,7 @@ export const getRatingAndReviewsOfAnItem = async (
                 firstName: "$ratingAndReviews.reviewerDetails.firstName",
                 lastName: "$ratingAndReviews.reviewerDetails.lastName",
                 email: "$ratingAndReviews.reviewerDetails.email",
-                image: "$ratingAndReviews.reviewerDetails.profileImage",
+                profileImage: "$ratingAndReviews.reviewerDetails.profileImage",
               },
               createdAt: "$ratingAndReviews.createdAt",
             },
@@ -474,7 +477,7 @@ export const getRatingAndReviewsOfAnItem = async (
           avgRating: 1, // Include computed avgRating
         },
       },
-    ]);
+    ])) as IRatingsAndReviewsOfItemInDetail[];
 
     res.status(200).json({
       success: true,

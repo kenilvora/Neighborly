@@ -42,7 +42,7 @@ export const ratingAndReviewEndpoints = {
   CREATE_RATING_AND_REVIEW: `${BACKEND_URL}/ratingAndReview/create`,
   GET_RATING_AND_REVIEW_USER: `${BACKEND_URL}/ratingAndReview/getOfUser`,
   GET_RATING_AND_REVIEW_ITEM: `${BACKEND_URL}/ratingAndReview/getOfItem`,
-  GET_RATING_AND_REVIEW_ITEM_OF_USER: `${BACKEND_URL}/ratingAndReview/getOfItemOfUser`,
+  GET_RATING_AND_REVIEW_ITEM_OF_USER: `${BACKEND_URL}/ratingAndReview/getOfItemsOfUser`,
 };
 
 export const disputeEndpoints = {
