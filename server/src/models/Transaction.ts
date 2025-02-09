@@ -5,7 +5,7 @@ interface ITransaction extends mongoose.Document {
   borrowerId: mongoose.Types.ObjectId;
   lenderId: mongoose.Types.ObjectId;
   borrowItemId: mongoose.Types.ObjectId;
-  transactionType: "Deposit" | "Withdraw" | "Refund" | "Penalty";
+  transactionType: "Borrow Fee" | "Withdraw" | "Refund" | "Penalty";
   amount: number;
   paymentId: string;
   status: "Completed" | "Failed";
@@ -33,7 +33,7 @@ const transactionSchema = new mongoose.Schema(
     transactionType: {
       type: String,
       required: true,
-      enum: ["Deposit", "Withdraw", "Refund", "Penalty"],
+      enum: ["Borrow Fee", "Withdraw", "Refund", "Penalty"],
     },
     amount: {
       type: Number,

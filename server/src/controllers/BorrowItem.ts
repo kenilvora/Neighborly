@@ -13,6 +13,8 @@ export const borrowItem = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const parsedData = borrowItemSchema.safeParse(req.body);
     const id = req.user?.id;
@@ -43,7 +45,7 @@ export const borrowItem = async (
       });
     }
 
-    const borrower = await User.findById(id);
+    const borrower = await User.findById(id, null, { session });
 
     if (!borrower) {
       res.status(404).json({
@@ -53,7 +55,7 @@ export const borrowItem = async (
       return;
     }
 
-    const item = await Item.findById(itemId);
+    const item = await Item.findById(itemId, null, { session });
 
     if (!item) {
       res.status(404).json({
@@ -63,7 +65,7 @@ export const borrowItem = async (
       return;
     }
 
-    const lender = await User.findById(item.lenderId);
+    const lender = await User.findById(item.lenderId, null, { session });
 
     if (!lender) {
       res.status(404).json({
@@ -149,7 +151,9 @@ export const borrowItem = async (
         return;
       }
 
-      const transaction = await Transaction.findById(transactionId);
+      const transaction = await Transaction.findById(transactionId, null, {
+        session,
+      });
 
       if (!transaction) {
         res.status(404).json({
@@ -201,7 +205,7 @@ export const borrowItem = async (
         }
       }
 
-      if (transaction.transactionType !== "Deposit") {
+      if (transaction.transactionType !== "Borrow Fee") {
         res.status(400).json({
           success: false,
           message: "Invalid Transaction",
@@ -240,7 +244,7 @@ export const borrowItem = async (
 
       lender.accountBalance += totalAmount + deliveryCharges;
 
-      await lender.save();
+      await lender.save({ session });
 
       paymentStatus = "Paid";
     }
@@ -254,69 +258,87 @@ export const borrowItem = async (
     const endingDate = new Date(endDate);
     item.availableFrom = new Date(endingDate.setDate(endingDate.getDate() + 1));
 
-    await item.save();
+    await item.save({ session });
 
     borrower.borrowItems.push(item._id);
 
-    await BorrowItem.create({
-      item: itemId,
-      borrower: id,
-      lender: item.lenderId,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      paymentMode,
-      paymentStatus,
-      deliveryType,
-      deliveryCharges:
-        deliveryType === "Delivery" ? deliveryCharges : undefined,
-      deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
-      transactionId: paymentMode === "Online" ? transactionId : undefined,
-      type: "Currently Borrowed",
-    });
+    await BorrowItem.create(
+      {
+        item: itemId,
+        borrower: id,
+        lender: item.lenderId,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        paymentMode,
+        paymentStatus,
+        deliveryType,
+        deliveryCharges:
+          deliveryType === "Delivery" ? deliveryCharges : undefined,
+        deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
+        transactionId: paymentMode === "Online" ? transactionId : undefined,
+        type: "Currently Borrowed",
+      },
+      { session }
+    );
 
     if (paymentMode !== "Cash") {
-      let itemStat = await ItemStat.findOne({
-        itemId: itemId,
-        userId: item.lenderId,
-      });
+      let itemStat = await ItemStat.findOne(
+        {
+          itemId: itemId,
+          userId: item.lenderId,
+        },
+        null,
+        { session }
+      );
 
       if (itemStat) {
         itemStat.borrowCount += 1;
         itemStat.totalProfit += item.price;
-        await itemStat.save();
+        await itemStat.save({ session });
       } else {
-        itemStat = await ItemStat.create({
-          itemId: itemId,
-          userId: item.lenderId,
-          borrowCount: 1,
-          totalProfit: item.price,
-        });
+        [itemStat] = await ItemStat.create(
+          {
+            itemId: itemId,
+            userId: item.lenderId,
+            borrowCount: 1,
+            totalProfit: item.price,
+          },
+          { session }
+        );
       }
       lender.statisticalData?.push(itemStat._id);
     }
 
-    const recentActivity = await RecentActivity.create({
-      userId: id,
-      itemID: itemId,
-      type: "Borrowed",
-      status: "Success",
-    });
+    const [recentActivity] = await RecentActivity.create(
+      {
+        userId: id,
+        itemID: itemId,
+        type: "Borrowed",
+        status: "Success",
+      },
+      { session }
+    );
 
     borrower.recentActivities?.push(recentActivity._id);
 
-    await borrower.save();
+    await borrower.save({ session });
 
-    await lender.save();
+    await lender.save({ session });
+
+    await session.commitTransaction();
 
     res.status(200).json({
       success: true,
       message: "Item borrowed successfully",
     });
   } catch (error) {
+    await session.abortTransaction();
     res.status(500).json({
       success: true,
       message: "Internal server error",
     });
+  } finally {
+    session.endSession();
   }
 };
 
