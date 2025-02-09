@@ -38,7 +38,7 @@ const UserInfo = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     setValue,
     getValues,
   } = useForm<UpdateUserDetailsInput>({
@@ -276,7 +276,17 @@ const UserInfo = () => {
             </label>
           </div>
         </div>
-        <button className="bg-blue-500 cursor-pointer text-white font-semibold py-2 rounded-lg text-lg w-fit px-4">
+        <button
+          className={`font-semibold py-2 rounded-lg text-lg w-fit px-4 text-white
+                      ${
+                        !isDirty
+                          ? "cursor-not-allowed bg-blue-300"
+                          : "bg-blue-500 cursor-pointer"
+                      }
+          `}
+          disabled={!isDirty}
+          type="submit"
+        >
           Update Profile
         </button>
       </form>

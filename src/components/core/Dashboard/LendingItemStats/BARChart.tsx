@@ -1,52 +1,72 @@
-import * as React from "react";
-import { BarChart } from "@mui/x-charts/BarChart";
-import { axisClasses } from "@mui/x-charts/ChartsAxis";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
 
-const chartSetting = {
-  yAxis: [],
-  series: [
-    { dataKey: "borrowCount", label: "Times Borrowed" },
-    { dataKey: "profit", label: "Profit" },
-  ],
-  height: 300,
-  sx: {
-    [`& .${axisClasses.directionY} .${axisClasses.label}`]: {
-      transform: "translateX(-10px)",
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+interface BarChartData {
+  label: string;
+  value: number;
+}
+
+interface BarChartProps {
+  data: BarChartData[];
+  label: string;
+}
+
+const getRandomColors = (numColors: number) => {
+  const colors = [];
+  for (let i = 0; i < numColors; i++) {
+    const color = `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(
+      Math.random() * 256
+    )},${Math.floor(Math.random() * 256)})`;
+    colors.push(color);
+  }
+  return colors;
+};
+
+const options = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: "top" as const,
+    },
+    title: {
+      display: true,
+      text: "Lending Item Stats",
     },
   },
 };
 
-interface BarChartData {
-  itemName: string;
-  borrowCount: number;
-  profit: number;
-  [key: string]: string | number;
-}
+const BARChart = ({ data, label }: BarChartProps) => {
+  const labels = data.map((item) => item.label);
 
-interface BarChartProps {
-  dataset: BarChartData[];
-}
+  const dataset = {
+    labels,
+    datasets: [
+      {
+        label: label,
+        data: data.map((item) => item.value),
+        backgroundColor: getRandomColors(data.length),
+      },
+    ],
+  };
 
-export default function BARChart({ dataset }: BarChartProps) {
-  const [tickPlacement] = React.useState<
-    "start" | "end" | "middle" | "extremities"
-  >("middle");
-  const [tickLabelPlacement] = React.useState<"middle" | "tick">("middle");
+  return <Bar options={options} data={dataset} />;
+};
 
-  return (
-    <div style={{ width: "100%" }}>
-      <BarChart
-        dataset={dataset}
-        xAxis={[
-          {
-            scaleType: "band",
-            dataKey: "itemName",
-            tickPlacement,
-            tickLabelPlacement,
-          },
-        ]}
-        {...chartSetting}
-      />
-    </div>
-  );
-}
+export default BARChart;

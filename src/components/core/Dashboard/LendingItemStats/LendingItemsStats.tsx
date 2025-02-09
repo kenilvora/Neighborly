@@ -4,16 +4,14 @@ import PIEChart from "./PIEChart";
 import { IStatisticalData } from "@kenil_vora/neighborly";
 import Loader from "../../../common/Loader";
 import { getStatisticalData } from "../../../../services/operations/userAPI";
+import CustomDropdown from "../../../common/CustomDropdown";
 
 interface BarChartData {
-  itemName: string;
-  borrowCount: number;
-  profit: number;
-  [key: string]: string | number;
+  label: string;
+  value: number;
 }
 
 interface PieChartData {
-  id: number;
   label: string;
   value: number;
 }
@@ -25,8 +23,37 @@ const LendingItemsStats = () => {
 
   const [barChartData, setBarChartData] = useState<BarChartData[]>([]);
   const [pieChartData, setPieChartData] = useState<PieChartData[]>([]);
-  const [pieChartData2, setPieChartData2] = useState<PieChartData[]>([]);
   const [totalProfit, setTotalProfit] = useState(0);
+
+  const pieChartOptions = [
+    {
+      value: "borrowCount",
+      label: "Borrow Count",
+    },
+    {
+      value: "profit",
+      label: "Profit",
+    },
+  ];
+
+  const [pieChart, setPieChart] = useState({
+    option: pieChartOptions[0].value,
+  });
+
+  const barChartOptions = [
+    {
+      value: "borrowCount",
+      label: "Borrow Count",
+    },
+    {
+      value: "profit",
+      label: "Profit",
+    },
+  ];
+
+  const [barChart, setBarChart] = useState({
+    option: barChartOptions[0].value,
+  });
 
   const [loading, setLoading] = useState(false);
 
@@ -49,36 +76,43 @@ const LendingItemsStats = () => {
 
   useEffect(() => {
     if (statsData && statsData.length > 0) {
+      // Pie Chart Data
+      const pieData: PieChartData[] = statsData.map((data) => ({
+        label: data.categoryName
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join("-"),
+        value:
+          pieChart.option === "borrowCount"
+            ? data.items.length
+            : data.items
+                .map((item) => item.totalProfit)
+                .reduce((a, b) => a + b, 0),
+      }));
+
+      setPieChartData(pieData);
+    }
+  }, [pieChart.option, statsData]);
+
+  useEffect(() => {
+    if (statsData && statsData.length > 0) {
       // Bar Chart Data
       const barData: BarChartData[] = statsData.flatMap((data) =>
         data.items.map((item) => ({
-          itemName: item.itemName,
-          borrowCount: item.borrowCount,
-          profit: item.totalProfit,
+          label: item.itemName,
+          value:
+            barChart.option === "borrowCount"
+              ? item.borrowCount
+              : item.totalProfit,
         }))
       );
 
-      // Pie Chart Data
-      const pieData: PieChartData[] = statsData.map((data, index) => ({
-        id: index,
-        label: data.categoryName
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join("-"),
-        value: data.items.length,
-      }));
+      setBarChartData(barData);
+    }
+  }, [barChart.option, statsData]);
 
-      const pieData2: PieChartData[] = statsData.map((data, index) => ({
-        id: index,
-        label: data.categoryName
-          .split("-")
-          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join("-"),
-        value: data.items
-          .map((item) => item.totalProfit)
-          .reduce((a, b) => a + b, 0),
-      }));
-
+  useEffect(() => {
+    if (statsData && statsData.length > 0) {
       // Total Profit
       const profit = statsData.reduce((acc, data) => {
         return (
@@ -86,9 +120,6 @@ const LendingItemsStats = () => {
         );
       }, 0);
 
-      setBarChartData(barData);
-      setPieChartData(pieData);
-      setPieChartData2(pieData2);
       setTotalProfit(profit);
     }
   }, [statsData]);
@@ -100,18 +131,41 @@ const LendingItemsStats = () => {
       ) : (
         <div className="flex flex-col gap-5 mt-5">
           <div className="flex flex-col gap-3 py-4 px-6 rounded-xl border-2 border-neutral-300 shadow-xl">
-            <h1 className="text-2xl font-bold">
-              Category Wise Items Borrowed Count
-            </h1>
+            <div className="flex justify-between items-center gap-4">
+              <h1 className="text-2xl font-bold">Category Wise Stats</h1>
+
+              <div className="min-w-[200px]">
+                <CustomDropdown
+                  data={pieChartOptions}
+                  fn={setPieChart}
+                  label="Select Option"
+                  name="option"
+                  value={pieChart.option}
+                />
+              </div>
+            </div>
             <PIEChart data={pieChartData} />
           </div>
+
           <div className="flex flex-col gap-3 py-4 px-6 rounded-xl border-2 border-neutral-300 shadow-xl">
-            <h1 className="text-2xl font-bold">Category Wise Profit Earned</h1>
-            <PIEChart data={pieChartData2} />
-          </div>
-          <div className="flex flex-col gap-3 py-4 px-6 rounded-xl border-2 border-neutral-300 shadow-xl">
-            <h1 className="text-2xl font-bold">Most Borrowed Items</h1>
-            <BARChart dataset={barChartData} />
+            <div className="flex justify-between items-center gap-4">
+              <h1 className="text-2xl font-bold">Item Wise Stats</h1>
+              <div className="min-w-[200px]">
+                <CustomDropdown
+                  data={barChartOptions}
+                  fn={setBarChart}
+                  label="Select Option"
+                  name="option"
+                  value={barChart.option}
+                />
+              </div>
+            </div>
+            <BARChart
+              data={barChartData}
+              label={
+                barChart.option === "borrowCount" ? "Borrow Count" : "Profit"
+              }
+            />
           </div>
 
           <div className="flex flex-col rounded-xl border-2 border-neutral-300 shadow-xl p-4 gap-2 px-6">
