@@ -29,7 +29,7 @@ export const createDispute = async (
 
     const { againstWhom, againstWhomId, reason } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(againstWhomId.toString())) {
+    if (!mongoose.Types.ObjectId.isValid(againstWhomId)) {
       res.status(400).json({
         success: false,
         message: "Invalid againstWhomId",

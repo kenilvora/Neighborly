@@ -98,10 +98,22 @@ const itemSchema = new mongoose.Schema(
     },
     availableFrom: {
       type: Date,
-      default: Date.now,
+      default: () => new Date(),
     },
     deliveryCharges: {
       type: Number,
+      validate: {
+        validator: function (this: IItem, v: number) {
+          if (
+            this.deliveryType === "Delivery" ||
+            this.deliveryType === "Both (Pickup & Delivery)"
+          ) {
+            return typeof v === "number" && v > 0;
+          }
+          return true;
+        },
+        message: "Delivery charges must be a positive number",
+      },
     },
     deliveryType: {
       type: String,
@@ -109,6 +121,18 @@ const itemSchema = new mongoose.Schema(
     },
     deliveryRadius: {
       type: Number,
+      validate: {
+        validator: function (this: IItem, v: number) {
+          if (
+            this.deliveryType === "Delivery" ||
+            this.deliveryType === "Both (Pickup & Delivery)"
+          ) {
+            return typeof v === "number" && v > 0;
+          }
+          return true;
+        },
+        message: "Delivery radius must be a positive number",
+      },
     },
     itemLocation: {
       type: mongoose.Schema.Types.ObjectId,

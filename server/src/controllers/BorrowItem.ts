@@ -36,7 +36,7 @@ export const borrowItem = async (
       deliveryType,
     } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(itemId.toString())) {
+    if (!mongoose.Types.ObjectId.isValid(itemId)) {
       res.status(400).json({
         success: false,
         message: "Invalid item id",
@@ -73,7 +73,16 @@ export const borrowItem = async (
       return;
     }
 
-    const deliveryCharges = item.deliveryCharges;
+    if (item.deliveryType === "Pickup" && deliveryType === "Delivery") {
+      res.status(400).json({
+        success: false,
+        message: "Delivery is not available for this item",
+      });
+      return;
+    }
+
+    const deliveryCharges =
+      deliveryType === "Delivery" ? item?.deliveryCharges ?? 0 : 0;
 
     if (borrower.lendItems.includes(itemId)) {
       res.status(400).json({
@@ -115,6 +124,14 @@ export const borrowItem = async (
       return;
     }
 
+    const totalDays =
+      Math.ceil(
+        Math.abs(new Date(endDate).getTime() - new Date(startDate).getTime()) /
+          (1000 * 60 * 60 * 24)
+      ) + 1;
+
+    const totalAmount = item.depositAmount + item.price * totalDays;
+
     if (paymentMode === "Online") {
       if (!transactionId) {
         res.status(400).json({
@@ -142,22 +159,20 @@ export const borrowItem = async (
         return;
       }
 
-      if (transaction) {
-        const createdAt = new Date(transaction.createdAt);
+      const createdAt = new Date(transaction.createdAt);
 
-        const currentDate = new Date();
+      const currentDate = new Date();
 
-        const diff = Math.abs(currentDate.getTime() - createdAt.getTime());
+      const diff = Math.abs(currentDate.getTime() - createdAt.getTime());
 
-        const diffDays = Math.ceil(diff / (1000 * 60 * 3));
+      const diffDays = Math.ceil(diff / (1000 * 60 * 3));
 
-        if (diffDays > 1) {
-          res.status(400).json({
-            success: false,
-            message: "Feels like you are trying to manipulate the system",
-          });
-          return;
-        }
+      if (diffDays > 1) {
+        res.status(400).json({
+          success: false,
+          message: "Feels like you are trying to manipulate the system",
+        });
+        return;
       }
 
       if (transaction.borrowerId !== id) {
@@ -177,10 +192,7 @@ export const borrowItem = async (
       }
 
       if (deliveryType === "Delivery") {
-        if (
-          transaction.amount !==
-          item.depositAmount + (deliveryCharges || 0)
-        ) {
+        if (transaction.amount !== totalAmount + deliveryCharges) {
           res.status(400).json({
             success: false,
             message: "Invalid Transaction amount",
@@ -216,7 +228,7 @@ export const borrowItem = async (
     if (paymentMode === "Wallet") {
       const userWallet = borrower.accountBalance;
 
-      if (userWallet < item.depositAmount + (deliveryCharges || 0)) {
+      if (userWallet < totalAmount + deliveryCharges) {
         res.status(400).json({
           success: false,
           message: "Insufficient balance",
@@ -224,9 +236,10 @@ export const borrowItem = async (
         return;
       }
 
-      borrower.accountBalance -= item.depositAmount + (deliveryCharges || 0);
+      borrower.accountBalance -= totalAmount + deliveryCharges;
 
-      lender.accountBalance += item.depositAmount + (deliveryCharges || 0);
+      lender.accountBalance += totalAmount + deliveryCharges;
+
       await lender.save();
 
       paymentStatus = "Paid";

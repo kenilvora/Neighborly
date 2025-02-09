@@ -17,6 +17,7 @@ import {
   IAllItems,
 } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
+import { de } from "@faker-js/faker/.";
 
 export const addItem = async (
   req: AuthRequest,
@@ -63,7 +64,7 @@ export const addItem = async (
       deliveryRadius = 0,
     } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(category.toString())) {
+    if (!mongoose.Types.ObjectId.isValid(category)) {
       res.status(400).json({
         success: false,
         message: "Invalid category",
@@ -95,6 +96,30 @@ export const addItem = async (
       res.status(400).json({
         success: false,
         message: "Invalid price or deposit amount",
+      });
+      return;
+    }
+
+    if (
+      (deliveryType === "Delivery" ||
+        deliveryType === "Both (Pickup & Delivery)") &&
+      deliveryCharges <= 0
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid delivery charges",
+      });
+      return;
+    }
+
+    if (
+      (deliveryType === "Delivery" ||
+        deliveryType === "Both (Pickup & Delivery)") &&
+      deliveryRadius <= 0
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid delivery radius",
       });
       return;
     }
@@ -670,7 +695,7 @@ export const updateItem = async (
       deliveryRadius = item.deliveryRadius,
     } = parsedData.data;
 
-    if (!mongoose.Types.ObjectId.isValid(category.toString())) {
+    if (!mongoose.Types.ObjectId.isValid(category)) {
       res.status(400).json({
         success: false,
         message: "Invalid category",
