@@ -52,3 +52,7 @@ export const disputeEndpoints = {
   CHANGE_DISPUTE_STATUS: `${BACKEND_URL}/dispute/changeDisputeStatus`,
   GET_DISPUTE: `${BACKEND_URL}/dispute/getDispute`,
 };
+
+export const transactionEndpoints = {
+  GET_ALL_TRANSACTIONS: `${BACKEND_URL}/transaction`,
+};

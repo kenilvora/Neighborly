@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 
 interface ITransaction extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
-  borrowerId: mongoose.Types.ObjectId;
-  lenderId: mongoose.Types.ObjectId;
-  borrowItemId: mongoose.Types.ObjectId;
-  transactionType: "Borrow Fee" | "Withdraw" | "Refund" | "Penalty";
+  payerId: mongoose.Types.ObjectId;
+  payeeId?: mongoose.Types.ObjectId;
+  borrowItemId?: mongoose.Types.ObjectId;
+  transactionType:
+    | "Borrow Fee"
+    | "Withdraw"
+    | "Refund"
+    | "Penalty"
+    | "Add Funds";
   amount: number;
   paymentId: string;
   status: "Completed" | "Failed";
@@ -15,25 +20,23 @@ interface ITransaction extends mongoose.Document {
 
 const transactionSchema = new mongoose.Schema(
   {
-    borrowerId: {
+    payerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    lenderId: {
+    payeeId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     borrowItemId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "BorrowItem",
-      required: true,
+      ref: "Item",
     },
     transactionType: {
       type: String,
       required: true,
-      enum: ["Borrow Fee", "Withdraw", "Refund", "Penalty"],
+      enum: ["Borrow Fee", "Withdraw", "Refund", "Penalty", "Add Funds"],
     },
     amount: {
       type: Number,
@@ -46,7 +49,7 @@ const transactionSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["Completed", "Failed"],
+      enum: ["Completed", "Failed", "Pending"],
     },
   },
   { timestamps: true }

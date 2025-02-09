@@ -1013,7 +1013,7 @@ export const getStatisticalData = async (
       return;
     }
 
-    const statsData = await User.aggregate([
+    const statsData = (await User.aggregate([
       {
         $match: {
           _id: new mongoose.Types.ObjectId(id),
@@ -1036,47 +1036,47 @@ export const getStatisticalData = async (
           localField: "stats.itemId",
           foreignField: "_id",
           as: "item",
-        }
+        },
       },
       {
         $unwind: "$item",
       },
       {
         $lookup: {
-          from:"categories",
+          from: "categories",
           localField: "item.category",
           foreignField: "_id",
-          as: "category"
-        }
+          as: "category",
+        },
       },
       {
-        $unwind: "$category"
+        $unwind: "$category",
       },
       {
         $group: {
           _id: {
             categoryID: "$category._id",
-            categoryName: "$category.name"
+            categoryName: "$category.name",
           },
-          items: { 
+          items: {
             $push: {
               itemId: "$item._id",
               itemName: "$item.name",
               borrowCount: "$stats.borrowCount",
-              totalProfit: "$stats.totalProfit"
-            }
+              totalProfit: "$stats.totalProfit",
+            },
           },
-        }
+        },
       },
       {
         $project: {
           _id: 0,
           items: 1,
           categoryId: "$_id.categoryID",
-          categoryName: "$_id.categoryName"
+          categoryName: "$_id.categoryName",
         },
       },
-    ]) as IStatisticalData[];
+    ])) as IStatisticalData[];
 
     if (!statsData) {
       res.status(400).json({

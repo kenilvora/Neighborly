@@ -179,7 +179,7 @@ export const borrowItem = async (
         return;
       }
 
-      if (transaction.borrowerId !== id) {
+      if (transaction.payerId !== id) {
         res.status(400).json({
           success: false,
           message: "You are not the borrower of this transaction",

@@ -4,9 +4,10 @@ import dbConnect from "./config/database";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes";
 import itemRoutes from "./routes/itemRoutes";
-import ratingAndReviewRoutes from "./routes/ratingAndReviews";
+import ratingAndReviewRoutes from "./routes/ratingAndReviewsRoutes";
 import categoryRoutes from "./routes/categoryRoutes";
 import disputeRoutes from "./routes/disputeRoutes";
+import transactionRoutes from "./routes/transactionRoutes";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import { cloudinaryConnect } from "./config/cloudinary";
@@ -40,6 +41,7 @@ app.use("/api/v1/item", itemRoutes);
 app.use("/api/v1/ratingAndReview", ratingAndReviewRoutes);
 app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/dispute", disputeRoutes);
+app.use("/api/v1/transaction", transactionRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT}`);
