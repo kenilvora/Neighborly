@@ -57,6 +57,7 @@ const LendingItemsStats = () => {
 
   const [loading, setLoading] = useState(false);
 
+  // Fetch Stats Data
   useEffect(() => {
     if (loading) return;
     const fetchData = async () => {
@@ -74,6 +75,7 @@ const LendingItemsStats = () => {
     fetchData();
   }, []);
 
+  // Update Pie Chart Data
   useEffect(() => {
     if (statsData && statsData.length > 0) {
       // Pie Chart Data
@@ -94,6 +96,7 @@ const LendingItemsStats = () => {
     }
   }, [pieChart.option, statsData]);
 
+  // Update Bar Chart Data
   useEffect(() => {
     if (statsData && statsData.length > 0) {
       // Bar Chart Data
@@ -111,6 +114,7 @@ const LendingItemsStats = () => {
     }
   }, [barChart.option, statsData]);
 
+  // Update Total Profit
   useEffect(() => {
     if (statsData && statsData.length > 0) {
       // Total Profit
