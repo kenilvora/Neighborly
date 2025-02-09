@@ -1,4 +1,3 @@
-import { IoMdStarOutline } from "react-icons/io";
 import { NavLink } from "react-router-dom";
 import { IAllItem } from "@kenil_vora/neighborly";
 import { Swiper, SwiperSlide } from "swiper/react";

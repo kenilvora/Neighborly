@@ -14,7 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardComponent from "./components/core/Dashboard/Dashboard";
 import Profile from "./components/core/Dashboard/Profile/Profile";
 import RatingsReviews from "./components/core/Dashboard/RatingsReviews";
-import BorrowedItems from "./components/core/Dashboard/BorrowedItems";
+import BorrowedItems from "./components/core/Dashboard/BorrowItems/BorrowedItems";
 import LendingItemsStats from "./components/core/Dashboard/LendingItemStats/LendingItemsStats";
 import Transactions from "./components/core/Dashboard/Transactions";
 import AddItem from "./components/core/Dashboard/AddItem";

@@ -536,6 +536,7 @@ export const getAllBorrowedItems = async (
   try {
     const id = req.user?.id;
     const type = req.query.type || "CB";
+    const paymentStatus = req.query.paymentStatus || "";
 
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 15;
@@ -551,10 +552,16 @@ export const getAllBorrowedItems = async (
     const borrowedItems = await BorrowItem.find({
       borrower: id,
       type: type === "CB" ? "Currently Borrowed" : "Previously Borrowed",
-    }).select("-borrower")
+      paymentStatus: paymentStatus ? paymentStatus : { $ne: "" },
+    })
+      .select("-borrower")
       .populate({
         path: "item",
-        select: "name description price depositAmount images",
+        select: "name description price depositAmount images itemLocation",
+        populate: {
+          path: "itemLocation",
+          select: "city state country -_id",
+        },
       })
       .populate({
         path: "lender",
