@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import Transaction from "../models/Transaction";
 import BorrowItem from "../models/BorrowItem";
 import ItemStat from "../models/ItemStat";
-import { borrowItemSchema } from "@kenil_vora/neighborly";
+import { borrowItemSchema, IBorrowedItemData } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
 
 export const borrowItem = async (
@@ -254,7 +254,8 @@ export const borrowItem = async (
       paymentMode,
       paymentStatus,
       deliveryType,
-      deliveryCharges: deliveryCharges || 0,
+      deliveryCharges:
+        deliveryType === "Delivery" ? deliveryCharges : undefined,
       deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
       transactionId: paymentMode === "Online" ? transactionId : undefined,
       type: "Currently Borrowed",
@@ -538,9 +539,6 @@ export const getAllBorrowedItems = async (
     const type = req.query.type || "CB";
     const paymentStatus = req.query.paymentStatus || "";
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 15;
-
     if (!id || !type || (type !== "CB" && type !== "PB")) {
       res.status(401).json({
         success: false,
@@ -549,7 +547,7 @@ export const getAllBorrowedItems = async (
       return;
     }
 
-    const borrowedItems = await BorrowItem.find({
+    const borrowedItems = (await BorrowItem.find({
       borrower: id,
       type: type === "CB" ? "Currently Borrowed" : "Previously Borrowed",
       paymentStatus: paymentStatus ? paymentStatus : { $ne: "" },
@@ -570,9 +568,7 @@ export const getAllBorrowedItems = async (
       .populate({
         path: "transactionId",
         select: "amount paymentId status transactionType",
-      })
-      .skip((page - 1) * limit)
-      .limit(limit);
+      })) as unknown as IBorrowedItemData[];
 
     if (!borrowedItems) {
       res.status(404).json({

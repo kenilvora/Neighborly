@@ -3,7 +3,7 @@ import { apiConnector } from "../apiConnector";
 import { itemEndpoints } from "../apis";
 import { setIsLoading } from "../../slices/itemSlice";
 import { Dispatch } from "redux";
-import { IAllItem } from "@kenil_vora/neighborly";
+import { IAllItem, IBorrowedItemData } from "@kenil_vora/neighborly";
 
 export function getAllItems(
   page: number,
@@ -88,4 +88,33 @@ export function getAllItems(
     }
     return result;
   };
+}
+
+export async function getAllBorrowedItems(
+  type?: string,
+  paymentStatus?: string
+): Promise<IBorrowedItemData[]> {
+  let result: IBorrowedItemData[] = [];
+  try {
+    const res = await apiConnector(
+      "GET",
+      itemEndpoints.GET_ALL_BORROWED_ITEMS,
+      null,
+      null,
+      {
+        ...(type && { type: type }),
+        ...(paymentStatus && { paymentStatus: paymentStatus }),
+      }
+    );
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    result = res.data.data;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+  } finally {
+    return result;
+  }
 }
