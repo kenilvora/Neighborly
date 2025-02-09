@@ -1,11 +1,10 @@
-import { useState } from "react";
 import { IoMdStarOutline } from "react-icons/io";
-import {
-  MdOutlineKeyboardArrowLeft,
-  MdOutlineKeyboardArrowRight,
-} from "react-icons/md";
 import { NavLink } from "react-router-dom";
 import { IAllItem } from "@kenil_vora/neighborly";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import "swiper/swiper-bundle.css";
+import { TiStarFullOutline } from "react-icons/ti";
 
 const ItemCard = (item: IAllItem) => {
   const {
@@ -20,52 +19,38 @@ const ItemCard = (item: IAllItem) => {
     avgRating,
     totalRating,
   } = item;
-  const [index, setIndex] = useState(0);
-
-  const handleNextImage = () => {
-    setIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
-
-  const handlePrevImage = () => {
-    setIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  };
 
   return (
     <div className="flex flex-col w-full h-[550px] max-h-[570px] flex-wrap items-start justify-between rounded-2xl shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300 ease-linear border border-neutral-200 overflow-hidden bg-white whitespace-normal">
       <div className="w-full h-60 relative">
-        <img
-          src={images[index]}
-          alt={name}
-          className="w-full h-60 object-cover object-center"
-          loading="eager"
-        />
+        <Swiper
+          loop={true}
+          modules={[Navigation, Pagination]}
+          pagination={{ clickable: true }}
+          className="mySwiper w-full"
+          breakpoints={{
+            // when window width is >= 320px
+            320: {
+              slidesPerView: 1,
+            },
+          }}
+        >
+          {images.map((image, index) => (
+            <SwiperSlide key={index}>
+              <img
+                src={image}
+                alt={name}
+                className="w-full h-60 object-cover object-center"
+                loading="eager"
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
         <div
           className="absolute top-2 right-2 bg-sky-200 text-blue-700 
                         bg-opacity-80 py-0.5 px-3 rounded-full hover:bg-sky-300 transition-all duration-200 font-semibold flex items-center"
         >
           {condition}
-        </div>
-        <div
-          className="absolute top-1/2 left-2 -translate-y-1/2 text-neutral-400 bg-white rounded-full hover:cursor-pointer border border-neutral-300"
-          onClick={handlePrevImage}
-        >
-          <MdOutlineKeyboardArrowLeft className="text-3xl font-bold" />
-        </div>
-        <div
-          className="absolute top-1/2 right-2 -translate-y-1/2 text-neutral-400 bg-white rounded-full hover:cursor-pointer border border-neutral-300"
-          onClick={handleNextImage}
-        >
-          <MdOutlineKeyboardArrowRight className="text-3xl font-bold" />
-        </div>
-        <div className="absolute bottom-2 flex gap-3 left-1/2 -translate-x-1/2">
-          {images.map((_image, i) => (
-            <span
-              className={`rounded-full p-[5px]
-                    ${i === index ? "bg-white" : "bg-neutral-300"}
-                        `}
-              key={i}
-            ></span>
-          ))}
         </div>
       </div>
       <div className="p-6 flex flex-col gap-2 h-[300px] w-full">
@@ -90,13 +75,13 @@ const ItemCard = (item: IAllItem) => {
         </div>
         <div className="flex items-center justify-between mt-auto w-full">
           <div className="flex items-center gap-2 max-[370px]:gap-0">
-            <IoMdStarOutline className="text-2xl text-yellow-500" />
-            <div className="flex items-center gap-2 max-[370px]:gap-1">
+            <div className="flex items-center max-[370px]:gap-1">
               <span className="font-semibold text-neutral-800">
                 {avgRating}
               </span>
-              <span className="text-neutral-500">({totalRating} reviews)</span>
+              <TiStarFullOutline size={24} className="text-yellow-500" />
             </div>
+            <span className="text-neutral-500">({totalRating} reviews)</span>
           </div>
           <NavLink
             to={`/item/${_id}`}

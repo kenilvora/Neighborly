@@ -217,11 +217,15 @@ select:-webkit-autofill:focus {
 }
 
 .mySwiper .swiper-pagination-bullet {
-  background-color: rgb(135, 92, 92); /* Change this to your preferred color */
+  background-color: rgb(205, 183, 183); /* Change this to your preferred color */
   opacity: 1; /* Adjust opacity as needed */
+  width: 10px;
+  height: 10px;
 }
 
 .mySwiper .swiper-pagination-bullet-active {
   background-color: blue; /* Change this to your preferred active color */
   opacity: 1; /* Adjust opacity as needed */
+  width: 10px;
+  height: 10px;
 }

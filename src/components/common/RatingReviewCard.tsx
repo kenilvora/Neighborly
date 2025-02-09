@@ -16,7 +16,7 @@ const RatingReviewCard = ({
   rating: number;
 }) => {
   return (
-    <div className="flex flex-col gap-2 bg-neutral-200 p-5 rounded-xl min-h-[200px] overflow-hidden">
+    <div className="flex flex-col gap-2 border-2 border-neutral-300 bg-neutral-100 p-5 rounded-xl min-h-[200px] overflow-hidden">
       <div className="flex items-center gap-2">
         <img src={image} alt="profile" className="w-10 h-10 rounded-full" />
         <div className="text-wrap">

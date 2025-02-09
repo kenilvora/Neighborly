@@ -548,10 +548,10 @@ export const getAllBorrowedItems = async (
       return;
     }
 
-    const borrowedItems = await BorrowItem.findOne({
+    const borrowedItems = await BorrowItem.find({
       borrower: id,
       type: type === "CB" ? "Currently Borrowed" : "Previously Borrowed",
-    })
+    }).select("-borrower")
       .populate({
         path: "item",
         select: "name description price depositAmount images",
