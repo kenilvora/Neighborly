@@ -61,7 +61,7 @@ const ItemCard = (item: IAllItem) => {
         </div>
         <div className="space-y-1">
           <div className="text-lg font-semibold text-blue-600 max-[370px]:text-[1rem]">
-            Price: <span className="text-neutral-800">₹{price}</span>
+            Price: <span className="text-neutral-800">₹{price} / Day</span>
           </div>
           <div className="text-lg font-semibold text-blue-600 max-[370px]:text-[1rem]">
             Deposit Amount:{" "}

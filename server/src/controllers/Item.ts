@@ -37,6 +37,7 @@ export const addItem = async (
         ? parseInt(req.body.deliveryRadius)
         : 0,
     };
+
     const parsedData = addItemSchema.safeParse(parsedBody);
     const id = req.user?.id;
 
@@ -124,6 +125,13 @@ export const addItem = async (
       return;
     }
 
+    if (availableFrom && new Date(availableFrom) < new Date()) {
+      res.status(400).json({
+        success: false,
+        message: "Available from date should be valid",
+      });
+      return;
+    }
     const images = req.files?.images;
 
     if (!images || (Array.isArray(images) && images.length === 0)) {

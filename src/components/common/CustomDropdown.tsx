@@ -26,6 +26,7 @@ const CustomDropdown = ({
     menu: (base: any) => ({
       ...base,
       padding: "6px", // Padding inside the dropdown menu
+      zIndex: 10,
     }),
     option: (base: any) => ({
       ...base,

@@ -2,9 +2,11 @@ import { IBorrowedItemData } from "@kenil_vora/neighborly";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/swiper-bundle.css";
-import { LuCalendar, LuCreditCard, LuTruck } from "react-icons/lu";
+import { LuCreditCard, LuTruck } from "react-icons/lu";
 import { GrLocation } from "react-icons/gr";
 import { useState } from "react";
+import { DateFormatter } from "../../../../utils/DateFormatter";
+import { FaRegCalendarAlt } from "react-icons/fa";
 
 const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
   const [showMore, setShowMore] = useState(false);
@@ -12,22 +14,20 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
   return (
     <div className="bg-neutral-100 shadow-md rounded-xl px-6 py-4 border-2 border-neutral-300 flex flex-col gap-2 h-fit">
       <div className="flex justify-between items-center gap-4">
-        <h1 className="text-xl font-semibold">{data.item.name}</h1>
-        <div>
-          {data.isReturned ? (
-            <span className="text-xs text-white bg-neutral-900 px-3 py-1 rounded-full font-medium">
-              Returned
-            </span>
-          ) : data.paymentStatus === "Pending" ? (
-            <span className="text-xs text-white bg-red-500 font-medium px-3 py-1 rounded-full animate-pulse">
-              Payment Pending
-            </span>
-          ) : (
-            <span className="text-xs text-white bg-neutral-900 px-3 py-1 rounded-full font-medium">
-              Currently Borrowed
-            </span>
-          )}
-        </div>
+        <h1 className="text-xl font-semibold line-clamp-1">{data.item.name}</h1>
+        {data.isReturned ? (
+          <div className="text-xs text-center text-white bg-neutral-900 px-3 py-1 rounded-full font-medium">
+            Returned
+          </div>
+        ) : data.paymentStatus === "Pending" ? (
+          <div className="text-xs text-center text-white bg-red-500 font-medium px-3 py-1 rounded-full animate-pulse">
+            Payment Pending
+          </div>
+        ) : (
+          <div className="text-xs text-center text-white bg-neutral-900 px-3 py-1 rounded-full font-medium">
+            Currently Borrowed
+          </div>
+        )}
       </div>
       <div className="my-2">
         <Swiper
@@ -65,9 +65,9 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <LuCalendar className="text-lg" />
-        {new Date(data.startDate).toDateString()} -{" "}
-        {new Date(data.endDate).toDateString()}
+        <FaRegCalendarAlt className="text-lg" />
+        {DateFormatter(new Date(data.startDate))} -{" "}
+        {DateFormatter(new Date(data.endDate))}
       </div>
       <div className="flex items-center gap-2">
         <LuTruck className="text-lg" />

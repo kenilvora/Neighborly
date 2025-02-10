@@ -123,7 +123,7 @@ const ViewAllItems = () => {
 
         setCategories(updatedCategories);
       } catch (error) {
-        toast.error("An error occurred while fetching categories");
+        console.error(error);
       }
     };
 

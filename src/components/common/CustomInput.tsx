@@ -10,6 +10,8 @@ interface CustomInputProps {
   name: string;
   id: string;
   required?: boolean;
+  fullWidth?: boolean;
+  tooltip?: string;
 }
 
 const CustomInput = ({
@@ -21,9 +23,15 @@ const CustomInput = ({
   name,
   id,
   required = true,
+  fullWidth = false,
+  tooltip,
 }: CustomInputProps) => {
   return (
-    <div className="w-[50%] max-[800px]:w-full flex relative flex-col gap-1">
+    <div
+      className={`flex relative flex-col gap-1
+        ${fullWidth ? "w-full" : "w-[50%] max-[800px]:w-full"}
+    `}
+    >
       <div className="absolute text-lg top-[13px] left-3 text-neutral-500">
         <Icon />
       </div>
@@ -36,6 +44,11 @@ const CustomInput = ({
         {...register(name, { required: required })}
         required={required}
       />
+      {tooltip && (
+        <div className="absolute -top-6 translate-y-1/2 right-2 text-xs bg-red-400 text-white px-4 py-1 rounded-full animate-pulse">
+          {tooltip}
+        </div>
+      )}
       {errors && (
         <span className="text-neutral-800 text-sm font-medium opacity-70">
           Please enter your {name}
