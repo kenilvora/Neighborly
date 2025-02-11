@@ -1,5 +1,5 @@
 import { AddItemInput } from "@kenil_vora/neighborly";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import CustomInput from "../../common/CustomInput";
 import { FaBoxOpen, FaHashtag } from "react-icons/fa6";
 import DatePickerComponent from "../../common/DatePickerComponent";
@@ -13,6 +13,7 @@ import CustomDropdown from "../../common/CustomDropdown";
 import { RxCross2 } from "react-icons/rx";
 import { LuRadius } from "react-icons/lu";
 import DropZone from "../../common/DropZone";
+import { setIsLoading } from "../../../slices/itemSlice";
 
 const AddItem = () => {
   const {
@@ -123,6 +124,22 @@ const AddItem = () => {
     },
   ];
 
+  const submitHandler: SubmitHandler<AddItemInput> = async (data) => {
+    try {
+      const formData = {
+        ...data,
+        tags,
+        images,
+        availableFrom: date.toISOString(),
+        ...otherOptions,
+      };
+
+      console.log("Form Data : ", formData);
+    } catch (error) {
+      toast.error("An error occurred while adding item");
+    }
+  };
+
   return (
     <>
       {loading ? (
@@ -131,7 +148,11 @@ const AddItem = () => {
         <div className="mt-5 mb-10 flex flex-col px-6 py-5 gap-5 rounded-lg border-2 border-neutral-300">
           <div className="text-2xl font-semibold">Item Details</div>
 
-          <form action="" className="flex flex-col gap-4 w-full">
+          <form
+            action=""
+            className="flex flex-col gap-4 w-full"
+            onSubmit={handleSubmit(submitHandler)}
+          >
             <CustomInput
               icon={FaBoxOpen}
               id="name"
@@ -168,7 +189,7 @@ const AddItem = () => {
                 register={register}
                 type="number"
                 errors={errors.price}
-                tooltip="Price / Day in INR"
+                tooltip="Price per Day in INR"
               />
 
               <CustomInput
@@ -271,6 +292,7 @@ const AddItem = () => {
               errors={errors.deliveryCharges}
               required={false}
               fullWidth={true}
+              tooltip="Deliverycharge per Kilometer in INR"
             />
 
             <CustomInput

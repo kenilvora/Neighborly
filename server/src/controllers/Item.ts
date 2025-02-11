@@ -17,12 +17,13 @@ import {
   IAllItems,
 } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
-import { de } from "@faker-js/faker/.";
 
 export const addItem = async (
   req: AuthRequest,
   res: Response
 ): Promise<void> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const parsedBody = {
       ...req.body,
@@ -73,7 +74,7 @@ export const addItem = async (
       return;
     }
 
-    const user = await User.findById(id);
+    const user = await User.findById(id, { session });
 
     if (!user) {
       res.status(404).json({
@@ -83,7 +84,7 @@ export const addItem = async (
       return;
     }
 
-    const categoryExists = await Category.findById(category);
+    const categoryExists = await Category.findById(category, { session });
 
     if (!categoryExists) {
       res.status(400).json({
@@ -148,65 +149,82 @@ export const addItem = async (
       uploadFileToCloudinary(image, process.env.CLOUD_FOLDER_NAME as string)
     );
 
+    // how to add session to this
     const results = await Promise.all(uploadPromise);
 
     const fileUrls = results.map((result) => result.secure_url);
 
-    const item = await Item.create({
-      name,
-      description,
-      price,
-      depositAmount,
-      category,
-      tags,
-      lenderId: id,
-      borrowers: [],
-      ratingAndReviews: [],
-      isAvailable,
-      images: fileUrls,
-      condition,
-      currentBorrowerId: undefined,
-      availableFrom,
-      deliveryCharges: deliveryCharges || 0,
-      deliveryType: deliveryType || "Pickup",
-      deliveryRadius: deliveryRadius || 0,
-      itemLocation: user?.address,
-    });
+    const [item] = await Item.create(
+      {
+        name,
+        description,
+        price,
+        depositAmount,
+        category,
+        tags,
+        lenderId: id,
+        borrowers: [],
+        ratingAndReviews: [],
+        isAvailable,
+        images: fileUrls,
+        condition,
+        currentBorrowerId: undefined,
+        availableFrom,
+        deliveryCharges: deliveryCharges || 0,
+        deliveryType: deliveryType || "Pickup",
+        deliveryRadius: deliveryRadius || 0,
+        itemLocation: user?.address,
+      },
+      { session }
+    );
 
     user.lendItems.push(item._id);
 
-    const recentActivity = await RecentActivity.create({
-      userId: id,
-      itemID: item._id,
-      type: "Lent",
-      status: "Item Added",
-    });
+    const [recentActivity] = await RecentActivity.create(
+      {
+        userId: id,
+        itemID: item._id,
+        type: "Lent",
+        status: "Item Added",
+      },
+      { session }
+    );
 
     user.recentActivities?.push(recentActivity._id);
 
-    await user.save();
+    await user.save({ session });
 
-    await Category.findByIdAndUpdate(category, {
-      $inc: { itemCount: 1 },
-      $push: { items: item._id },
-    });
+    await Category.findByIdAndUpdate(
+      category,
+      {
+        $inc: { itemCount: 1 },
+        $push: { items: item._id },
+      },
+      { session }
+    );
 
-    await Notification.create({
-      message: `You have successfully added a new item named ${name}`,
-      recipient: id,
-      isRead: false,
-      type: "System",
-    });
+    await Notification.create(
+      {
+        message: `You have successfully added a new item named ${name}`,
+        recipient: id,
+        isRead: false,
+        type: "System",
+      },
+      { session }
+    );
 
     res.status(201).json({
       success: true,
       message: "Item added successfully",
     });
   } catch (err) {
+    await session.abortTransaction();
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
+  } finally {
+    session.endSession();
   }
 };
 

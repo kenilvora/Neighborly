@@ -57,7 +57,7 @@ const DropZone = ({
           <p className="text-xl text-neutral-500">Drop the files here ...</p>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <FaCloudUploadAlt className="text-[100px] text-neutral-500" />
+            <FaCloudUploadAlt className="text-[80px] text-neutral-500" />
             <p className="text-xl text-neutral-500">
               Drag 'n' drop some files here, or click to select files
             </p>
@@ -69,7 +69,7 @@ const DropZone = ({
         <div className="flex items-center mt-2 gap-2 flex-wrap justify-between">
           {previewImages.map((img, i: number) => (
             <div
-              className="flex items-center justify-center gap-1 min-w-[160px] relative w-1/6 p-3 rounded-md aspect-square"
+              className="flex items-center justify-center hover:bg-neutral-100 hover:scale-110 cursor-pointer gap-1 min-w-[160px] relative w-1/6 p-3 rounded-md aspect-square transition-all duration-300 ease-in-out"
               key={i}
             >
               <img

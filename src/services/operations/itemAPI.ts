@@ -3,7 +3,11 @@ import { apiConnector } from "../apiConnector";
 import { itemEndpoints } from "../apis";
 import { setIsLoading } from "../../slices/itemSlice";
 import { Dispatch } from "redux";
-import { IAllItem, IBorrowedItemData } from "@kenil_vora/neighborly";
+import {
+  AddItemInput,
+  IAllItem,
+  IBorrowedItemData,
+} from "@kenil_vora/neighborly";
 
 export function getAllItems(
   page: number,
@@ -117,4 +121,14 @@ export async function getAllBorrowedItems(
   } finally {
     return result;
   }
+}
+
+export function addItem({ data }: { data: AddItemInput }) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    dispatch(setIsLoading(true));
+    try {
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    }
+  };
 }

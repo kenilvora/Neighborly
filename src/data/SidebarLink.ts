@@ -1,3 +1,4 @@
+import { FaBoxOpen } from "react-icons/fa6";
 import {
   LuBookOpen,
   LuChartNoAxesCombined,
@@ -7,6 +8,7 @@ import {
   LuShieldAlert,
   LuStar,
   LuUserCog,
+  LuWallet,
 } from "react-icons/lu";
 
 export const SidebarLink = [
@@ -58,4 +60,16 @@ export const SidebarLink = [
     path: "/dashboard/addItem",
     icon: LuCirclePlus,
   },
+  {
+    id: 9,
+    name: "My Items",
+    path: "/dashboard/myItems",
+    icon: FaBoxOpen,
+  },
+  {
+    id: 10,
+    name: "Wallet",
+    path: "/dashboard/wallet",
+    icon: LuWallet
+  }
 ];
