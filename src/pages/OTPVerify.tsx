@@ -98,7 +98,10 @@ const OTPVerify = () => {
 
   return (
     <>
-      {isLoading ||
+      {isLoading.sendOtp ||
+      isLoading.login ||
+      isLoading.signUp ||
+      isLoading.twoFactorAuth ||
       (otpType === "signup" && !signUpData) ||
       (otpType === "login" && !loginData) ||
       (otpType === "twoFactorAuth" && !twoFactorAuthData) ? (

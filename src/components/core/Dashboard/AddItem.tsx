@@ -13,14 +13,18 @@ import CustomDropdown from "../../common/CustomDropdown";
 import { RxCross2 } from "react-icons/rx";
 import { LuRadius } from "react-icons/lu";
 import DropZone from "../../common/DropZone";
-import { setIsLoading } from "../../../slices/itemSlice";
+import { addItem } from "../../../services/operations/itemAPI";
+import { useDispatch } from "react-redux";
 
 const AddItem = () => {
   const {
     register,
     formState: { errors, isSubmitSuccessful },
     handleSubmit,
+    reset,
   } = useForm<AddItemInput>();
+
+  const dispatch = useDispatch();
 
   const [date, setDate] = useState<Dayjs>(dayjs());
 
@@ -42,7 +46,7 @@ const AddItem = () => {
         const res = await getAllCategories();
 
         const updatedCategories = res.map((category) => ({
-          value: category.name,
+          value: category._id,
           label: `${category.name}`,
         }));
 
@@ -126,15 +130,45 @@ const AddItem = () => {
 
   const submitHandler: SubmitHandler<AddItemInput> = async (data) => {
     try {
-      const formData = {
-        ...data,
-        tags,
-        images,
-        availableFrom: date.toISOString(),
-        ...otherOptions,
-      };
+      const formData = new FormData();
 
-      console.log("Form Data : ", formData);
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("price", data.price.toString());
+      formData.append("depositAmount", data.depositAmount.toString());
+      formData.append("category", otherOptions.category);
+      formData.append("tags", JSON.stringify(tags));
+      formData.append("isAvailable", data.isAvailable ? "true" : "false");
+      formData.append("condition", otherOptions.condition);
+      formData.append("availableFrom", date.toISOString());
+      formData.append("deliveryType", otherOptions.deliveryType);
+      formData.append(
+        "deliveryCharges",
+        (data.deliveryCharges ?? 0).toString()
+      );
+      formData.append("deliveryRadius", (data.deliveryRadius ?? 0).toString());
+
+      if (Array.isArray(images)) {
+        images.forEach((image) => {
+          formData.append("images", image);
+        });
+      } else {
+        formData.append("images", images);
+      }
+
+      await dispatch(addItem(formData) as any);
+
+      if (isSubmitSuccessful) {
+        reset();
+        setTags([]);
+        setImages([]);
+        setDate(dayjs());
+        setOtherOptions({
+          category: "",
+          condition: "",
+          deliveryType: "",
+        });
+      }
     } catch (error) {
       toast.error("An error occurred while adding item");
     }
@@ -172,6 +206,7 @@ const AddItem = () => {
                 {...register("description", { required: true })}
                 className="border border-neutral-300 min-h-[67.6px] h-auto overflow-y-hidden rounded-md px-3 py-[9px] text-[1rem] outline-blue-500 pl-9"
                 placeholder="Enter Item Description"
+                required
               ></textarea>
               {errors.description && (
                 <span className="text-neutral-800 text-sm font-medium opacity-70">
@@ -308,7 +343,7 @@ const AddItem = () => {
               tooltip="In Kilometers"
             />
 
-            <DropZone setImages={setImages} />
+            <DropZone setImages={setImages} isSubmit={isSubmitSuccessful} />
 
             <button className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 hover:cursor-pointer max-[370px]:px-2 w-fit">
               Add Item

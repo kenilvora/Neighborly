@@ -10,6 +10,8 @@ const Dashboard = () => {
   const userLoading = useSelector((state: RootState) => state.user.isLoading);
   const itemLoading = useSelector((state: RootState) => state.item.isLoading);
 
+  const { otpType } = useSelector((state: RootState) => state.user);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const location = useLocation();
@@ -20,7 +22,12 @@ const Dashboard = () => {
 
   return (
     <>
-      {userLoading || itemLoading ? (
+      {userLoading.logout ||
+      userLoading.passwordChange ||
+      userLoading.twoFactorAuth ||
+      userLoading.updateProfile ||
+      (userLoading.sendOtp && otpType === "twoFactorAuth") ||
+      itemLoading.addItem ? (
         <Loader />
       ) : (
         <div className="h-[calc(100vh-73px)] overflow-hidden relative flex">
@@ -39,9 +46,7 @@ const Dashboard = () => {
                 } transition-all duration-300 ease-in-out mx-auto
               `}
             >
-              <h1 className="text-3xl font-semibold">
-                {currentPage?.name}
-              </h1>
+              <h1 className="text-3xl font-semibold">{currentPage?.name}</h1>
 
               <Outlet />
             </div>

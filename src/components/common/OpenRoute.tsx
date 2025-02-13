@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../reducer/store";
 import { getMe } from "../../services/operations/userAPI";
 import Cookies from "js-cookie";
-import { setIsLoading, setToken, setUser } from "../../slices/userSlice";
+import { setToken, setUser } from "../../slices/userSlice";
 import { Navigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loader from "./Loader";
@@ -24,7 +24,6 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
   useEffect(() => {
     const validate = async () => {
       try {
-        dispatch(setIsLoading(true));
         if (token) {
           const isValid = (await dispatch(getMe() as any)) as boolean;
           setIsAuthenticated(isValid);
@@ -33,8 +32,6 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
         }
       } catch (error) {
         toast.error("Failed to validate user. Please try again.");
-      } finally {
-        dispatch(setIsLoading(false));
       }
     };
 

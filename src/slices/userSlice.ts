@@ -1,8 +1,16 @@
 import { LoginInput, SignUpInput, IUserDetails } from "@kenil_vora/neighborly";
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
 type OtpType = "signup" | "login" | "twoFactorAuth";
+type LoadingKeys =
+  | "signUp"
+  | "login"
+  | "twoFactorAuth"
+  | "sendOtp"
+  | "updateProfile"
+  | "passwordChange"
+  | "logout";
 
 const initialState = {
   signUpData: null as SignUpInput | null,
@@ -16,7 +24,15 @@ const initialState = {
     : null,
   token: Cookies.get("token") ? Cookies.get("token") : null,
   otpType: "" as OtpType,
-  isLoading: false,
+  isLoading: {
+    signUp: false,
+    login: false,
+    twoFactorAuth: false,
+    sendOtp: false,
+    updateProfile: false,
+    passwordChange: false,
+    logout: false,
+  },
 };
 
 const userSlice = createSlice({
@@ -41,8 +57,14 @@ const userSlice = createSlice({
     setOtpType: (state, action) => {
       state.otpType = action.payload;
     },
-    setIsLoading: (state, action) => {
-      state.isLoading = action.payload;
+    setIsLoading: (
+      state,
+      action: PayloadAction<{
+        key: LoadingKeys;
+        value?: boolean;
+      }>
+    ) => {
+      state.isLoading[action.payload.key] = action.payload.value!;
     },
   },
 });

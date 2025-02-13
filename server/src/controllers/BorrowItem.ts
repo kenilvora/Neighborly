@@ -45,7 +45,7 @@ export const borrowItem = async (
       });
     }
 
-    const borrower = await User.findById(id, null, { session });
+    const borrower = await User.findById(id).session(session);
 
     if (!borrower) {
       res.status(404).json({
@@ -55,7 +55,7 @@ export const borrowItem = async (
       return;
     }
 
-    const item = await Item.findById(itemId, null, { session });
+    const item = await Item.findById(itemId).session(session);
 
     if (!item) {
       res.status(404).json({
@@ -65,7 +65,7 @@ export const borrowItem = async (
       return;
     }
 
-    const lender = await User.findById(item.lenderId, null, { session });
+    const lender = await User.findById(item.lenderId).session(session);
 
     if (!lender) {
       res.status(404).json({
@@ -151,9 +151,9 @@ export const borrowItem = async (
         return;
       }
 
-      const transaction = await Transaction.findById(transactionId, null, {
-        session,
-      });
+      const transaction = await Transaction.findById(transactionId).session(
+        session
+      );
 
       if (!transaction) {
         res.status(404).json({
@@ -263,21 +263,23 @@ export const borrowItem = async (
     borrower.borrowItems.push(item._id);
 
     await BorrowItem.create(
-      {
-        item: itemId,
-        borrower: id,
-        lender: item.lenderId,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-        paymentMode,
-        paymentStatus,
-        deliveryType,
-        deliveryCharges:
-          deliveryType === "Delivery" ? deliveryCharges : undefined,
-        deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
-        transactionId: paymentMode === "Online" ? transactionId : undefined,
-        type: "Currently Borrowed",
-      },
+      [
+        {
+          item: itemId,
+          borrower: id,
+          lender: item.lenderId,
+          startDate: new Date(startDate),
+          endDate: new Date(endDate),
+          paymentMode,
+          paymentStatus,
+          deliveryType,
+          deliveryCharges:
+            deliveryType === "Delivery" ? deliveryCharges : undefined,
+          deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
+          transactionId: paymentMode === "Online" ? transactionId : undefined,
+          type: "Currently Borrowed",
+        },
+      ],
       { session }
     );
 
@@ -296,30 +298,34 @@ export const borrowItem = async (
         itemStat.totalProfit += item.price;
         await itemStat.save({ session });
       } else {
-        [itemStat] = await ItemStat.create(
-          {
-            itemId: itemId,
-            userId: item.lenderId,
-            borrowCount: 1,
-            totalProfit: item.price,
-          },
+        let newItemStat = await ItemStat.create(
+          [
+            {
+              itemId: itemId,
+              userId: item.lenderId,
+              borrowCount: 1,
+              totalProfit: item.price,
+            },
+          ],
           { session }
         );
+        lender.statisticalData?.push(newItemStat[0]._id);
       }
-      lender.statisticalData?.push(itemStat._id);
     }
 
-    const [recentActivity] = await RecentActivity.create(
-      {
-        userId: id,
-        itemID: itemId,
-        type: "Borrowed",
-        status: "Success",
-      },
+    const recentActivity = await RecentActivity.create(
+      [
+        {
+          userId: id,
+          itemID: itemId,
+          type: "Borrowed",
+          status: "Success",
+        },
+      ],
       { session }
     );
 
-    borrower.recentActivities?.push(recentActivity._id);
+    borrower.recentActivities?.push(recentActivity[0]._id);
 
     await borrower.save({ session });
 

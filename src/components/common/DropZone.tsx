@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import toast from "react-hot-toast";
 import { FaCloudUploadAlt } from "react-icons/fa";
@@ -6,8 +6,10 @@ import { RxCross2 } from "react-icons/rx";
 
 const DropZone = ({
   setImages,
+  isSubmit,
 }: {
   setImages: React.Dispatch<React.SetStateAction<File[]>>;
+  isSubmit?: boolean;
 }) => {
   const [previewImages, setPreviewImages] = useState<string[]>([]);
 
@@ -46,11 +48,19 @@ const DropZone = ({
     setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  useEffect(() => {
+    if (isSubmit) {
+      setPreviewImages([]);
+    }
+  }, [isSubmit]);
+
   return (
     <>
       <div
         {...getRootProps()}
-        className="w-full border-2 border-neutral-300 shadow-md py-3 flex min-h-[200px] text-center justify-center items-center rounded-lg cursor-pointer"
+        className={`w-full border-2 shadow-md py-3 flex min-h-[200px] text-center justify-center items-center rounded-lg cursor-pointer
+            ${isDragActive ? "border-blue-500" : "border-neutral-300"}
+          `}
       >
         <input {...getInputProps()} />
         {isDragActive ? (

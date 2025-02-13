@@ -3,11 +3,8 @@ import { apiConnector } from "../apiConnector";
 import { itemEndpoints } from "../apis";
 import { setIsLoading } from "../../slices/itemSlice";
 import { Dispatch } from "redux";
-import {
-  AddItemInput,
-  IAllItem,
-  IBorrowedItemData,
-} from "@kenil_vora/neighborly";
+import { IAllItem, IBorrowedItemData } from "@kenil_vora/neighborly";
+import { AxiosHeaders } from "axios";
 
 export function getAllItems(
   page: number,
@@ -50,7 +47,12 @@ export function getAllItems(
         sortOrder = "-1";
       }
 
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "getAllItems",
+          value: true,
+        })
+      );
       if (makeLoading) {
         toastId = toast.loading("Fetching items...");
       }
@@ -85,7 +87,12 @@ export function getAllItems(
     } catch (error) {
       toast.error("An error occurred while fetching items");
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "getAllItems",
+          value: false,
+        })
+      );
       if (makeLoading) {
         toast.dismiss(toastId);
       }
@@ -123,12 +130,43 @@ export async function getAllBorrowedItems(
   }
 }
 
-export function addItem({ data }: { data: AddItemInput }) {
+export function addItem(data: FormData) {
   return async (dispatch: Dispatch): Promise<void> => {
-    dispatch(setIsLoading(true));
+    const toastId = toast.loading("Adding item...");
     try {
+      dispatch(
+        setIsLoading({
+          key: "addItem",
+          value: true,
+        })
+      );
+
+      const header = new AxiosHeaders();
+
+      header.set("Content-Type", "multipart/form-data");
+
+      const res = await apiConnector(
+        "POST",
+        itemEndpoints.CREATE_ITEM,
+        data,
+        header
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success("Item Added Successfully");
     } catch (error) {
       toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(
+        setIsLoading({
+          key: "addItem",
+          value: false,
+        })
+      );
+      toast.dismiss(toastId);
     }
   };
 }

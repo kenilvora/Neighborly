@@ -37,12 +37,14 @@ export const addItem = async (
       deliveryRadius: req.body.deliveryRadius
         ? parseInt(req.body.deliveryRadius)
         : 0,
+      availableFrom: new Date(req.body.availableFrom),
     };
 
     const parsedData = addItemSchema.safeParse(parsedBody);
     const id = req.user?.id;
 
     if (!parsedData.success) {
+      console.log(parsedData.error);
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -74,7 +76,7 @@ export const addItem = async (
       return;
     }
 
-    const user = await User.findById(id, { session });
+    const user = await User.findById(id).session(session);
 
     if (!user) {
       res.status(404).json({
@@ -84,7 +86,7 @@ export const addItem = async (
       return;
     }
 
-    const categoryExists = await Category.findById(category, { session });
+    const categoryExists = await Category.findById(category).session(session);
 
     if (!categoryExists) {
       res.status(400).json({
@@ -126,13 +128,18 @@ export const addItem = async (
       return;
     }
 
-    if (availableFrom && new Date(availableFrom) < new Date()) {
+    if (
+      availableFrom &&
+      new Date(availableFrom).toISOString().slice(0, 10) <
+        new Date().toISOString().slice(0, 10)
+    ) {
       res.status(400).json({
         success: false,
         message: "Available from date should be valid",
       });
       return;
     }
+
     const images = req.files?.images;
 
     if (!images || (Array.isArray(images) && images.length === 0)) {
@@ -149,48 +156,53 @@ export const addItem = async (
       uploadFileToCloudinary(image, process.env.CLOUD_FOLDER_NAME as string)
     );
 
-    // how to add session to this
     const results = await Promise.all(uploadPromise);
 
     const fileUrls = results.map((result) => result.secure_url);
 
-    const [item] = await Item.create(
-      {
-        name,
-        description,
-        price,
-        depositAmount,
-        category,
-        tags,
-        lenderId: id,
-        borrowers: [],
-        ratingAndReviews: [],
-        isAvailable,
-        images: fileUrls,
-        condition,
-        currentBorrowerId: undefined,
-        availableFrom,
-        deliveryCharges: deliveryCharges || 0,
-        deliveryType: deliveryType || "Pickup",
-        deliveryRadius: deliveryRadius || 0,
-        itemLocation: user?.address,
-      },
+    const item = await Item.create(
+      [
+        {
+          name,
+          description,
+          price,
+          depositAmount,
+          category,
+          tags,
+          lenderId: id,
+          borrowers: [],
+          ratingAndReviews: [],
+          isAvailable,
+          images: fileUrls,
+          condition,
+          currentBorrowerId: undefined,
+          availableFrom,
+          deliveryCharges: deliveryCharges || 0,
+          deliveryType: deliveryType || "Pickup",
+          deliveryRadius: deliveryRadius || 0,
+          itemLocation: user?.address,
+        },
+      ],
       { session }
     );
 
-    user.lendItems.push(item._id);
+    console.log("Created item: ", item);
 
-    const [recentActivity] = await RecentActivity.create(
-      {
-        userId: id,
-        itemID: item._id,
-        type: "Lent",
-        status: "Item Added",
-      },
+    user.lendItems.push(item[0]._id);
+
+    const recentActivity = await RecentActivity.create(
+      [
+        {
+          userId: id,
+          itemID: item[0]._id,
+          type: "Lent",
+          status: "Item Added",
+        },
+      ],
       { session }
     );
 
-    user.recentActivities?.push(recentActivity._id);
+    user.recentActivities?.push(recentActivity[0]._id);
 
     await user.save({ session });
 
@@ -198,20 +210,24 @@ export const addItem = async (
       category,
       {
         $inc: { itemCount: 1 },
-        $push: { items: item._id },
+        $push: { items: item[0]._id },
       },
       { session }
     );
 
     await Notification.create(
-      {
-        message: `You have successfully added a new item named ${name}`,
-        recipient: id,
-        isRead: false,
-        type: "System",
-      },
+      [
+        {
+          message: `You have successfully added a new item named ${name}`,
+          recipient: id,
+          isRead: false,
+          type: "System",
+        },
+      ],
       { session }
     );
+
+    await session.commitTransaction();
 
     res.status(201).json({
       success: true,
@@ -219,6 +235,7 @@ export const addItem = async (
     });
   } catch (err) {
     await session.abortTransaction();
+    console.log("Error: ", err);
     res.status(500).json({
       success: false,
       message: "Internal server error",

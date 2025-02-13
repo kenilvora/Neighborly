@@ -29,7 +29,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { isLoading } = useSelector((state: RootState) => state.user);
+  const { isLoading, otpType } = useSelector((state: RootState) => state.user);
 
   const [loading, setLoading] = useState(false);
 
@@ -62,7 +62,9 @@ const Login = () => {
 
   return (
     <>
-      {isLoading || loading ? (
+      {isLoading.login ||
+      (isLoading.sendOtp && otpType === "login") ||
+      loading ? (
         <Loader />
       ) : (
         <div className="w-full min-h-[calc(100vh-74.8px)] overflow-hidden flex justify-center items-center">

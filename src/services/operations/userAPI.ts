@@ -37,7 +37,12 @@ export function signUp(data: SignUpInput, navigate: NavigateFunction | null) {
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Signing up...");
     try {
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "signUp",
+          value: true,
+        })
+      );
 
       const res = await apiConnector("POST", userEndpoints.SIGNUP, data);
 
@@ -53,7 +58,12 @@ export function signUp(data: SignUpInput, navigate: NavigateFunction | null) {
       toast.error((error as any).response.data.message);
       navigate && navigate("/signup");
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "signUp",
+          value: false,
+        })
+      );
       toast.dismiss(toastId);
     }
   };
@@ -63,7 +73,12 @@ export function login(data: LoginInput, navigate: NavigateFunction | null) {
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Logging in...");
     try {
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "login",
+          value: true,
+        })
+      );
       const res = await apiConnector("POST", userEndpoints.LOGIN, data);
 
       if (!res.data.success) {
@@ -78,7 +93,12 @@ export function login(data: LoginInput, navigate: NavigateFunction | null) {
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "login",
+          value: false,
+        })
+      );
       toast.dismiss(toastId);
     }
   };
@@ -91,7 +111,12 @@ export function sendOtp(
 ) {
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Sending OTP...");
-    dispatch(setIsLoading(true));
+    dispatch(
+      setIsLoading({
+        key: "sendOtp",
+        value: true,
+      })
+    );
     try {
       const res = await apiConnector("POST", userEndpoints.SEND_OTP, {
         email,
@@ -109,7 +134,12 @@ export function sendOtp(
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "sendOtp",
+          value: false,
+        })
+      );
       toast.dismiss(toastId);
     }
   };
@@ -118,7 +148,6 @@ export function sendOtp(
 export function getMe() {
   return async (dispatch: Dispatch): Promise<boolean> => {
     try {
-      dispatch(setIsLoading(true));
       const res = await apiConnector("GET", userEndpoints.GET_ME);
 
       if (!res.data.success) {
@@ -134,8 +163,6 @@ export function getMe() {
       return true;
     } catch (error) {
       return false;
-    } finally {
-      dispatch(setIsLoading(false));
     }
   };
 }
@@ -143,7 +170,12 @@ export function getMe() {
 export function logOut(navigate: NavigateFunction | null) {
   return async (dispatch: Dispatch): Promise<void> => {
     try {
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "logout",
+          value: true,
+        })
+      );
       const res = await apiConnector("POST", userEndpoints.LOGOUT);
 
       if (!res.data.success) {
@@ -164,7 +196,12 @@ export function logOut(navigate: NavigateFunction | null) {
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "logout",
+          value: false,
+        })
+      );
     }
   };
 }
@@ -189,7 +226,12 @@ export function updateProfile(data: UpdateUserDetailsInput) {
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Updating Profile...");
     try {
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "updateProfile",
+          value: true,
+        })
+      );
       const res = await apiConnector("PUT", userEndpoints.UPDATE_PROFILE, data);
 
       if (!res.data.success) {
@@ -206,7 +248,12 @@ export function updateProfile(data: UpdateUserDetailsInput) {
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "updateProfile",
+          value: false,
+        })
+      );
       toast.dismiss(toastId);
     }
   };
@@ -216,7 +263,12 @@ export function changePassword(data: ChangePasswordInput) {
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Changing Password...");
     try {
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "passwordChange",
+          value: true,
+        })
+      );
       const res = await apiConnector(
         "PUT",
         userEndpoints.CHANGE_PASSWORD,
@@ -231,7 +283,12 @@ export function changePassword(data: ChangePasswordInput) {
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "passwordChange",
+          value: false,
+        })
+      );
       toast.dismiss(toastId);
     }
   };
@@ -247,7 +304,12 @@ export function changeTwoFactorAuth(
   return async (dispatch: Dispatch): Promise<void> => {
     const toastId = toast.loading("Changing Two Factor Authentication...");
     try {
-      dispatch(setIsLoading(true));
+      dispatch(
+        setIsLoading({
+          key: "twoFactorAuth",
+          value: true,
+        })
+      );
       const res = await apiConnector(
         "PUT",
         userEndpoints.CHANGE_TWO_FACTOR_AUTH,
@@ -271,7 +333,12 @@ export function changeTwoFactorAuth(
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
-      dispatch(setIsLoading(false));
+      dispatch(
+        setIsLoading({
+          key: "twoFactorAuth",
+          value: false,
+        })
+      );
       toast.dismiss(toastId);
     }
   };

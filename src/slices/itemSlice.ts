@@ -1,8 +1,13 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+type LoadingKeys = "getAllItems" | "addItem";
 
 const initialState = {
   searchQuery: "",
-  isLoading: false,
+  isLoading: {
+    getAllItems: false,
+    addItem: false,
+  },
   hasMore: true,
   page: 1,
 };
@@ -14,8 +19,11 @@ const itemSlice = createSlice({
     setSearchQuery: (state, action) => {
       state.searchQuery = action.payload;
     },
-    setIsLoading: (state, action) => {
-      state.isLoading = action.payload;
+    setIsLoading: (
+      state,
+      action: PayloadAction<{ key: LoadingKeys; value: boolean }>
+    ) => {
+      state.isLoading[action.payload.key] = action.payload.value;
     },
     setHasMore: (state, action) => {
       state.hasMore = action.payload;

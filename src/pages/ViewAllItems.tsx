@@ -132,7 +132,7 @@ const ViewAllItems = () => {
 
   // Fetching items
   const getItems = async () => {
-    if (!hasMore || isLoading) return;
+    if (!hasMore || isLoading.getAllItems) return;
     try {
       const res = (await dispatch(
         getAllItems(
@@ -189,7 +189,7 @@ const ViewAllItems = () => {
     let observer: IntersectionObserver;
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      if (!isLoading && hasMore && entries[0].isIntersecting) {
+      if (!isLoading.getAllItems && hasMore && entries[0].isIntersecting) {
         dispatch(setPage(page + 1));
       }
     };
@@ -212,7 +212,7 @@ const ViewAllItems = () => {
         observer.unobserve(loader.current);
       }
     };
-  }, [isLoading, hasMore]);
+  }, [isLoading.getAllItems, hasMore]);
 
   const conditions = [
     {
@@ -341,7 +341,7 @@ const ViewAllItems = () => {
 
   return (
     <>
-      {isLoading && page === 1 ? (
+      {isLoading.getAllItems && page === 1 ? (
         <Loader />
       ) : (
         <div

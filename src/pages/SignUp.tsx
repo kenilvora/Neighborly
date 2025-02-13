@@ -52,7 +52,7 @@ const SignUp = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading } = useSelector((state: RootState) => state.user);
+  const { isLoading, otpType } = useSelector((state: RootState) => state.user);
 
   const [confirmPassword, setConfirmPassword] = useState("");
   const password = watch("password");
@@ -205,7 +205,7 @@ const SignUp = () => {
 
   return (
     <>
-      {isLoading ? (
+      {isLoading.signUp || (isLoading.sendOtp && otpType === "signup") ? (
         <Loader />
       ) : (
         <div className="w-full min-h-[calc(100vh-74.8px)] overflow-auto flex justify-center items-center my-12">
