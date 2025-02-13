@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "@kenil_vora/neighborly": "^1.1.5",
+    "@types/ws": "^8.5.14",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.5.1",
     "cookie-parser": "^1.4.7",
@@ -27,6 +28,7 @@
     "nodemailer": "^6.9.16",
     "otp-generator": "^4.0.1",
     "razorpay": "^2.9.5",
+    "ws": "^8.18.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

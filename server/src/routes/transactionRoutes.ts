@@ -1,9 +1,17 @@
 import express from "express";
 import { auth, isUser } from "../middlewares/Auth";
-import { getAllTransactions } from "../controllers/Transaction";
+import {
+  addMoney,
+  getAllTransactions,
+  verifyPayment,
+} from "../controllers/Transaction";
 
 const router = express.Router();
 
 router.get("/", auth, isUser, getAllTransactions);
+
+router.post("/addMoney", auth, isUser, addMoney);
+
+router.post("/verifyPayment", verifyPayment);
 
 export default router;

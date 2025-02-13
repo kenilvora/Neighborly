@@ -10,7 +10,8 @@ type LoadingKeys =
   | "sendOtp"
   | "updateProfile"
   | "passwordChange"
-  | "logout";
+  | "logout"
+  | "addMoney";
 
 const initialState = {
   signUpData: null as SignUpInput | null,
@@ -32,6 +33,7 @@ const initialState = {
     updateProfile: false,
     passwordChange: false,
     logout: false,
+    addMoney: false,
   },
 };
 

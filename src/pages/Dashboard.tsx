@@ -26,6 +26,7 @@ const Dashboard = () => {
       userLoading.passwordChange ||
       userLoading.twoFactorAuth ||
       userLoading.updateProfile ||
+      userLoading.addMoney ||
       (userLoading.sendOtp && otpType === "twoFactorAuth") ||
       itemLoading.addItem ? (
         <Loader />

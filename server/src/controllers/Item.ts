@@ -186,8 +186,6 @@ export const addItem = async (
       { session }
     );
 
-    console.log("Created item: ", item);
-
     user.lendItems.push(item[0]._id);
 
     const recentActivity = await RecentActivity.create(

@@ -20,6 +20,7 @@ import Transactions from "./components/core/Dashboard/Transactions";
 import AddItem from "./components/core/Dashboard/AddItem";
 import Disputes from "./components/core/Dashboard/Disputes";
 import Loader from "./components/common/Loader";
+import Wallet from "./components/core/Dashboard/Wallet";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -101,6 +102,8 @@ function App() {
             <Route path="/dashboard/disputes" element={<Disputes />} />
 
             <Route path="/dashboard/addItem" element={<AddItem />} />
+
+            <Route path="/dashboard/wallet" element={<Wallet />} />
           </Route>
 
           <Route path="/load" element={<Loader />} />
