@@ -54,6 +54,6 @@ export const disputeEndpoints = {
 };
 
 export const transactionEndpoints = {
-  GET_ALL_TRANSACTIONS: `${BACKEND_URL}/transaction`,
+  GET_ALL_TRANSACTIONS: `${BACKEND_URL}/transaction/getAll`,
   ADD_MONEY: `${BACKEND_URL}/transaction/addMoney`,
 };

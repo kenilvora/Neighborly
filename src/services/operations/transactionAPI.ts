@@ -72,8 +72,6 @@ export function addMoney(amount: number, user: RootState["user"]["user"]) {
         throw new Error("Failed to create order");
       }
 
-      console.log("Order", order);
-
       const options = {
         key: razorpayKey,
         currency: order.data.data.currency,

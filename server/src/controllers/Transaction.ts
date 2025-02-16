@@ -4,6 +4,10 @@ import User from "../models/User";
 import { instance } from "../config/razorpay";
 import mongoose from "mongoose";
 import crypto from "crypto";
+import clients from "../connections";
+import { IRatings, IUserDetails } from "@kenil_vora/neighborly";
+import getAvgRating from "../utils/getAverageRating";
+import Transaction from "../models/Transaction";
 
 export const getAllTransactions = async (
   req: AuthRequest,
@@ -18,7 +22,7 @@ export const getAllTransactions = async (
         path: "transactions",
         populate: [
           {
-            path: "lenderId",
+            path: "payeeId",
             select: "firstName lastName email contactNumber profileImage",
           },
           {
@@ -26,13 +30,14 @@ export const getAllTransactions = async (
             select: "name price depositAmount",
           },
         ],
-      });
+      })
 
     res.status(200).json({
       success: true,
       data: transactions?.transactions,
     });
   } catch (error) {
+    console.log("Error in getAllTransactions", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -76,12 +81,19 @@ export const addMoney = async (
       receipt: `${user.firstName}_${amount}_${Date.now()
         .toLocaleString()
         .slice(0, 10)}`,
+      notes: {
+        user: userId?.toString()!,
+      },
     };
 
     try {
       const order = await instance.orders.create(options);
 
       await session.commitTransaction();
+
+      const userSocket = clients.get(userId?.toString()!);
+
+      userSocket?.send("Payment initiated");
 
       res.status(200).json({
         success: true,
@@ -98,6 +110,7 @@ export const addMoney = async (
       return;
     }
   } catch (error) {
+    console.log("Error in addMoney", error);
     await session.abortTransaction();
     res.status(500).json({
       success: false,
@@ -112,6 +125,8 @@ export const verifyPayment = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
@@ -119,13 +134,130 @@ export const verifyPayment = async (
     shasum.update(JSON.stringify(req.body));
     const digest = shasum.digest("hex");
 
+    const userId = req.body.payload.payment.entity.notes.user;
+
+    const userSocket = clients.get(userId);
+
     if (digest === req.headers["x-razorpay-signature"]) {
+      const uuid = new mongoose.Types.ObjectId(userId as string);
+
+      const oldTransaction = await Transaction.findOne({
+        paymentId: req.body.payload.payment.entity.id,
+      }).session(session);
+
+      if (oldTransaction) {
+        const message = {
+          success: false,
+          type: "payment",
+          message: "Invalid payment",
+        };
+
+        userSocket?.send(JSON.stringify(message));
+
+        await session.abortTransaction();
+
+        res.status(400).json({
+          success: false,
+          message: "Payment already verified",
+        });
+        return;
+      }
+
+      const transaction = await Transaction.create(
+        [
+          {
+            payerId: uuid,
+            transactionType: "Add Funds",
+            amount: req.body.payload.payment.entity.amount / 100,
+            paymentId: req.body.payload.payment.entity.id,
+            status: "Completed",
+            payeeId: req.body.payload.payment.entity.notes.payee || null,
+            borrowItemId:
+              req.body.payload.payment.entity.notes.borrowItem || null,
+          },
+        ],
+        { session }
+      );
+
+      const user = await User.findById(uuid)
+        .select(
+          "firstName lastName email contactNumber address profileImage transactions ratingAndReviews upiId upiIdVerified accountBalance twoFactorAuth"
+        )
+        .populate({
+          path: "address",
+          select: "-userId",
+        })
+        .populate<{ ratingAndReviews: IRatings[] }>({
+          path: "ratingAndReviews",
+          select: "rating",
+        })
+        .session(session);
+
+      if (!user) {
+        const message = {
+          success: false,
+          type: "payment",
+          message: "Payment not verified",
+        };
+
+        userSocket?.send(JSON.stringify(message));
+
+        await session.abortTransaction();
+        res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+        return;
+      }
+
+      user.accountBalance += req.body.payload.payment.entity.amount / 100;
+      user.transactions.push(transaction[0]._id);
+
+      await user.save({ session });
+
+      const updatedUser = {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        contactNumber: user.contactNumber,
+        address: user.address,
+        profileImage: user.profileImage,
+        ratingAndReviews: user.ratingAndReviews,
+        upiId: user.upiId,
+        upiIdVerified: user.upiIdVerified,
+        accountBalance: user.accountBalance,
+        twoFactorAuth: user.twoFactorAuth,
+        avgRating: getAvgRating(user.ratingAndReviews),
+      };
+
+      const message = {
+        success: true,
+        type: "payment",
+        message: "Payment verified",
+        user: updatedUser,
+      };
+
+      userSocket?.send(JSON.stringify(message));
+
+      await session.commitTransaction();
+
       res.status(200).json({
         success: true,
         message: "Payment verified",
       });
       return;
     } else {
+      await session.abortTransaction();
+
+      const message = {
+        success: false,
+        type: "payment",
+        message: "Payment not verified",
+      };
+
+      userSocket?.send(JSON.stringify(message));
+
       res.status(400).json({
         success: false,
         message: "Payment not verified",
@@ -133,9 +265,23 @@ export const verifyPayment = async (
       return;
     }
   } catch (error) {
+    await session.abortTransaction();
+
+    const message = {
+      success: false,
+      type: "payment",
+      message: "Payment not verified",
+    };
+
+    const userSocket = clients.get(req.body.payload.payment.entity.notes.user);
+
+    userSocket?.send(JSON.stringify(message));
+
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
+  } finally {
+    session.endSession();
   }
 };

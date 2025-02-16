@@ -8,7 +8,7 @@ import {
 
 const router = express.Router();
 
-router.get("/", auth, isUser, getAllTransactions);
+router.get("/getAll", auth, isUser, getAllTransactions);
 
 router.post("/addMoney", auth, isUser, addMoney);
 

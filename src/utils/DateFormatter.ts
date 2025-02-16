@@ -4,6 +4,19 @@ const options = {
   day: "2-digit" as "2-digit",
 };
 
-export const DateFormatter = (date: Date) => {
-  return new Intl.DateTimeFormat("en-US", options).format(date);
+const options2 = {
+  year: "numeric" as "numeric",
+  month: "short" as "short",
+  day: "2-digit" as "2-digit",
+  hour: "2-digit" as "2-digit",
+  minute: "2-digit" as "2-digit",
+  hour12: true, // Ensures AM/PM format
+};
+
+export const DateFormatter = (date: Date, includeTime = false) => {
+  if (includeTime) {
+    return new Intl.DateTimeFormat("en-US", options2).format(date);
+  } else {
+    return new Intl.DateTimeFormat("en-US", options).format(date);
+  }
 };
