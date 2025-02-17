@@ -26,7 +26,6 @@
     "mongoose": "^8.9.5",
     "nodemailer": "^6.9.16",
     "otp-generator": "^4.0.1",
-    "pm2": "^5.4.3",
     "razorpay": "^2.9.5",
     "ws": "^8.18.0",
     "zod": "^3.24.1"
