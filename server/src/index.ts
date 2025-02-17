@@ -81,6 +81,10 @@ async function startServer() {
         }
       });
     });
+
+    app.get("/", (req, res) => {
+      res.json("Server is Healthy and Running");
+    });
   } catch (error) {
     console.log(error);
   }
