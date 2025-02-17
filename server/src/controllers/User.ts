@@ -264,7 +264,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const token = jwt.sign(payload, process.env.JWT_SECRET as string);
 
     res.cookie("token", token, {
-      domain: process.env.COOKIE_DOMAIN,
+      path: "/",
       secure: true,
       sameSite: "lax",
       maxAge: 31536000000,
@@ -372,7 +372,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
     res.clearCookie("token", {
-      domain: process.env.COOKIE_DOMAIN,
+      path: "/",
       secure: true,
       sameSite: "lax",
     });
