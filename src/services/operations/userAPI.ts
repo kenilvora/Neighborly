@@ -86,6 +86,11 @@ export function login(data: LoginInput, navigate: NavigateFunction | null) {
       }
 
       dispatch(setToken(res.data.token));
+      Cookies.set("token", res.data.token, {
+        secure: true,
+        sameSite: "lax",
+        expires: 365,
+      });
       toast.success("Logged In Successfully.");
       if (navigate) {
         navigate("/dashboard");
@@ -185,6 +190,10 @@ export function logOut(navigate: NavigateFunction | null) {
       dispatch(setToken(null));
       dispatch(setUser(null));
       Cookies.remove("user", {
+        secure: true,
+        sameSite: "lax",
+      });
+      Cookies.remove("token", {
         secure: true,
         sameSite: "lax",
       });
