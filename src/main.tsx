@@ -14,11 +14,11 @@ const store = configureStore({
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
-    <HelmetProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <HelmetProvider>
         <App />
         <Toaster />
-      </BrowserRouter>
-    </HelmetProvider>
+      </HelmetProvider>
+    </BrowserRouter>
   </Provider>
 );
