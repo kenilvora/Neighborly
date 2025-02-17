@@ -3,7 +3,7 @@ import navImage from "../../assets/navbarImage.jpeg";
 import { IoIosSearch } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../reducer/store";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import { MdOutlineArrowDropDown, MdOutlineArrowDropUp } from "react-icons/md";
 import { setSearchQuery } from "../../slices/itemSlice";

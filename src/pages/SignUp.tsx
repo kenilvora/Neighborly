@@ -19,6 +19,7 @@ import { sendOtp } from "../services/operations/userAPI";
 import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
 import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
+import { Helmet } from "react-helmet-async";
 
 const countryData = data as Country[];
 
@@ -208,344 +209,358 @@ const SignUp = () => {
       {isLoading.signUp || (isLoading.sendOtp && otpType === "signup") ? (
         <Loader />
       ) : (
-        <div className="w-full min-h-[calc(100vh-74.8px)] overflow-auto flex justify-center items-center my-12">
-          <div className="w-[90%] max-w-[1000px] flex flex-col justify-center gap-4 p-5 py-10 max-[800px]:py-5 max-[800px]:pb-1 max-[800px]:px-3 rounded-xl border-3 border-neutral-100 shadow-xl">
-            <div className="flex flex-col items-center gap-2 text-center">
-              <h1 className="text-4xl font-bold max-[600px]:text-2xl max-[400px]:text-xl">
-                Sign Up To Get Started
-              </h1>
-              <p className="text-neutral-500 text-lg max-[600px]:text-sm max-[400px]:text-xs">
-                Borrow, Lend, Connect -{" "}
-                <span className="font-semibold">Hassle-Free!</span>
-              </p>
-            </div>
-            <form
-              action=""
-              className="flex flex-col gap-5 w-[85%] max-[800px]:w-full self-center my-4"
-              onSubmit={handleSubmit(submitForm)}
-            >
-              <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
-                <CustomInput
-                  icon={RiUserFill}
-                  id="firstName"
-                  name="firstName"
-                  placeholder="Enter your FirstName"
-                  register={register}
-                  type="text"
-                  errors={errors.firstName}
-                />
-                <CustomInput
-                  icon={RiUserFill}
-                  id="lastName"
-                  name="lastName"
-                  placeholder="Enter your LastName"
-                  register={register}
-                  type="text"
-                  errors={errors.lastName}
-                />
-              </div>
-              <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
-                <CustomInput
-                  icon={MdEmail}
-                  id="email"
-                  name="email"
-                  placeholder="Enter your Email"
-                  register={register}
-                  type="email"
-                  errors={errors.email}
-                />
-                <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1">
-                  <PhoneInput
-                    country={"in"}
-                    onChange={(value, countryData: CountryData) => {
-                      const formattedValue = formatPhoneNumber(
-                        value,
-                        countryData.dialCode
-                      );
-                      setValue("contactNumber", formattedValue, {
-                        shouldValidate: true,
-                      }); // Manually set value
-                    }}
-                    autoFormat={true}
-                    enableAreaCodes={true}
-                    enableSearch={true}
-                    inputStyle={{
-                      border: "1px solid #d4d4d8",
-                      borderRadius: "6px",
-                      padding: "21px 0px 21px 52px",
-                      fontSize: "1rem",
-                      outlineColor: "#3b82f6",
-                      width: "100%",
-                    }}
-                    buttonStyle={{
-                      borderRadius: "6px 0px 0px 6px",
-                      paddingLeft: "4px",
-                      backgroundColor: "white",
-                    }}
-                    inputProps={{
-                      id: "contactNumber",
-                      name: "contactNumber",
-                      required: true,
-                      autoComplete: "on",
-                      ref: register("contactNumber", { required: true }).ref, // Assign ref manually
-                    }}
-                    value={getValues("contactNumber")}
-                  />
-                  {errors.contactNumber && (
-                    <span className="text-neutral-800 font-semibold opacity-70">
-                      Please enter your contact number
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
-                <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1 relative">
-                  <div className="absolute text-xl top-[11px] left-3 text-neutral-500">
-                    <IoMdLock />
-                  </div>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    placeholder="Enter your Password"
-                    className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500 pl-9 pr-[39px]"
-                    autoComplete="off"
-                    {...register("password", { required: true })}
-                    required
-                    onCopy={(e) => e.preventDefault()}
-                    onCut={(e) => e.preventDefault()}
-                    onPaste={(e) => e.preventDefault()}
-                    minLength={8}
-                  />
-                  <span
-                    className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? (
-                      <AiOutlineEyeInvisible />
-                    ) : (
-                      <AiOutlineEye />
-                    )}
-                  </span>
-                  {errors.password && (
-                    <span className="text-neutral-800 font-semibold opacity-70">
-                      Please enter your password
-                    </span>
-                  )}
-                </div>
-                <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1 relative">
-                  <div className="absolute text-xl top-[11px] left-3 text-neutral-500">
-                    <IoMdLock />
-                  </div>
-                  <input
-                    type={showConfirmPassword ? "text" : "password"}
-                    id="confirmPassword"
-                    placeholder="Confirm your Password"
-                    className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500 pl-9 pr-[39px]"
-                    autoComplete="off"
-                    value={confirmPassword}
-                    onChange={(e) => {
-                      setConfirmPassword(e.target.value);
-                    }}
-                    required
-                    onCopy={(e) => e.preventDefault()}
-                    onCut={(e) => e.preventDefault()}
-                    onPaste={(e) => e.preventDefault()}
-                    minLength={8}
-                  />
-                  <span
-                    className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  >
-                    {showConfirmPassword ? (
-                      <AiOutlineEyeInvisible />
-                    ) : (
-                      <AiOutlineEye />
-                    )}
-                  </span>
-                </div>
-              </div>
-              <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
-                <CustomInput
-                  icon={IoMdHome}
-                  id="addressLine1"
-                  name="addressLine1"
-                  placeholder="Enter your Address Line 1"
-                  register={register}
-                  type="text"
-                  errors={errors.addressLine1}
-                />
-                <CustomInput
-                  icon={IoMdHome}
-                  id="addressLine2"
-                  name="addressLine2"
-                  placeholder="Enter your Address Line 2"
-                  register={register}
-                  type="text"
-                  errors={errors.addressLine2}
-                  required={false}
-                />
-              </div>
-              <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
-                <CustomDropdown
-                  data={countryData}
-                  label="Country"
-                  fn={setAddressData}
-                  value={country}
-                  name="country"
-                  required={true}
-                />
+        <>
+          <Helmet>
+            <title>Neighborly | Sign Up</title>
+            <meta
+              name="description"
+              content="Sign up to get started with Neighborly"
+            />
+            <meta
+              name="keywords"
+              content="Neighborly, Sign Up, Borrow, Lend, Connect"
+            />
+          </Helmet>
 
-                <CustomDropdown
-                  data={stateData}
-                  label="State"
-                  fn={setAddressData}
-                  value={state}
-                  name="state"
-                  required={true}
-                />
-
-                <CustomDropdown
-                  data={cityData}
-                  label="City"
-                  fn={setAddressData}
-                  value={city}
-                  name="city"
-                  required={true}
-                />
+          <div className="w-full min-h-[calc(100vh-74.8px)] overflow-auto flex justify-center items-center my-12">
+            <div className="w-[90%] max-w-[1000px] flex flex-col justify-center gap-4 p-5 py-10 max-[800px]:py-5 max-[800px]:pb-1 max-[800px]:px-3 rounded-xl border-3 border-neutral-100 shadow-xl">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <h1 className="text-4xl font-bold max-[600px]:text-2xl max-[400px]:text-xl">
+                  Sign Up To Get Started
+                </h1>
+                <p className="text-neutral-500 text-lg max-[600px]:text-sm max-[400px]:text-xs">
+                  Borrow, Lend, Connect -{" "}
+                  <span className="font-semibold">Hassle-Free!</span>
+                </p>
               </div>
-              <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
-                <CustomInput
-                  icon={TbMapPinCode}
-                  id="pincode"
-                  name="pincode"
-                  placeholder="Enter your Pincode"
-                  register={register}
-                  type="number"
-                  errors={errors.pincode}
-                />
-                <div className="flex items-center gap-3 w-[50%] max-[800px]:w-full">
-                  <div className="container">
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      id="isPrimary"
-                      {...register("isPrimary")}
+              <form
+                action=""
+                className="flex flex-col gap-5 w-[85%] max-[800px]:w-full self-center my-4"
+                onSubmit={handleSubmit(submitForm)}
+              >
+                <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+                  <CustomInput
+                    icon={RiUserFill}
+                    id="firstName"
+                    name="firstName"
+                    placeholder="Enter your FirstName"
+                    register={register}
+                    type="text"
+                    errors={errors.firstName}
+                  />
+                  <CustomInput
+                    icon={RiUserFill}
+                    id="lastName"
+                    name="lastName"
+                    placeholder="Enter your LastName"
+                    register={register}
+                    type="text"
+                    errors={errors.lastName}
+                  />
+                </div>
+                <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+                  <CustomInput
+                    icon={MdEmail}
+                    id="email"
+                    name="email"
+                    placeholder="Enter your Email"
+                    register={register}
+                    type="email"
+                    errors={errors.email}
+                  />
+                  <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1">
+                    <PhoneInput
+                      country={"in"}
+                      onChange={(value, countryData: CountryData) => {
+                        const formattedValue = formatPhoneNumber(
+                          value,
+                          countryData.dialCode
+                        );
+                        setValue("contactNumber", formattedValue, {
+                          shouldValidate: true,
+                        }); // Manually set value
+                      }}
+                      autoFormat={true}
+                      enableAreaCodes={true}
+                      enableSearch={true}
+                      inputStyle={{
+                        border: "1px solid #d4d4d8",
+                        borderRadius: "6px",
+                        padding: "21px 0px 21px 52px",
+                        fontSize: "1rem",
+                        outlineColor: "#3b82f6",
+                        width: "100%",
+                      }}
+                      buttonStyle={{
+                        borderRadius: "6px 0px 0px 6px",
+                        paddingLeft: "4px",
+                        backgroundColor: "white",
+                      }}
+                      inputProps={{
+                        id: "contactNumber",
+                        name: "contactNumber",
+                        required: true,
+                        autoComplete: "on",
+                        ref: register("contactNumber", { required: true }).ref, // Assign ref manually
+                      }}
+                      value={getValues("contactNumber")}
                     />
-                    <label className="switch" htmlFor="isPrimary">
-                      <span className="isAvailable"></span>
+                    {errors.contactNumber && (
+                      <span className="text-neutral-800 font-semibold opacity-70">
+                        Please enter your contact number
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+                  <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1 relative">
+                    <div className="absolute text-xl top-[11px] left-3 text-neutral-500">
+                      <IoMdLock />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      placeholder="Enter your Password"
+                      className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500 pl-9 pr-[39px]"
+                      autoComplete="off"
+                      {...register("password", { required: true })}
+                      required
+                      onCopy={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
+                      onPaste={(e) => e.preventDefault()}
+                      minLength={8}
+                    />
+                    <span
+                      className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
+                    </span>
+                    {errors.password && (
+                      <span className="text-neutral-800 font-semibold opacity-70">
+                        Please enter your password
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-[50%] max-[800px]:w-full flex flex-col gap-1 relative">
+                    <div className="absolute text-xl top-[11px] left-3 text-neutral-500">
+                      <IoMdLock />
+                    </div>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      id="confirmPassword"
+                      placeholder="Confirm your Password"
+                      className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500 pl-9 pr-[39px]"
+                      autoComplete="off"
+                      value={confirmPassword}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                      }}
+                      required
+                      onCopy={(e) => e.preventDefault()}
+                      onCut={(e) => e.preventDefault()}
+                      onPaste={(e) => e.preventDefault()}
+                      minLength={8}
+                    />
+                    <span
+                      className="absolute hover:cursor-pointer top-[10px] text-2xl right-2 text-neutral-600"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    >
+                      {showConfirmPassword ? (
+                        <AiOutlineEyeInvisible />
+                      ) : (
+                        <AiOutlineEye />
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+                  <CustomInput
+                    icon={IoMdHome}
+                    id="addressLine1"
+                    name="addressLine1"
+                    placeholder="Enter your Address Line 1"
+                    register={register}
+                    type="text"
+                    errors={errors.addressLine1}
+                  />
+                  <CustomInput
+                    icon={IoMdHome}
+                    id="addressLine2"
+                    name="addressLine2"
+                    placeholder="Enter your Address Line 2"
+                    register={register}
+                    type="text"
+                    errors={errors.addressLine2}
+                    required={false}
+                  />
+                </div>
+                <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+                  <CustomDropdown
+                    data={countryData}
+                    label="Country"
+                    fn={setAddressData}
+                    value={country}
+                    name="country"
+                    required={true}
+                  />
+
+                  <CustomDropdown
+                    data={stateData}
+                    label="State"
+                    fn={setAddressData}
+                    value={state}
+                    name="state"
+                    required={true}
+                  />
+
+                  <CustomDropdown
+                    data={cityData}
+                    label="City"
+                    fn={setAddressData}
+                    value={city}
+                    name="city"
+                    required={true}
+                  />
+                </div>
+                <div className="flex max-[800px]:flex-col w-full justify-between gap-5">
+                  <CustomInput
+                    icon={TbMapPinCode}
+                    id="pincode"
+                    name="pincode"
+                    placeholder="Enter your Pincode"
+                    register={register}
+                    type="number"
+                    errors={errors.pincode}
+                  />
+                  <div className="flex items-center gap-3 w-[50%] max-[800px]:w-full">
+                    <div className="container">
+                      <input
+                        type="checkbox"
+                        className="checkbox"
+                        id="isPrimary"
+                        {...register("isPrimary")}
+                      />
+                      <label className="switch" htmlFor="isPrimary">
+                        <span className="isAvailable"></span>
+                      </label>
+                    </div>
+                    <label htmlFor="isPrimary">
+                      <span className="text-xl max-[450px]:text-base font-semibold">
+                        Primary Address
+                      </span>
                     </label>
                   </div>
-                  <label htmlFor="isPrimary">
-                    <span className="text-xl max-[450px]:text-base font-semibold">
-                      Primary Address
-                    </span>
-                  </label>
                 </div>
-              </div>
-              <div className="flex flex-col justify-center gap-2 max-[560px]:text-sm max-[490px]:text-xs">
-                <p
-                  className={`flex items-center gap-2 font-medium
+                <div className="flex flex-col justify-center gap-2 max-[560px]:text-sm max-[490px]:text-xs">
+                  <p
+                    className={`flex items-center gap-2 font-medium
                       ${
                         passwordCriteria.length
                           ? "text-green-500"
                           : "text-red-500"
                       }
                   `}
-                >
-                  {passwordCriteria.length ? (
-                    <FaCircleCheck className="text-green-500" />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" />
-                  )}
-                  Password must be at least 8 characters long
-                </p>
-                <p
-                  className={`flex items-center gap-2 font-medium
+                  >
+                    {passwordCriteria.length ? (
+                      <FaCircleCheck className="text-green-500" />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" />
+                    )}
+                    Password must be at least 8 characters long
+                  </p>
+                  <p
+                    className={`flex items-center gap-2 font-medium
                       ${
                         passwordCriteria.uppercase
                           ? "text-green-500"
                           : "text-red-500"
                       }
                   `}
-                >
-                  {passwordCriteria.uppercase ? (
-                    <FaCircleCheck className="text-green-500" />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" />
-                  )}
-                  Password must contain at least one uppercase letter
-                </p>
-                <p
-                  className={`flex items-center gap-2 font-medium
+                  >
+                    {passwordCriteria.uppercase ? (
+                      <FaCircleCheck className="text-green-500" />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" />
+                    )}
+                    Password must contain at least one uppercase letter
+                  </p>
+                  <p
+                    className={`flex items-center gap-2 font-medium
                       ${
                         passwordCriteria.lowercase
                           ? "text-green-500"
                           : "text-red-500"
                       }
                   `}
-                >
-                  {passwordCriteria.lowercase ? (
-                    <FaCircleCheck className="text-green-500" />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" />
-                  )}
-                  Password must contain at least one lowercase letter
-                </p>
-                <p
-                  className={`flex items-center gap-2 font-medium
+                  >
+                    {passwordCriteria.lowercase ? (
+                      <FaCircleCheck className="text-green-500" />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" />
+                    )}
+                    Password must contain at least one lowercase letter
+                  </p>
+                  <p
+                    className={`flex items-center gap-2 font-medium
                       ${
                         passwordCriteria.number
                           ? "text-green-500"
                           : "text-red-500"
                       }
                   `}
-                >
-                  {passwordCriteria.number ? (
-                    <FaCircleCheck className="text-green-500" />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" />
-                  )}
-                  Password must contain at least one number
-                </p>
-                <p
-                  className={`flex items-center gap-2 font-medium
+                  >
+                    {passwordCriteria.number ? (
+                      <FaCircleCheck className="text-green-500" />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" />
+                    )}
+                    Password must contain at least one number
+                  </p>
+                  <p
+                    className={`flex items-center gap-2 font-medium
                       ${
                         passwordCriteria.special
                           ? "text-green-500"
                           : "text-red-500"
                       }
                   `}
-                >
-                  {passwordCriteria.special ? (
-                    <FaCircleCheck className="text-green-500" />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" />
-                  )}
-                  Password must contain at least one special character
-                </p>
-                <p
-                  className={`flex items-center gap-2 font-medium
+                  >
+                    {passwordCriteria.special ? (
+                      <FaCircleCheck className="text-green-500" />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" />
+                    )}
+                    Password must contain at least one special character
+                  </p>
+                  <p
+                    className={`flex items-center gap-2 font-medium
                       ${
                         passwordCriteria.passwordMatch
                           ? "text-green-500"
                           : "text-red-500"
                       }
                   `}
-                >
-                  {passwordCriteria.passwordMatch ? (
-                    <FaCircleCheck className="text-green-500" />
-                  ) : (
-                    <FaCircleXmark className="text-red-500" />
-                  )}
-                  Password & Confirm Password must match
-                </p>
-              </div>
-              <button className="bg-blue-500 cursor-pointer text-white font-semibold py-2 rounded-lg text-lg">
-                Sign Up
-              </button>
-            </form>
+                  >
+                    {passwordCriteria.passwordMatch ? (
+                      <FaCircleCheck className="text-green-500" />
+                    ) : (
+                      <FaCircleXmark className="text-red-500" />
+                    )}
+                    Password & Confirm Password must match
+                  </p>
+                </div>
+                <button className="bg-blue-500 cursor-pointer text-white font-semibold py-2 rounded-lg text-lg">
+                  Sign Up
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </>
   );
