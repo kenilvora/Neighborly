@@ -27,7 +27,7 @@ const Wallet = () => {
 
   const submitHandler: SubmitHandler<WalletForm> = async (data) => {
     try {
-      const skt = new WebSocket("ws://localhost:4000");
+      const skt = new WebSocket("wss://neighborly-backend.kenilvora.tech");
 
       const startingMessage = {
         type: "payment_notification",
