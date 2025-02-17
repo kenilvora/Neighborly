@@ -27,6 +27,9 @@ import {
 } from "@kenil_vora/neighborly";
 import BorrowItem from "../models/BorrowItem";
 import RecentActivity from "../models/RecentActivity";
+import { config } from "dotenv";
+
+config();
 
 export const signUp = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -261,6 +264,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const token = jwt.sign(payload, process.env.JWT_SECRET as string);
 
     res.cookie("token", token, {
+      domain: process.env.COOKIE_DOMAIN,
       secure: true,
       sameSite: "lax",
       maxAge: 31536000000,
@@ -368,6 +372,7 @@ export const sendOtp = async (req: Request, res: Response): Promise<void> => {
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
     res.clearCookie("token", {
+      domain: process.env.COOKIE_DOMAIN,
       secure: true,
       sameSite: "lax",
     });
