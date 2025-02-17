@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc -b && node dist/index.js",
-    "dev": "nodemon"
+    "build": "tsc -b",
+    "start": "pm2 start dist/index.js --name backend --env production"
   },
   "keywords": [],
   "author": "",
@@ -27,6 +27,7 @@
     "mongoose": "^8.9.5",
     "nodemailer": "^6.9.16",
     "otp-generator": "^4.0.1",
+    "pm2": "^5.4.3",
     "razorpay": "^2.9.5",
     "ws": "^8.18.0",
     "zod": "^3.24.1"
@@ -40,7 +41,6 @@
     "@types/express-fileupload": "^1.5.1",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/nodemailer": "^6.4.17",
-    "@types/otp-generator": "^4.0.2",
-    "nodemon": "^3.1.9"
+    "@types/otp-generator": "^4.0.2"
   }
 }
