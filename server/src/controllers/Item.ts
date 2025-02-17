@@ -504,15 +504,15 @@ export const getAllItems = async (
   res: Response
 ): Promise<void> => {
   try {
-    const filter = (req.query.filter as string) || ""; // done
-    const filterPrice = parseInt(req.query.filterPrice as string) || 0; // done
+    const filter = (req.query.filter as string) || "";
+    const filterPrice = parseInt(req.query.filterPrice as string) || 0;
     const filterDeposit = parseInt(req.query.filterDeposit as string) || 0;
-    const filterCondition = (req.query.filterCondition as string) || ""; // done
-    const filterCategory = (req.query.filterCategory as string) || ""; // done
+    const filterCondition = (req.query.filterCondition as string) || "";
+    const filterCategory = (req.query.filterCategory as string) || "";
     const filterDeliveryType = (req.query.filterDeliveryType as string) || "";
-    const filterCity = (req.query.filterCity as string) || ""; // done
-    const filterState = (req.query.filterState as string) || ""; // done
-    const filterCountry = (req.query.filterCountry as string) || ""; // done
+    const filterCity = (req.query.filterCity as string) || "";
+    const filterState = (req.query.filterState as string) || "";
+    const filterCountry = (req.query.filterCountry as string) || "";
     const filterTags =
       ((req.query.filterTags &&
         JSON.parse(req.query.filterTags as string)) as string[]) || [];
@@ -521,6 +521,22 @@ export const getAllItems = async (
 
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 15;
+
+    if (page < 1 || limit < 1) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid page or limit",
+      });
+      return;
+    }
+
+    if (limit > 20) {
+      res.status(400).json({
+        success: false,
+        message: "Limit cannot be more than 20",
+      });
+      return;
+    }
 
     const sortField = req.query.sortField as string;
     const sortOrder = parseInt(req.query.sortOrder as string);
