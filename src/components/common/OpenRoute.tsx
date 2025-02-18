@@ -1,10 +1,9 @@
 import { ReactNode, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../reducer/store";
+import { useDispatch } from "react-redux";
 import { getMe } from "../../services/operations/userAPI";
 import Cookies from "js-cookie";
 import { setToken, setUser } from "../../slices/userSlice";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loader from "./Loader";
 
@@ -15,7 +14,15 @@ interface OpenRouteProps {
 const OpenRoute = ({ children }: OpenRouteProps) => {
   const dispatch = useDispatch();
 
-  const { token } = useSelector((state: RootState) => state.user);
+  const token = Cookies.get("token");
+
+  if (token) {
+    dispatch(setToken(token));
+  } else {
+    dispatch(setToken(null));
+  }
+
+  const location = useLocation();
 
   const [isAuthenticated, setIsAuthenticated] = useState(
     null as boolean | null
@@ -36,9 +43,10 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
     };
 
     validate();
-  }, [token, dispatch]);
+  }, [token, location.pathname]);
 
   useEffect(() => {
+    console.log("IsAuthenticated: ", isAuthenticated);
     if (isAuthenticated === false) {
       Cookies.remove("token", {
         secure: true,
@@ -51,7 +59,7 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
       dispatch(setToken(null));
       dispatch(setUser(null));
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated]);
 
   if (isAuthenticated === null) return <Loader />;
 
