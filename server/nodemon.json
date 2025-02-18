@@ -2,5 +2,5 @@
   "watch": ["src"],
   "ext": "ts",
   "ignore": ["dist"],
-  "exec": "npm run start"
+  "exec": "tsc -b && node dist/index.js"
 }

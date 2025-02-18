@@ -393,3 +393,86 @@ export async function getStatisticalData(): Promise<IStatisticalData[]> {
     return result;
   }
 }
+
+export function resetPasswordToken(email: string) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    const toastId = toast.loading("Sending Reset Password Token...");
+    dispatch(
+      setIsLoading({
+        key: "resetPasswordToken",
+        value: true,
+      })
+    );
+    try {
+      const res = await apiConnector(
+        "POST",
+        userEndpoints.RESET_PASSWORD_TOKEN,
+        {
+          email,
+        }
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success(res.data.message);
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(
+        setIsLoading({
+          key: "resetPasswordToken",
+          value: false,
+        })
+      );
+      toast.dismiss(toastId);
+    }
+  };
+}
+
+export function resetPassword(
+  password: string,
+  confirmPassword: string,
+  token: string,
+  navigate: NavigateFunction | null
+) {
+  return async (dispatch: Dispatch): Promise<void> => {
+    const toastId = toast.loading("Resetting Password...");
+    dispatch(
+      setIsLoading({
+        key: "resetPassword",
+        value: true,
+      })
+    );
+    try {
+      const res = await apiConnector(
+        "PUT",
+        `${userEndpoints.RESET_PASSWORD}/${token}`,
+        {
+          password,
+          confirmPassword,
+        }
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success("Password Reset Successfully.");
+      if (navigate) {
+        navigate("/login");
+      }
+    } catch (error) {
+      toast.error((error as any).response.data.message);
+    } finally {
+      dispatch(
+        setIsLoading({
+          key: "resetPassword",
+          value: false,
+        })
+      );
+      toast.dismiss(toastId);
+    }
+  };
+}

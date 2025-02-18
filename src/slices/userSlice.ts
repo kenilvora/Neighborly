@@ -10,6 +10,8 @@ type LoadingKeys =
   | "sendOtp"
   | "updateProfile"
   | "passwordChange"
+  | "resetPassword"
+  | "resetPasswordToken"
   | "logout"
   | "addMoney";
 
@@ -34,6 +36,8 @@ const initialState = {
     passwordChange: false,
     logout: false,
     addMoney: false,
+    resetPasswordToken: false,
+    resetPassword: false,
   },
 };
 

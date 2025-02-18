@@ -22,6 +22,8 @@ import Disputes from "./components/core/Dashboard/Disputes";
 import Loader from "./components/common/Loader";
 import Wallet from "./components/core/Dashboard/Wallet";
 import ViewLendItems from "./components/core/Dashboard/LendItems/ViewLendItems";
+import ForgotPasswordToken from "./pages/ForgotPasswordToken";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -71,6 +73,24 @@ function App() {
             element={
               <OpenRoute>
                 <Login />
+              </OpenRoute>
+            }
+          />
+
+          <Route
+            path="/forgot-password"
+            element={
+              <OpenRoute>
+                <ForgotPasswordToken />
+              </OpenRoute>
+            }
+          />
+
+          <Route
+            path="/forgot-password/:token"
+            element={
+              <OpenRoute>
+                <ForgotPassword />
               </OpenRoute>
             }
           />

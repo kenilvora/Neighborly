@@ -133,7 +133,8 @@ const Navbar = () => {
             >
               <NavLink
                 to={"/signup"}
-                className="text-neutral-800 font-semibold border border-neutral-300 px-5 max-[855px]:px-3 max-[855px]:text-sm py-2 max-[855px]:py-2.5 rounded-md max-[420px]:px-1.5 line-clamp-1
+                className="text-neutral-800 font-semibold border border-neutral-300 px-5 max-[855px]:px-3 max-[855px]:text-sm py-2 
+                          max-[855px]:py-2.5 overflow-hidden rounded-md max-[420px]:px-1.5 line-clamp-1
                 hover:bg-gray-100"
               >
                 Sign Up

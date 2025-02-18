@@ -597,7 +597,7 @@ export const resetPasswordToken = async (
 
     await user.save();
 
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+    const resetUrl = `${process.env.CLIENT_URL}/forgot-password/${resetToken}`;
 
     try {
       const name = `${user.firstName} ${user.lastName}`;
@@ -640,6 +640,52 @@ export const resetPassword = async (
     }
 
     const { password, confirmPassword } = parsedData.data;
+
+    const hasLength = password.length >= 8;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g.test(password);
+
+    if (!hasLength) {
+      res.status(400).json({
+        success: false,
+        message: "Password must be atleast 8 characters long",
+      });
+      return;
+    }
+
+    if (!hasUppercase) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one uppercase letter",
+      });
+      return;
+    }
+
+    if (!hasLowercase) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one lowercase letter",
+      });
+      return;
+    }
+
+    if (!hasNumber) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one number",
+      });
+      return;
+    }
+
+    if (!hasSpecial) {
+      res.status(400).json({
+        success: false,
+        message: "Password must contain atleast one special character",
+      });
+      return;
+    }
 
     if (password !== confirmPassword) {
       res.status(400).json({

@@ -11,7 +11,7 @@ import {
   login,
   sendOtp,
 } from "../services/operations/userAPI";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { setLoginData, setOtpType } from "../slices/userSlice";
 import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
@@ -145,9 +145,12 @@ const Login = () => {
                   Login Securely
                 </button>
 
-                <div className="text-blue-400 font-medium">
+                <NavLink
+                  to={"/forgot-password"}
+                  className="text-blue-400 font-medium"
+                >
                   Forgot Password?
-                </div>
+                </NavLink>
               </form>
             </div>
           </div>
