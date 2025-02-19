@@ -46,7 +46,6 @@ const OpenRoute = ({ children }: OpenRouteProps) => {
   }, [token, location.pathname]);
 
   useEffect(() => {
-    console.log("IsAuthenticated: ", isAuthenticated);
     if (isAuthenticated === false) {
       Cookies.remove("token", {
         secure: true,

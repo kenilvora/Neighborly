@@ -50,7 +50,7 @@ const Navbar = () => {
     if (isMenuOpen) {
       setIsMenuOpen(false);
     }
-  }, [location, location.pathname]);
+  }, [location.pathname]);
 
   const handler = useRef<ReturnType<typeof setTimeout> | null>(null);
 

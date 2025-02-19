@@ -24,6 +24,7 @@ import Wallet from "./components/core/Dashboard/Wallet";
 import ViewLendItems from "./components/core/Dashboard/LendItems/ViewLendItems";
 import ForgotPasswordToken from "./pages/ForgotPasswordToken";
 import ForgotPassword from "./pages/ForgotPassword";
+import PublicRoute from "./components/common/PublicRoute";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -55,7 +56,14 @@ function App() {
       <Navbar />
       <div className="mt-[4.55rem]">
         <Routes>
-          <Route path="/" element={<ViewAllItems />} />
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <ViewAllItems />
+              </PublicRoute>
+            }
+          />
 
           <Route
             path="/signup"
