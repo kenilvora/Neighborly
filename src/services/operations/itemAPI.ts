@@ -3,7 +3,7 @@ import { apiConnector } from "../apiConnector";
 import { itemEndpoints } from "../apis";
 import { setIsLoading } from "../../slices/itemSlice";
 import { Dispatch } from "redux";
-import { IAllItem, IBorrowedItemData } from "@kenil_vora/neighborly";
+import { IAllItem, IBorrowedItemData, IItemWithAvgRating } from "@kenil_vora/neighborly";
 import { AxiosHeaders } from "axios";
 
 export function getAllItems(
@@ -169,4 +169,29 @@ export function addItem(data: FormData) {
       toast.dismiss(toastId);
     }
   };
+}
+
+export async function getItemsOfALender(userId?: string): Promise<IItemWithAvgRating[]> {
+  let result: IItemWithAvgRating[] = [];
+  try {
+    const res = await apiConnector(
+      "GET",
+      itemEndpoints.GET_ITEMS_OF_A_LENDER,
+      null,
+      null,
+      {
+        ...(userId && { userId: userId }),
+      }
+    );
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    result = res.data.data;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+  } finally {
+    return result;
+  }
 }

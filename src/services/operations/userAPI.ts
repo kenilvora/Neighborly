@@ -200,7 +200,7 @@ export function logOut(navigate: NavigateFunction | null) {
       localStorage.clear();
       if (navigate) {
         toast.success("Logged Out Successfully");
-        navigate("/login");
+        navigate("/");
       }
     } catch (error) {
       toast.error((error as any).response.data.message);

@@ -321,7 +321,8 @@ export const getItemsOfALender = async (
   try {
     let includeBorrowers = false;
     let id;
-    if (req.query.userId) {
+
+    if (req.query && req.query.userId) {
       id = req.query.userId;
     } else {
       id = req.user?.id;
@@ -349,31 +350,42 @@ export const getItemsOfALender = async (
     const page = parseInt(req.query.page as string);
     const limit = parseInt(req.query.limit as string) || 15;
 
+    const populateFields: any[] = [
+      {
+        path: "category",
+        select: "name",
+      },
+      {
+        path: "ratingAndReviews",
+        select: "rating",
+      },
+      {
+        path: "lenderId",
+        select: "firstName lastName email contactNumber profileImage",
+      },
+      {
+        path: "currentBorrowerId",
+        select: "firstName lastName email contactNumber profileImage",
+      },
+      {
+        path: "itemLocation",
+        select: "city state country",
+      },
+    ];
+
+    if (includeBorrowers) {
+      populateFields.push({
+        path: "borrowers",
+        select: "firstName lastName email contactNumber profileImage",
+      });
+    }
+
     const items = (await User.findById(id)
       .select("lendItems")
       .populate<ILendItem>({
         path: "lendItems",
-        select: includeBorrowers
-          ? "-lenderId -itemLocation"
-          : "-lenderId -borrowers -itemLocation",
-        populate: [
-          {
-            path: "category",
-            select: "name",
-          },
-          {
-            path: "ratingAndReviews",
-            select: "rating",
-          },
-          {
-            path: "lenderId",
-            select: "firstName lastName email contactNumber profileImage",
-          },
-          {
-            path: "currentBorrowerId",
-            select: "firstName lastName email contactNumber profileImage",
-          },
-        ],
+        select: includeBorrowers ? "-lenderId" : "-lenderId -borrowers",
+        populate: populateFields,
         options: {
           sort: { createdAt: -1 },
           limit,

@@ -32,8 +32,14 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
             secure: true,
             sameSite: "lax",
           });
+          Cookies.remove("token", {
+            secure: true,
+            sameSite: "lax",
+          });
+          setIsAuthenticated(false);
         }
       } catch (error) {
+        setIsAuthenticated(false);
         console.log(error);
       }
     };

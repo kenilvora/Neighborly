@@ -201,6 +201,7 @@ const Navbar = () => {
                     className="text-neutral-800 font-medium cursor-pointer px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
                     onClick={() => {
                       dispatch(logOut(navigate) as any);
+                      setIsMenuOpen(false);
                     }}
                   >
                     <IoLogOutOutline className="text-xl" />
