@@ -9,11 +9,13 @@
     "start": "concurrently -n \"client,server\" -c \"bgBlue,bgYellow\" \"npm run dev\" \"npm run server\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "npmpush": "cd common && tsc -b && npm publish --access public && cd ..",
+    "npmi": "npm i @kenil_vora/neighborly && cd server && npm i @kenil_vora/neighborly && cd .."
   },
   "dependencies": {
     "@emotion/styled": "^11.14.0",
-    "@kenil_vora/neighborly": "^1.1.7",
+    "@kenil_vora/neighborly": "^1.2.7",
     "@mui/x-date-pickers": "^7.26.0",
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.9",

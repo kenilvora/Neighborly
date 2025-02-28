@@ -452,7 +452,11 @@ export const getItemById = async (
       })
       .populate({
         path: "lenderId",
-        select: "firstName lastName email contactNumber upiId profileImage",
+        select:
+          "firstName lastName email contactNumber upiId profileImage ratingAndReviews",
+        options: {
+          lean: true,
+        },
       })
       .populate({
         path: "borrowers",
@@ -464,7 +468,10 @@ export const getItemById = async (
       })
       .populate({
         path: "ratingAndReviews",
-        select: "rating review",
+        populate: {
+          path: "reviewer",
+          select: "firstName lastName email profileImage",
+        },
         options: {
           sort: { createdAt: -1 },
           limit: 10,
@@ -486,6 +493,18 @@ export const getItemById = async (
       return;
     }
 
+    let userRatings = item.lenderId?.ratingsAndReviews;
+
+    let userAvgRating = 0,
+      userTotalRating = 0;
+
+    if (userRatings && userRatings.length > 0) {
+      userAvgRating = getAvgRating(userRatings);
+      if (item.lenderId) {
+        item.lenderId.ratingsAndReviews = undefined;
+      }
+    }
+
     let updatedItem: IItemWithAvgRating, avgRating: number;
 
     if (item.ratingAndReviews && item.ratingAndReviews.length > 0) {
@@ -497,6 +516,8 @@ export const getItemById = async (
     updatedItem = {
       item: item,
       avgRating: avgRating,
+      lenderAvgRating: userAvgRating,
+      lenderTotalRating: userTotalRating,
     };
 
     res.status(200).json({

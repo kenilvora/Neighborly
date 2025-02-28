@@ -19,12 +19,12 @@ import LendingItemsStats from "./components/core/Dashboard/LendingItemStats/Lend
 import Transactions from "./components/core/Dashboard/Transactions";
 import AddItem from "./components/core/Dashboard/AddItem";
 import Disputes from "./components/core/Dashboard/Disputes";
-import Loader from "./components/common/Loader";
 import Wallet from "./components/core/Dashboard/Wallet";
 import ViewLendItems from "./components/core/Dashboard/LendItems/ViewLendItems";
 import ForgotPasswordToken from "./pages/ForgotPasswordToken";
 import ForgotPassword from "./pages/ForgotPassword";
 import PublicRoute from "./components/common/PublicRoute";
+import Item from "./pages/Item";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -61,6 +61,15 @@ function App() {
             element={
               <PublicRoute>
                 <ViewAllItems />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/item/:id"
+            element={
+              <PublicRoute>
+                <Item />
               </PublicRoute>
             }
           />
@@ -136,8 +145,6 @@ function App() {
 
             <Route path="/dashboard/wallet" element={<Wallet />} />
           </Route>
-
-          <Route path="/load" element={<Loader />} />
 
           <Route path="*" element={<ErrorPage />} />
         </Routes>
