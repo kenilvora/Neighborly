@@ -46,7 +46,7 @@ const ItemCard = (item: IAllItem) => {
           ))}
         </Swiper>
         <div
-          className="absolute top-2 right-2 bg-sky-200 text-blue-700 
+          className="absolute top-2 right-2 bg-sky-200 text-blue-700  z-10
                         bg-opacity-80 py-0.5 px-3 rounded-full hover:bg-sky-300 transition-all duration-200 font-semibold flex items-center"
         >
           {condition}
