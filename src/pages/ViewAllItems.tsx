@@ -127,13 +127,22 @@ const ViewAllItems = () => {
       }
     };
 
+    console.log("Fetching categories");
+    setHasMore(true);
+    setPage(1);
+    setAllItems([]);
     getCategories();
   }, []);
 
   // Fetching items
   const getItems = async () => {
+    console.log("Fetching items");
+    console.log("Has More: ", hasMore);
+    console.log("Is Loading: ", isLoading.getAllItems);
+
     if (!hasMore || isLoading.getAllItems) return;
     try {
+      console.log("Fetching items inside try");
       const res = (await dispatch(
         getAllItems(
           page,
@@ -170,7 +179,7 @@ const ViewAllItems = () => {
   // Fetching items on page changes
   useEffect(() => {
     getItems();
-  }, [page, dispatch]);
+  }, [page, hasMore]);
 
   // Fetching items on filter changes
   useEffect(() => {
@@ -448,7 +457,7 @@ const ViewAllItems = () => {
                   name="deliveryType"
                 />
 
-                <div className="flex flex-col w-sm">
+                <div className="flex flex-col w-full">
                   <input
                     type="text"
                     id="tags"

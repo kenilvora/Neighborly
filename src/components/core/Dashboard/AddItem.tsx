@@ -327,7 +327,6 @@ const AddItem = () => {
               errors={errors.deliveryCharges}
               required={false}
               fullWidth={true}
-              tooltip="Deliverycharge per Kilometer in INR"
             />
 
             <CustomInput

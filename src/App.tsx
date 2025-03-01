@@ -25,6 +25,7 @@ import ForgotPasswordToken from "./pages/ForgotPasswordToken";
 import ForgotPassword from "./pages/ForgotPassword";
 import PublicRoute from "./components/common/PublicRoute";
 import Item from "./pages/Item";
+import RentItem from "./pages/RentItem";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -71,6 +72,15 @@ function App() {
               <PublicRoute>
                 <Item />
               </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/rentItem/:id"
+            element={
+              <PrivateRoute>
+                <RentItem />
+              </PrivateRoute>
             }
           />
 

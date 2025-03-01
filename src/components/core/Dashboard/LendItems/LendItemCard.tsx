@@ -99,7 +99,7 @@ const LendItemCard = ({
             {item.itemLocation?.country}
           </div>
           <div>
-            Delivery Charges: ₹{item.deliveryCharges} / km (within{" "}
+            Delivery Charges: ₹{item.deliveryCharges} (within{" "}
             {item.deliveryRadius} km)
           </div>
         </div>

@@ -1,6 +1,6 @@
 import { IItemWithAvgRating } from "@kenil_vora/neighborly";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getItemById } from "../services/operations/itemAPI";
 import Loader from "../components/common/Loader";
 import { GrLocation } from "react-icons/gr";
@@ -8,15 +8,24 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import "swiper/swiper-bundle.css";
 import RatingReviewCard from "../components/common/RatingReviewCard";
+import { LuTruck, LuUser } from "react-icons/lu";
+import toast from "react-hot-toast";
+import { RootState } from "../reducer/store";
+import { useSelector } from "react-redux";
+import { DateFormatter } from "../utils/DateFormatter";
 
 const Item = () => {
   const [item, setItem] = useState<IItemWithAvgRating>(
     {} as IItemWithAvgRating
   );
 
+  const { user } = useSelector((state: RootState) => state.user);
+
   const [loading, setLoading] = useState(true);
 
   const location = useLocation();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getItem = async () => {
@@ -47,25 +56,25 @@ const Item = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="w-[94%] max-w-[1480px] mx-auto mt-16 h-auto">
+        <div className="w-[94%] max-w-[1480px] mx-auto mt-10 h-auto">
           <div className="flex gap-16">
-            <div className="flex flex-col items-center justify-center w-[35%]">
-              <div className="w-full h-[500px] rounded-xl overflow-hidden bg-gray-200">
+            <div className="flex flex-col justify-center w-[35%]">
+              <div className="w-full h-[500px] rounded-xl overflow-hidden bg-gray-200 p-3 shadow-lg">
                 <img
                   src={item.item.images[currImage]}
                   alt={item.item.name}
                   loading="lazy"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain rounded-xl"
                 />
               </div>
 
               <div
-                className={`mt-5 grid grid-cols-${item.item.images.length} gap-4`}
+                className={`mt-5 flex gap-5 items-center overflow-x-auto pb-3`}
               >
                 {item.item.images.map((image, index) => (
                   <div
                     key={index}
-                    className={`overflow-hidden h-[120px] rounded-md p-2 bg-gray-200 cursor-pointer 
+                    className={`overflow-hidden h-[120px] w-[120px] rounded-md p-2 bg-gray-200 cursor-pointer 
                             ${
                               currImage === index
                                 ? "border-2 border-blue-600"
@@ -125,6 +134,49 @@ const Item = () => {
                   {item.item.depositAmount}
                 </div>
               </div>
+              <div className="flex flex-col gap-2 justify-center mt-4">
+                <div className="text-lg font-semibold">
+                  Supported Delivery Type :
+                </div>
+                {item.item.deliveryType === "Both (Pickup & Delivery)" ? (
+                  <div className="flex items-center w-full gap-4">
+                    <div
+                      className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
+                              hover:bg-neutral-300 hover:text-neutral-600 font-medium text-blue-600 bg-sky-200
+                    `}
+                    >
+                      <LuUser />
+                      <span>Pickup</span>
+                    </div>
+                    <div
+                      className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
+                              hover:bg-neutral-300 hover:text-neutral-600 font-medium text-blue-600 bg-sky-200
+                    `}
+                    >
+                      <LuTruck />
+                      <span>Delivery (+ ₹{item.item.deliveryCharges})</span>
+                    </div>
+                  </div>
+                ) : item.item.deliveryType === "Pickup" ? (
+                  <div
+                    className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
+                                hover:bg-neutral-300 hover:text-neutral-600 font-medium text-blue-600 bg-sky-200
+                      `}
+                  >
+                    <LuUser />
+                    <span>Pickup</span>
+                  </div>
+                ) : (
+                  <div
+                    className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
+                                hover:bg-neutral-300 hover:text-neutral-600 font-medium text-blue-600 bg-sky-200
+                      `}
+                  >
+                    <LuTruck />
+                    <span>Delivery (+ ₹{item.item.deliveryCharges})</span>
+                  </div>
+                )}
+              </div>
               <div
                 className={`
                         ${
@@ -135,7 +187,13 @@ const Item = () => {
                         px-3 py-1 rounded-full font-semibold w-fit mt-5 border
                     `}
               >
-                {item.item.isAvailable ? "Available" : "Not Available"}
+                {item.item.isAvailable
+                  ? `Available From ${DateFormatter(
+                      new Date(item.item.availableFrom)
+                    )}`
+                  : `Not Available ( Available From ${DateFormatter(
+                      new Date(item.item.availableFrom)
+                    )} )`}
               </div>
               <div className="mt-5 flex flex-col justify-center gap-1">
                 <div className="flex items-center gap-2">
@@ -145,10 +203,10 @@ const Item = () => {
                     ? ", " + item.item.itemLocation?.addressLine2
                     : ""}
                 </div>
-                <div className="flex items-center gap-2 ml-6">
-                  <span>{item.item.itemLocation?.country},</span>
+                <div className="flex items-center gap-1 ml-6">
+                  <span>{item.item.itemLocation?.city},</span>
                   <span>{item.item.itemLocation?.state},</span>
-                  <span>{item.item.itemLocation?.city}</span>
+                  <span>{item.item.itemLocation?.country}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2 mt-5">
@@ -169,55 +227,76 @@ const Item = () => {
               </div>
               <button
                 className={`
-                        mt-5 px-5 py-2 rounded-md font-semibold text-white
+                        mt-5 px-5 py-2 rounded-md flex items-center justify-center font-semibold text-white
                         ${
                           item.item.isAvailable
                             ? "bg-[#15a349] hover:bg-[#0e7a2b]"
                             : "bg-gray-400 cursor-not-allowed"
                         }
                     `}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  if (!item.item.isAvailable) {
+                    toast.error("Item is not available for rent");
+                    return;
+                  }
+
+                  if (user && item.item.lenderId?._id === user._id) {
+                    toast.error("You can't rent your own item");
+                    return;
+                  }
+
+                  navigate(`/rentItem/${item.item._id}`);
+                }}
               >
                 Rent Now
               </button>
             </div>
           </div>
 
-          <div className="my-10">
-            <Swiper
-              spaceBetween={15}
-              loop={true}
-              modules={[Navigation, Pagination]}
-              pagination={{ clickable: true }}
-              className="mySwiper w-full"
-              breakpoints={{
-                // when window width is >= 320px
-                320: {
-                  slidesPerView: 1,
-                },
-                // when window width is >= 640px
-                750: {
-                  slidesPerView: 2,
-                },
-                1110: {
-                  slidesPerView: 3,
-                },
-                // you can add more breakpoints here
-              }}
-            >
-              {item.item.ratingAndReviews.map((review, index) => (
-                <SwiperSlide key={index}>
-                  <RatingReviewCard
-                    email={review.reviewer.email}
-                    firstName={review.reviewer.firstName}
-                    image={review.reviewer.profileImage}
-                    lastName={review.reviewer.lastName}
-                    rating={review.rating}
-                    review={review.review}
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
+          {item.item.ratingAndReviews &&
+            item.item.ratingAndReviews.length > 0 && (
+              <div className="my-10 flex flex-col gap-5">
+                <h1 className="text-3xl font-semibold">Ratings & Reviews</h1>
+
+                <Swiper
+                  spaceBetween={15}
+                  loop={true}
+                  modules={[Navigation, Pagination]}
+                  pagination={{ clickable: true }}
+                  className="mySwiper w-full"
+                  breakpoints={{
+                    // when window width is >= 320px
+                    320: {
+                      slidesPerView: 1,
+                    },
+                    // when window width is >= 640px
+                    750: {
+                      slidesPerView: 2,
+                    },
+                    1110: {
+                      slidesPerView: 3,
+                    },
+                    // you can add more breakpoints here
+                  }}
+                >
+                  {item.item.ratingAndReviews.map((review, index) => (
+                    <SwiperSlide key={index}>
+                      <RatingReviewCard
+                        email={review.reviewer.email}
+                        firstName={review.reviewer.firstName}
+                        image={review.reviewer.profileImage}
+                        lastName={review.reviewer.lastName}
+                        rating={review.rating}
+                        review={review.review}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+            )}
         </div>
       )}
     </>

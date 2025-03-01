@@ -74,10 +74,8 @@ const Wallet = () => {
           ₹ {MoneyFormatter(user?.accountBalance || 0)}
           <div className="absolute -top-1 -right-5 text-lg cursor-pointer group">
             <IoInformationCircleOutline />
-            <div className="hidden group-hover:block absolute top-0 min-w-[300px] text-center -right-68 bg-neutral-300 px-5 py-1 rounded-lg shadow-lg">
-              <p className="text-sm">
-                Precise Account Balance : ₹ {user?.accountBalance}
-              </p>
+            <div className="hidden group-hover:flex absolute min-w-[100px] justify-center top-0 text-center bg-neutral-300 px-2 py-1 rounded-lg shadow-lg">
+              <p className="text-sm">₹ {user?.accountBalance}</p>
             </div>
           </div>
         </div>

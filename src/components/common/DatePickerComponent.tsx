@@ -35,6 +35,7 @@ export default function DatePickerComponent({
           }}
           showDaysOutsideCurrentMonth={true}
           label={label}
+          minDate={dayjs()}
         />
       </DemoContainer>
     </LocalizationProvider>

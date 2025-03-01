@@ -103,7 +103,7 @@ export const borrowItem = async (
     }
 
     if (
-      new Date(startDate).toISOString().slice(0, 10) !==
+      new Date(startDate).toISOString().slice(0, 10) <
       new Date(item.availableFrom).toISOString().slice(0, 10)
     ) {
       res.status(400).json({
@@ -249,6 +249,8 @@ export const borrowItem = async (
       paymentStatus = "Paid";
     }
 
+    const dC = deliveryType === "Delivery" ? item.deliveryCharges : 0;
+
     item.isAvailable = false;
 
     item.currentBorrowerId = id;
@@ -273,8 +275,7 @@ export const borrowItem = async (
           paymentMode,
           paymentStatus,
           deliveryType,
-          deliveryCharges:
-            deliveryType === "Delivery" ? deliveryCharges : undefined,
+          deliveryCharges: dC,
           deliveryStatus: deliveryType === "Delivery" ? "Pending" : undefined,
           transactionId: paymentMode === "Online" ? transactionId : undefined,
           type: "Currently Borrowed",
@@ -295,7 +296,7 @@ export const borrowItem = async (
 
       if (itemStat) {
         itemStat.borrowCount += 1;
-        itemStat.totalProfit += item.price;
+        itemStat.totalProfit += totalAmount + deliveryCharges;
         await itemStat.save({ session });
       } else {
         let newItemStat = await ItemStat.create(

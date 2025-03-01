@@ -4,6 +4,7 @@ import { itemEndpoints } from "../apis";
 import { setIsLoading } from "../../slices/itemSlice";
 import { Dispatch } from "redux";
 import {
+  BorrowItemInput,
   IAllItem,
   IBorrowedItemData,
   IItemWithAvgRating,
@@ -221,5 +222,21 @@ export async function getItemById(itemId: string): Promise<IItemWithAvgRating> {
   } finally {
     toast.dismiss(toastId);
     return result;
+  }
+}
+
+export async function borrowItem(itemData: BorrowItemInput): Promise<boolean> {
+  try {
+    const res = await apiConnector("POST", itemEndpoints.BORROW_ITEM, itemData);
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    toast.success("Item Borrowed Successfully");
+    return true;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+    return false;
   }
 }

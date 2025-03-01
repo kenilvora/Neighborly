@@ -11,6 +11,14 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
   const [showMore, setShowMore] = useState(false);
 
+  const totalDays =
+    Math.ceil(
+      Math.abs(
+        new Date(data.endDate).getTime() - new Date(data.startDate).getTime()
+      ) /
+        (1000 * 60 * 60 * 24)
+    ) + 1;
+
   return (
     <div className="bg-neutral-100 shadow-md rounded-xl px-6 py-4 border-2 border-neutral-300 flex flex-col gap-2 h-fit">
       <div className="flex justify-between items-center gap-4">
@@ -20,11 +28,11 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
             Returned
           </div>
         ) : data.paymentStatus === "Pending" ? (
-          <div className="text-xs text-center text-white bg-red-500 font-medium px-3 py-1 rounded-full animate-pulse">
+          <div className="text-xs text-center text-white bg-red-500 font-medium px-3 py-1 rounded-full animate-pulse min-w-fit">
             Payment Pending
           </div>
         ) : (
-          <div className="text-xs text-center text-white bg-neutral-900 px-3 py-1 rounded-full font-medium">
+          <div className="text-xs text-center text-white bg-neutral-900 px-3 py-1 rounded-full font-medium min-w-fit">
             Currently Borrowed
           </div>
         )}
@@ -67,7 +75,7 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
       <div className="flex items-center gap-2">
         <FaRegCalendarAlt className="text-lg" />
         {DateFormatter(new Date(data.startDate))} -{" "}
-        {DateFormatter(new Date(data.endDate))}
+        {DateFormatter(new Date(data.endDate))} = {totalDays} Days
       </div>
       <div className="flex items-center gap-2">
         <LuTruck className="text-lg" />
@@ -130,13 +138,13 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
         <div>
           <span className="font-bold text-sm">Delivery Charges : </span>
           <span className="text-sm text-neutral-700 font-medium">
-            ₹{data.deliveryCharges}.00
+            ₹{data.deliveryCharges || 0}
           </span>
         </div>
         <div>
           <span className="font-bold text-sm">Delivery Status : </span>
           <span className="text-sm text-neutral-700 font-medium">
-            {data.deliveryStatus}
+            {data.deliveryStatus || "N/A"}
           </span>
         </div>
       </div>
