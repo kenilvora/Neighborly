@@ -240,3 +240,34 @@ export async function borrowItem(itemData: BorrowItemInput): Promise<boolean> {
     return false;
   }
 }
+
+export async function updateItem(
+  itemData: FormData,
+  itemId: string
+): Promise<boolean> {
+  const toastId = toast.loading("Updating item...");
+  try {
+    const header = new AxiosHeaders();
+
+    header.set("Content-Type", "multipart/form-data");
+
+    const res = await apiConnector(
+      "PUT",
+      `${itemEndpoints.UPDATE_ITEM}/${itemId}`,
+      itemData,
+      header
+    );
+
+    if (!res.data.success) {
+      throw new Error(res.data.message);
+    }
+
+    toast.success("Item Updated Successfully");
+    return true;
+  } catch (error) {
+    toast.error((error as any).response.data.message);
+    return false;
+  } finally {
+    toast.dismiss(toastId);
+  }
+}

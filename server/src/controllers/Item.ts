@@ -10,13 +10,13 @@ import getAvgRating from "../utils/getAverageRating";
 import {
   addItemSchema,
   updateItemSchema,
-  deleteItemImagesSchema,
   ILendItem,
   IItemWithAvgRating,
   IAllItem,
   IAllItems,
 } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
+import { v2 as cloudinary } from "cloudinary";
 
 export const addItem = async (
   req: AuthRequest,
@@ -740,7 +740,31 @@ export const updateItem = async (
   res: Response
 ): Promise<void> => {
   try {
-    const parsedData = updateItemSchema.safeParse(req.body);
+    const parsedBody = {
+      ...req.body,
+      price: req.body?.price ? parseInt(req.body?.price) : null,
+      depositAmount: req.body?.depositAmount
+        ? parseInt(req.body?.depositAmount)
+        : null,
+      tags: req.body?.tags ? JSON.parse(req.body?.tags) : [],
+      isAvailable: req.body?.isAvailable
+        ? req.body?.isAvailable === "true"
+        : null,
+      deliveryCharges: req.body?.deliveryCharges
+        ? parseInt(req.body?.deliveryCharges)
+        : 0,
+      deliveryRadius: req.body?.deliveryRadius
+        ? parseInt(req.body?.deliveryRadius)
+        : 0,
+      availableFrom: req.body?.availableFrom
+        ? new Date(req.body?.availableFrom)
+        : null,
+      deleteImages: req.body?.deleteImages
+        ? JSON.parse(req.body?.deleteImages)
+        : [],
+    };
+
+    const parsedData = updateItemSchema.safeParse(parsedBody);
     const id = req.user?.id;
     const itemId = req.params.itemId;
 
@@ -762,7 +786,7 @@ export const updateItem = async (
 
     const item = await Item.findById(itemId);
 
-    if (!item || item.lenderId !== id) {
+    if (!item || item.lenderId.toString() !== id.toString()) {
       res.status(404).json({
         success: false,
         message: "Item not found",
@@ -783,7 +807,10 @@ export const updateItem = async (
       deliveryCharges = item.deliveryCharges,
       deliveryType = item.deliveryType,
       deliveryRadius = item.deliveryRadius,
+      deleteImages = [],
     } = parsedData.data;
+
+    const addImages = req.files?.images;
 
     if (!mongoose.Types.ObjectId.isValid(category)) {
       res.status(400).json({
@@ -801,6 +828,30 @@ export const updateItem = async (
       return;
     }
 
+    if (
+      new Date(availableFrom).toISOString().slice(0, 10) <
+      new Date().toISOString().slice(0, 10)
+    ) {
+      res.status(400).json({
+        success: false,
+        message:
+          "Available from date should be greater than or equal to today's date",
+      });
+      return;
+    }
+
+    if (
+      (deliveryType === "Delivery" ||
+        deliveryType === "Both (Pickup & Delivery)") &&
+      ((deliveryCharges || 0) <= 0 || (deliveryRadius || 0) <= 0)
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid delivery charges or delivery radius",
+      });
+      return;
+    }
+
     const existingCategory = await Category.findById(category);
 
     if (!existingCategory) {
@@ -809,6 +860,47 @@ export const updateItem = async (
         message: "Category does not exist",
       });
       return;
+    }
+
+    if (deleteImages) {
+      deleteImages.forEach((image) => {
+        if (!item.images.includes(image)) {
+          res.status(400).json({
+            success: false,
+            message: "Image not found",
+          });
+          return;
+        }
+      });
+
+      const deletePromise = deleteImages.map((image) => {
+        const publicId = image.split("/").slice(7).join("/").split(".")[0];
+        return cloudinary.uploader.destroy(publicId as string, {
+          invalidate: true,
+        });
+      });
+
+      await Promise.all(deletePromise);
+
+      const filteredImages = item.images.filter(
+        (image) => !deleteImages.includes(image)
+      );
+
+      item.images = filteredImages;
+    }
+
+    if (addImages) {
+      const imageArray = Array.isArray(addImages) ? addImages : [addImages];
+
+      const uploadPromise = imageArray.map((image) =>
+        uploadFileToCloudinary(image, process.env.CLOUD_FOLDER_NAME as string)
+      );
+
+      const results = await Promise.all(uploadPromise);
+
+      const fileUrls = results.map((result) => result.secure_url);
+
+      item.images.push(...fileUrls);
     }
 
     if (parsedData.data.category !== item.category) {
@@ -821,18 +913,6 @@ export const updateItem = async (
         $inc: { itemCount: 1 },
         $push: { items: item._id },
       });
-    }
-
-    if (
-      parsedData.data.availableFrom &&
-      new Date(availableFrom).toISOString().slice(0, 10) <
-        new Date().toISOString().slice(0, 10)
-    ) {
-      res.status(400).json({
-        success: false,
-        message: "Available from date should be in the future",
-      });
-      return;
     }
 
     item.name = name;
@@ -855,133 +935,11 @@ export const updateItem = async (
       message: "Item updated successfully",
     });
   } catch (err) {
+    console.log("Error: ", err);
     res.status(500).json({
       success: false,
       message: "Internal server error",
       error: err,
-    });
-  }
-};
-
-export const deleteItemImages = async (
-  req: AuthRequest,
-  res: Response
-): Promise<void> => {
-  try {
-    const itemId = req.params.itemId;
-    const id = req.user?.id;
-
-    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid data",
-      });
-      return;
-    }
-
-    const parsedData = deleteItemImagesSchema.safeParse(req.body);
-
-    if (!parsedData.success) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid data",
-      });
-      return;
-    }
-
-    const item = await Item.findById(itemId);
-
-    if (!item || item.lenderId !== id) {
-      res.status(404).json({
-        success: false,
-        message: "Item not found",
-      });
-      return;
-    }
-
-    const { images } = parsedData.data;
-
-    if (images.length === 0) {
-      res.status(400).json({
-        success: false,
-        message: "No images found",
-      });
-      return;
-    }
-
-    const filteredImages = item.images.filter(
-      (image) => !images.includes(image)
-    );
-
-    item.images = filteredImages;
-
-    await item.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Images deleted successfully",
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-  }
-};
-
-export const addNewImages = async (
-  req: AuthRequest,
-  res: Response
-): Promise<void> => {
-  try {
-    const itemId = req.params.itemId;
-    const id = req.user?.id;
-
-    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid data",
-      });
-      return;
-    }
-
-    const images = req.files?.images;
-
-    if (!images || (Array.isArray(images) && images.length === 0)) {
-      res.status(400).json({
-        success: false,
-        message: "No images found",
-      });
-      return;
-    }
-
-    const imageArray = Array.isArray(images) ? images : [images];
-
-    const uploadPromise = imageArray.map((image) =>
-      uploadFileToCloudinary(image, process.env.CLOUD_FOLDER_NAME as string)
-    );
-
-    const results = await Promise.all(uploadPromise);
-
-    const fileUrls = results.map((result) => result.secure_url);
-
-    await Item.findByIdAndUpdate(itemId, {
-      $push: {
-        images: {
-          $each: fileUrls,
-        },
-      },
-    }),
-      { new: true };
-
-    res.status(200).json({
-      success: true,
-      message: "Images added successfully",
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
     });
   }
 };

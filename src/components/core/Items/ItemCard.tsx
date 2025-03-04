@@ -36,12 +36,14 @@ const ItemCard = (item: IAllItem) => {
         >
           {images.map((image, index) => (
             <SwiperSlide key={index}>
-              <img
-                src={image}
-                alt={name}
-                className="w-full h-60 object-cover object-center"
-                loading="eager"
-              />
+              <div className="overflow-hidden h-64 p-3 w-full bg-gray-200">
+                <img
+                  src={image}
+                  alt={name}
+                  className="w-full h-full object-contain"
+                  loading="eager"
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>

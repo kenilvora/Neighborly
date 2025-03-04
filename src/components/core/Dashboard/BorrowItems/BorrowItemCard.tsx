@@ -53,12 +53,14 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
         >
           {data.item.images.map((image, index) => (
             <SwiperSlide key={index}>
-              <img
-                src={image}
-                alt="item"
-                className="w-full h-60 rounded-lg object-cover object-center"
-                loading="eager"
-              />
+              <div className="overflow-hidden h-64 p-3 w-full bg-gray-200 rounded-lg">
+                <img
+                  src={image}
+                  alt="item"
+                  className="w-full h-full object-contain"
+                  loading="eager"
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>

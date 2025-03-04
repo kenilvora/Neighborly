@@ -5,6 +5,7 @@ import "swiper/swiper-bundle.css";
 import { TiStarFullOutline } from "react-icons/ti";
 import { LuTruck } from "react-icons/lu";
 import { GrLocation } from "react-icons/gr";
+import { NavLink } from "react-router-dom";
 
 const LendItemCard = ({
   item,
@@ -30,12 +31,14 @@ const LendItemCard = ({
         >
           {item.images.map((image, index) => (
             <SwiperSlide key={index}>
-              <img
-                src={image}
-                alt="item"
-                className="w-full aspect-[2/1.4] object-cover object-center"
-                loading="eager"
-              />
+              <div className="overflow-hidden h-64 p-3 w-full bg-gray-200">
+                <img
+                  src={image}
+                  alt="item"
+                  className="w-full h-full object-contain"
+                  loading="eager"
+                />
+              </div>
             </SwiperSlide>
           ))}
         </Swiper>
@@ -99,8 +102,7 @@ const LendItemCard = ({
             {item.itemLocation?.country}
           </div>
           <div>
-            Delivery Charges: ₹{item.deliveryCharges} (within{" "}
-            {item.deliveryRadius} km)
+            Delivery Charges: ₹{item.deliveryCharges} ({item.deliveryRadius} km)
           </div>
         </div>
 
@@ -148,6 +150,14 @@ const LendItemCard = ({
             </div>
           </div>
         )}
+      </div>
+      <div className="px-5 pb-6 flex">
+        <NavLink
+          to={`/dashboard/myItems/update/${item._id}`}
+          className="bg-blue-600 text-white w-full text-center py-2 font-semibold rounded-lg"
+        >
+          Update Item
+        </NavLink>
       </div>
     </div>
   );

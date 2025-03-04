@@ -2,9 +2,7 @@ import express from "express";
 import { auth, isUser } from "../middlewares/Auth";
 import {
   addItem,
-  addNewImages,
   deleteItem,
-  deleteItemImages,
   getAllItems,
   getItemById,
   getItemsOfALender,
@@ -36,12 +34,6 @@ router.get("/getAllItems", getAllItems);
 
 // Update Item Route
 router.put("/update/:itemId", auth, isUser, updateItem);
-
-// Delete Item Image Route
-router.delete("/deleteItemImage/:itemId", auth, isUser, deleteItemImages);
-
-// Add New Images Route
-router.put("/addNewImages/:itemId", auth, isUser, addNewImages);
 
 // Borrow Item Route
 router.post("/borrowItem", auth, isUser, borrowItem);

@@ -7,22 +7,32 @@ import { RxCross2 } from "react-icons/rx";
 const DropZone = ({
   setImages,
   isSubmit,
+  defaultPreviewImages,
+  setDeleteImages,
 }: {
   setImages: React.Dispatch<React.SetStateAction<File[]>>;
   isSubmit?: boolean;
+  defaultPreviewImages?: string[];
+  setDeleteImages?: React.Dispatch<React.SetStateAction<string[]>>;
 }) => {
   const [previewImages, setPreviewImages] = useState<string[]>([]);
 
+  useEffect(() => {
+    if (defaultPreviewImages && defaultPreviewImages.length > 0) {
+      setPreviewImages(defaultPreviewImages);
+    }
+  }, [defaultPreviewImages]);
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      console.log("Accepted Files Length : ", acceptedFiles.length);
-      console.log("Preview Images Length : ", previewImages.length);
-
-      if (acceptedFiles.length + previewImages.length > 5) {
+      if (
+        !defaultPreviewImages &&
+        acceptedFiles.length + previewImages.length > 5
+      ) {
         toast.error("You can only upload 5 images at a time");
         return;
       }
-      console.log(acceptedFiles);
+
       if (acceptedFiles.length > 0) {
         setImages((prev) => [...prev, ...acceptedFiles]);
         const images = acceptedFiles.map((file) => URL.createObjectURL(file));
@@ -44,7 +54,17 @@ const DropZone = ({
     e.preventDefault();
     e.stopPropagation();
 
-    setImages((prev) => prev.filter((_, i) => i !== index));
+    if (
+      defaultPreviewImages &&
+      defaultPreviewImages.length > 0 &&
+      defaultPreviewImages.includes(previewImages[index]) &&
+      setDeleteImages
+    ) {
+      setDeleteImages((prev) => [...prev, previewImages[index]]);
+    } else {
+      setImages((prev) => prev.filter((_, i) => i !== index));
+    }
+
     setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -76,7 +96,7 @@ const DropZone = ({
       </div>
 
       {previewImages && previewImages.length > 0 && (
-        <div className="flex items-center mt-2 gap-2 flex-wrap justify-between">
+        <div className="flex items-center mt-2 gap-10 flex-wrap">
           {previewImages.map((img, i: number) => (
             <div
               className="flex items-center justify-center hover:bg-neutral-100 hover:scale-110 cursor-pointer gap-1 min-w-[160px] relative w-1/6 p-3 rounded-md aspect-square transition-all duration-300 ease-in-out"

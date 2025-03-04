@@ -154,6 +154,25 @@ const RentItem = () => {
                       ( Fully Refundable )
                     </span>
                   </div>
+
+                  <div
+                    className={`
+                        ${
+                          item.item.isAvailable
+                            ? "text-[#15a349] border-[#15a349]"
+                            : "text-red-500 border-red-500"
+                        }
+                        px-3 py-1 rounded-full font-semibold w-fit mt-1 border
+                    `}
+                  >
+                    {item.item.isAvailable
+                      ? `Available From ${DateFormatter(
+                          new Date(item.item.availableFrom)
+                        )}`
+                      : `Not Available ( Available From ${DateFormatter(
+                          new Date(item.item.availableFrom)
+                        )} )`}
+                  </div>
                 </div>
               </div>
 

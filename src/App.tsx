@@ -26,6 +26,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import PublicRoute from "./components/common/PublicRoute";
 import Item from "./pages/Item";
 import RentItem from "./pages/RentItem";
+import UpdateItem from "./pages/UpdateItem";
 
 function App() {
   const [isVisible, setIsVisible] = useState(false);
@@ -152,6 +153,11 @@ function App() {
             <Route path="/dashboard/addItem" element={<AddItem />} />
 
             <Route path="/dashboard/myItems" element={<ViewLendItems />} />
+
+            <Route
+              path="/dashboard/myItems/update/:id"
+              element={<UpdateItem />}
+            />
 
             <Route path="/dashboard/wallet" element={<Wallet />} />
           </Route>

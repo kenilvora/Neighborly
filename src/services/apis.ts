@@ -24,8 +24,6 @@ export const itemEndpoints = {
   GET_ITEM: `${BACKEND_URL}/item/getItem`,
   GET_ALL_ITEMS: `${BACKEND_URL}/item/getAllItems`,
   UPDATE_ITEM: `${BACKEND_URL}/item/update`,
-  DELETE_ITEM_IMAGE: `${BACKEND_URL}/item/deleteItemImage`,
-  ADD_NEW_IMAGES: `${BACKEND_URL}/item/addNewImages`,
   BORROW_ITEM: `${BACKEND_URL}/item/borrowItem`,
   RETURN_ITEM: `${BACKEND_URL}/item/returnItem`,
   PAYMENT_RECEIVED: `${BACKEND_URL}/item/paymentReceived`,
