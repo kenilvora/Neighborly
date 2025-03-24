@@ -183,14 +183,19 @@ const ViewAllItems = () => {
 
   // Fetching items on filter changes
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    async function fetchData() {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+      setAllItems([]);
+      dispatch(setPage(1));
+      dispatch(setHasMore(true));
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      getItems();
     }
-    setAllItems([]);
-    dispatch(setPage(1));
-    dispatch(setHasMore(true));
-    getItems();
+
+    fetchData();
   }, [appliedFilters, searchQuery]);
 
   // Infinite scrolling
@@ -556,7 +561,8 @@ const ViewAllItems = () => {
                 `}
                 ref={loader}
               >
-                {hasMore ? "Loading more items..." : "No more Items"}
+                {!isLoading.getAllItems &&
+                  (hasMore ? "Loading more items..." : "No more Items")}
               </div>
             </div>
           </div>
