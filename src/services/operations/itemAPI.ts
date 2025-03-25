@@ -13,7 +13,6 @@ import { AxiosHeaders } from "axios";
 
 export function getAllItems(
   page: number,
-  makeLoading: boolean = true,
   filter: string = "",
   filterPrice: string = "",
   filterDeposit: string = "",
@@ -29,7 +28,6 @@ export function getAllItems(
 ) {
   return async (dispatch: Dispatch): Promise<IAllItem[]> => {
     let result: IAllItem[] = [];
-    let toastId: string | number = "";
     try {
       const available = isAvailable ? "true" : "false";
       let sortField = "";
@@ -58,9 +56,6 @@ export function getAllItems(
           value: true,
         })
       );
-      if (makeLoading) {
-        toastId = toast.loading("Fetching items...");
-      }
       const response = await apiConnector(
         "GET",
         itemEndpoints.GET_ALL_ITEMS,
@@ -98,9 +93,6 @@ export function getAllItems(
           value: false,
         })
       );
-      if (makeLoading) {
-        toast.dismiss(toastId);
-      }
     }
     return result;
   };

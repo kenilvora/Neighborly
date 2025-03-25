@@ -553,7 +553,7 @@ export const getAllItems = async (
     const isAvailable = req.query.isAvailable as string;
 
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 15;
+    const limit = 15;
 
     if (page < 1 || limit < 1) {
       res.status(400).json({
@@ -605,7 +605,12 @@ export const getAllItems = async (
     }
 
     if (filterDeliveryType) {
-      query.deliveryType = filterDeliveryType;
+      query.deliveryType =
+        filterDeliveryType !== ""
+          ? {
+              $in: [filterDeliveryType, "Both (Pickup & Delivery)"],
+            }
+          : "";
     }
 
     if (filterTags.length > 0) {

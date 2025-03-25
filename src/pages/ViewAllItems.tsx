@@ -44,8 +44,6 @@ const ViewAllItems = () => {
 
   const dispatch = useDispatch();
 
-  const isFirstRender = useRef(true);
-
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [filters, setFilters] = useState({
@@ -86,29 +84,46 @@ const ViewAllItems = () => {
 
   // Fetching states based on selected country
   useEffect(() => {
-    if (country === "" || country === null || country === undefined) {
+    if (country === null || country === undefined) {
       setStateData([]);
       return;
     }
+
     const selectedCountry = countryData.find((c) => c.value === country);
 
     if (selectedCountry) {
+      if (
+        selectedCountry?.children &&
+        selectedCountry.children[0].value !== ""
+      ) {
+        selectedCountry.children.unshift({
+          value: "",
+          label: "All States",
+          children: [{ value: "", label: "All Cities" }],
+        } as State);
+      }
       setStateData(selectedCountry.children);
     }
   }, [country]);
 
   // Fetching cities based on selected state
   useEffect(() => {
-    if (state === "" || state === null || state === undefined) {
+    if (state === null || state === undefined) {
       setCityData([]);
       return;
     }
     const selectedState = stateData.find((s) => s.value === state);
 
     if (selectedState) {
+      if (selectedState?.children && selectedState.children[0].value !== "") {
+        selectedState.children.unshift({
+          value: "",
+          label: "All Cities",
+        } as City);
+      }
       setCityData(selectedState.children);
     }
-  }, [state]);
+  }, [state, stateData]);
 
   // Fetching categories
   useEffect(() => {
@@ -121,32 +136,27 @@ const ViewAllItems = () => {
           label: `${category.name}`,
         }));
 
+        updatedCategories.unshift({
+          value: "",
+          label: "All Categories",
+        });
+
         setCategories(updatedCategories);
       } catch (error) {
         console.error(error);
       }
     };
 
-    console.log("Fetching categories");
-    setHasMore(true);
-    setPage(1);
-    setAllItems([]);
     getCategories();
   }, []);
 
   // Fetching items
   const getItems = async () => {
-    console.log("Fetching items");
-    console.log("Has More: ", hasMore);
-    console.log("Is Loading: ", isLoading.getAllItems);
-
     if (!hasMore || isLoading.getAllItems) return;
     try {
-      console.log("Fetching items inside try");
       const res = (await dispatch(
         getAllItems(
           page,
-          page === 1,
           searchQuery,
           appliedFilters.price.toString(),
           appliedFilters.deposit.toString(),
@@ -184,10 +194,6 @@ const ViewAllItems = () => {
   // Fetching items on filter changes
   useEffect(() => {
     async function fetchData() {
-      if (isFirstRender.current) {
-        isFirstRender.current = false;
-        return;
-      }
       setAllItems([]);
       dispatch(setPage(1));
       dispatch(setHasMore(true));
@@ -230,6 +236,10 @@ const ViewAllItems = () => {
 
   const conditions = [
     {
+      value: "",
+      label: "All Conditions",
+    },
+    {
       value: "New",
       label: "New",
     },
@@ -253,6 +263,10 @@ const ViewAllItems = () => {
 
   const deliveryTypes = [
     {
+      value: "",
+      label: "All Delivery Types",
+    },
+    {
       value: "Pickup",
       label: "Pickup",
     },
@@ -260,13 +274,13 @@ const ViewAllItems = () => {
       value: "Delivery",
       label: "Delivery",
     },
-    {
-      value: "Both (Pickup & Delivery)",
-      label: "Both (Pickup & Delivery)",
-    },
   ];
 
   const sortingOptions = [
+    {
+      value: "",
+      label: "Default",
+    },
     {
       value: "price-asc",
       label: "Price: Low to High",
@@ -349,7 +363,6 @@ const ViewAllItems = () => {
     if (allItems.length === 0) {
       dispatch(setPage(1));
       dispatch(setHasMore(true));
-      getItems();
     }
   };
 
