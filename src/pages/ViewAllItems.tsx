@@ -44,6 +44,8 @@ const ViewAllItems = () => {
 
   const dispatch = useDispatch();
 
+  const isFirstRender = useRef(true);
+
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [filters, setFilters] = useState({
@@ -188,16 +190,23 @@ const ViewAllItems = () => {
 
   // Fetching items on page changes
   useEffect(() => {
+    console.log("Fetching items on page change");
     getItems();
   }, [page, hasMore]);
 
   // Fetching items on filter changes
   useEffect(() => {
     async function fetchData() {
+      if (isFirstRender.current) {
+        isFirstRender.current = false;
+        return;
+      }
+
       setAllItems([]);
       dispatch(setPage(1));
       dispatch(setHasMore(true));
       await new Promise((resolve) => setTimeout(resolve, 1));
+      console.log("Fetching items on filter change");
       getItems();
     }
 
@@ -368,219 +377,216 @@ const ViewAllItems = () => {
 
   return (
     <>
-      {isLoading.getAllItems && page === 1 ? (
-        <Loader />
-      ) : (
-        <>
-          <Helmet>
-            <title>Neighborly</title>
-            <meta
-              name="description"
-              content="Neighborly is a seamless peer-to-peer rental platform that allows users to lend and borrow items effortlessly. From electronics to outdoor gear, Neighborly connects people looking to rent with those who have items to share. Enjoy a secure, community-driven marketplace with transparent reviews, flexible delivery options, and hassle-free transactions."
-            />
+      <Helmet>
+        <title>Neighborly</title>
+        <meta
+          name="description"
+          content="Neighborly is a seamless peer-to-peer rental platform that allows users to lend and borrow items effortlessly. From electronics to outdoor gear, Neighborly connects people looking to rent with those who have items to share. Enjoy a secure, community-driven marketplace with transparent reviews, flexible delivery options, and hassle-free transactions."
+        />
 
-            <meta
-              name="keywords"
-              content="peer-to-peer rental, item lending, borrow items, Neighborly, rent household items, online renting platform, community marketplace, secure rentals, item sharing, local rentals, rental service, borrow and lend platform"
-            />
-          </Helmet>
-          <div
-            className="w-[94%] relative max-w-[1480px] mx-auto my-8 flex gap-9 max-[670px]:flex-col 
+        <meta
+          name="keywords"
+          content="peer-to-peer rental, item lending, borrow items, Neighborly, rent household items, online renting platform, community marketplace, secure rentals, item sharing, local rentals, rental service, borrow and lend platform"
+        />
+      </Helmet>
+      <div
+        className="w-[94%] relative max-w-[1480px] mx-auto my-8 flex gap-9 max-[670px]:flex-col 
         "
-          >
-            <div className="min-[1200px]:w-[30%] min-[670px]:w-[40%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1200px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
-              <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
-                <h1 className="text-2xl font-semibold">Advanced Filters</h1>
+      >
+        <div className="min-[1200px]:w-[30%] min-[670px]:w-[40%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1200px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
+          <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
+            <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
-                <div>
-                  <h1 className="">Price Range: Above ₹ {price}</h1>
-                  <input
-                    type="range"
-                    className="w-full"
-                    min={0}
-                    max={10000}
-                    value={price}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        price: parseInt(e.target.value),
-                      }))
-                    }
-                  />
-                </div>
-
-                <div>
-                  <h1 className="">Deposit Range: Above ₹ {deposit}</h1>
-                  <input
-                    type="range"
-                    className="w-full"
-                    min={0}
-                    max={10000}
-                    value={deposit}
-                    onChange={(e) =>
-                      setFilters((prev) => ({
-                        ...prev,
-                        deposit: parseInt(e.target.value),
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-4 w-full">
-                <CustomDropdown
-                  data={categories}
-                  label="Category"
-                  fn={setFilters}
-                  value={category}
-                  name="category"
-                />
-
-                <CustomDropdown
-                  data={countryData}
-                  label="Country"
-                  fn={setFilters}
-                  value={country}
-                  name="country"
-                />
-
-                <CustomDropdown
-                  data={stateData}
-                  label="State"
-                  fn={setFilters}
-                  value={state}
-                  name="state"
-                />
-
-                <CustomDropdown
-                  data={cityData}
-                  label="City"
-                  fn={setFilters}
-                  value={city}
-                  name="city"
-                />
-
-                <CustomDropdown
-                  data={conditions}
-                  label="Condition"
-                  fn={setFilters}
-                  value={condition}
-                  name="condition"
-                />
-
-                <CustomDropdown
-                  data={deliveryTypes}
-                  label="Delivery Type"
-                  fn={setFilters}
-                  value={deliveryType}
-                  name="deliveryType"
-                />
-
-                <div className="flex flex-col w-full">
-                  <input
-                    type="text"
-                    id="tags"
-                    className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500"
-                    placeholder="Search by Tags..."
-                    onKeyDown={handleKeyDown}
-                  />
-                  {tags && tags.length > 0 && (
-                    <div className="flex items-center mt-2 gap-2 flex-wrap">
-                      {tags.map((tag, i: number) => (
-                        <div
-                          className="flex items-center justify-center gap-1 rounded-full bg-sky-200 w-fit px-3 text-sm text-blue-700 py-0.5"
-                          key={i}
-                        >
-                          {tag}
-                          <RxCross2
-                            className="hover:cursor-pointer"
-                            onClick={(e) => removeTag(e, i)}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2 items-center">
-                  <div className="font-semibold text-lg">
-                    Show only Available Items
-                  </div>
-
-                  <div className="container">
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      id="checkbox"
-                      checked={isAvailable}
-                      onChange={(e) =>
-                        setFilters((prev) => ({
-                          ...prev,
-                          isAvailable: e.target.checked,
-                        }))
-                      }
-                    />
-                    <label className="switch" htmlFor="checkbox">
-                      <span className="isAvailable"></span>
-                    </label>
-                  </div>
-                </div>
-
-                <CustomDropdown
-                  data={sortingOptions}
-                  label="Sort By"
-                  fn={setFilters}
-                  value={filters.sorting}
-                  name="sorting"
-                />
-
-                <div className="w-full flex justify-between items-center">
-                  <button
-                    className="bg-blue-500 text-white px-[0.7rem] 
-                  py-[0.4rem] h-fit rounded-md hover:bg-blue-600 hover:cursor-pointer text-lg"
-                    onClick={(
-                      e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-                    ) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-
-                      setAppliedFilters(filters);
-                    }}
-                  >
-                    Apply
-                  </button>
-                  <button
-                    className="bg-neutral-800 text-white px-[0.7rem] py-[0.4rem] h-fit 
-                  rounded-md hover:bg-neutral-500 hover:cursor-pointer text-lg"
-                    onClick={resetFilters}
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
+            <div>
+              <h1 className="">Price Range: Above ₹ {price}</h1>
+              <input
+                type="range"
+                className="w-full"
+                min={0}
+                max={10000}
+                value={price}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    price: parseInt(e.target.value),
+                  }))
+                }
+              />
             </div>
-            <div className="w-full">
-              {allItems.length > 0 && (
-                <div
-                  className={`w-full grid grid-cols-1 gap-5 min-[1200px]:grid-cols-2 min-[1515px]:grid-cols-3`}
-                >
-                  {allItems.map((item, i) => (
-                    <ItemCard key={i} {...item} />
+
+            <div>
+              <h1 className="">Deposit Range: Above ₹ {deposit}</h1>
+              <input
+                type="range"
+                className="w-full"
+                min={0}
+                max={10000}
+                value={deposit}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    deposit: parseInt(e.target.value),
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-4 w-full">
+            <CustomDropdown
+              data={categories}
+              label="Category"
+              fn={setFilters}
+              value={category}
+              name="category"
+            />
+
+            <CustomDropdown
+              data={countryData}
+              label="Country"
+              fn={setFilters}
+              value={country}
+              name="country"
+            />
+
+            <CustomDropdown
+              data={stateData}
+              label="State"
+              fn={setFilters}
+              value={state}
+              name="state"
+            />
+
+            <CustomDropdown
+              data={cityData}
+              label="City"
+              fn={setFilters}
+              value={city}
+              name="city"
+            />
+
+            <CustomDropdown
+              data={conditions}
+              label="Condition"
+              fn={setFilters}
+              value={condition}
+              name="condition"
+            />
+
+            <CustomDropdown
+              data={deliveryTypes}
+              label="Delivery Type"
+              fn={setFilters}
+              value={deliveryType}
+              name="deliveryType"
+            />
+
+            <div className="flex flex-col w-full">
+              <input
+                type="text"
+                id="tags"
+                className="border border-neutral-300 rounded-md px-3 py-[9px] text-[1rem] outline-blue-500"
+                placeholder="Search by Tags..."
+                onKeyDown={handleKeyDown}
+              />
+              {tags && tags.length > 0 && (
+                <div className="flex items-center mt-2 gap-2 flex-wrap">
+                  {tags.map((tag, i: number) => (
+                    <div
+                      className="flex items-center justify-center gap-1 rounded-full bg-sky-200 w-fit px-3 text-sm text-blue-700 py-0.5"
+                      key={i}
+                    >
+                      {tag}
+                      <RxCross2
+                        className="hover:cursor-pointer"
+                        onClick={(e) => removeTag(e, i)}
+                      />
+                    </div>
                   ))}
                 </div>
               )}
-              <div
-                className={`w-full flex justify-center items-center text-xl font-semibold
-              ${allItems.length === 0 ? "h-full" : "mt-20"}
-                `}
-                ref={loader}
-              >
-                {!isLoading.getAllItems &&
-                  (hasMore ? "Loading more items..." : "No more Items")}
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <div className="font-semibold text-lg">
+                Show only Available Items
+              </div>
+
+              <div className="container">
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  id="checkbox"
+                  checked={isAvailable}
+                  onChange={(e) =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      isAvailable: e.target.checked,
+                    }))
+                  }
+                />
+                <label className="switch" htmlFor="checkbox">
+                  <span className="isAvailable"></span>
+                </label>
               </div>
             </div>
+
+            <CustomDropdown
+              data={sortingOptions}
+              label="Sort By"
+              fn={setFilters}
+              value={filters.sorting}
+              name="sorting"
+            />
+
+            <div className="w-full flex justify-between items-center">
+              <button
+                className="bg-blue-500 text-white px-[0.7rem] 
+                  py-[0.4rem] h-fit rounded-md hover:bg-blue-600 hover:cursor-pointer text-lg"
+                onClick={(
+                  e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+                ) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  setAppliedFilters(filters);
+                }}
+              >
+                Apply
+              </button>
+              <button
+                className="bg-neutral-800 text-white px-[0.7rem] py-[0.4rem] h-fit 
+                  rounded-md hover:bg-neutral-500 hover:cursor-pointer text-lg"
+                onClick={resetFilters}
+              >
+                Reset
+              </button>
+            </div>
           </div>
-        </>
-      )}
+        </div>
+        {isLoading.getAllItems && page === 1 ? (
+          <Loader />
+        ) : (
+          <div className="w-full">
+            {allItems.length > 0 && (
+              <div
+                className={`w-full grid grid-cols-1 gap-5 min-[1200px]:grid-cols-2 min-[1515px]:grid-cols-3`}
+              >
+                {allItems.map((item, i) => (
+                  <ItemCard key={i} {...item} />
+                ))}
+              </div>
+            )}
+            <div
+              className={`w-full flex justify-center items-center text-xl font-semibold
+              ${allItems.length === 0 ? "h-full" : "mt-20"}
+                `}
+              ref={loader}
+            >
+              {hasMore ? "Loading Items..." : "No more Items"}
+            </div>
+          </div>
+        )}
+      </div>
     </>
   );
 };
