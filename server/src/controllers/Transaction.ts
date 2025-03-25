@@ -20,6 +20,11 @@ export const getAllTransactions = async (
       .select("transactions -_id")
       .populate({
         path: "transactions",
+        options: {
+          sort: {
+            createdAt: -1,
+          },
+        },
         populate: [
           {
             path: "payeeId",

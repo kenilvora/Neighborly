@@ -8,10 +8,12 @@ export default function DatePickerComponent({
   date,
   setDate,
   label,
+  minDate,
 }: {
   date: Dayjs;
   setDate: (date: Dayjs) => void;
   label: string;
+  minDate?: Dayjs;
 }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -35,7 +37,7 @@ export default function DatePickerComponent({
           }}
           showDaysOutsideCurrentMonth={true}
           label={label}
-          minDate={dayjs()}
+          minDate={minDate}
         />
       </DemoContainer>
     </LocalizationProvider>

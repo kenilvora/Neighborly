@@ -17,7 +17,7 @@ interface IUser extends mongoose.Document {
   upiId?: string;
   upiIdVerified?: boolean;
   accountBalance: number;
-  notofications: mongoose.Types.ObjectId[];
+  notifications: mongoose.Types.ObjectId[];
   twoFactorAuth?: boolean;
   statisticalData?: mongoose.Types.ObjectId[];
   disputesCreatedByMe?: mongoose.Types.ObjectId[];
@@ -108,7 +108,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    notofications: [
+    notifications: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Notification",

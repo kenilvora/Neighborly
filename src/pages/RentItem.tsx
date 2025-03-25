@@ -1,6 +1,6 @@
 import { BorrowItemInput, IItemWithAvgRating } from "@kenil_vora/neighborly";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { borrowItem, getItemById } from "../services/operations/itemAPI";
 import Loader from "../components/common/Loader";
 import DatePickerComponent from "../components/common/DatePickerComponent";
@@ -72,6 +72,8 @@ const RentItem = () => {
         setDeliveryType(
           response.item.deliveryType === "Delivery" ? "Delivery" : "Pickup"
         );
+        setStartDate(dayjs(response.item.availableFrom));
+        setEndDate(dayjs(response.item.availableFrom));
       } catch (error) {
         console.error(error);
       } finally {
@@ -185,6 +187,7 @@ const RentItem = () => {
                     date={startDate}
                     setDate={setStartDate}
                     label="Start Date"
+                    minDate={dayjs(item.item.availableFrom)}
                   />
                 </div>
 
@@ -196,6 +199,7 @@ const RentItem = () => {
                     date={endDate}
                     setDate={setEndDate}
                     label="End Date"
+                    minDate={dayjs(item.item.availableFrom)}
                   />
                 </div>
               </div>
@@ -413,42 +417,79 @@ const RentItem = () => {
               </div>
 
               {paymentMethod === "Wallet" && (
-                <div
-                  className={`w-full rounded-lg border-2 shadow-lg flex gap-3 h-[50px] items-center overflow-hidden
+                <>
+                  <div
+                    className={`w-full rounded-xl border-2 shadow-lg flex gap-3 min-h-[50px] items-center 
                           ${
                             (user?.accountBalance || 0) >= totalAmount
                               ? "text-[#15a349] border-[#15a349]"
                               : "text-red-500 border-red-500"
                           }
                         `}
-                >
-                  <div
-                    className={`h-full w-2
+                  >
+                    <div
+                      className={`h-full w-2 rounded-l-3xl
                         ${
                           (user?.accountBalance || 0) >= totalAmount
                             ? "bg-[#15a349]"
                             : "bg-red-500"
                         }
                       `}
-                  ></div>
-                  {(user?.accountBalance || 0) < totalAmount ? (
-                    <div className="flex items-center gap-2">
-                      <BiErrorCircle className="text-xl text-red-500" />
-                      <p>
-                        You don't have sufficient balance in your wallet to rent
-                        this item.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <LuCheck className="text-xl text-[#15a349]" />
-                      <p>
-                        You have sufficient balance in your wallet to rent this
-                        item.
-                      </p>
-                    </div>
-                  )}
-                </div>
+                    ></div>
+
+                    <p className="text-lg font-semibold">
+                      Wallet Balance : ₹{user?.accountBalance || 0}
+                    </p>
+                  </div>
+                  <div
+                    className={`w-full rounded-xl border-2 shadow-lg flex gap-3 min-h-[50px] items-center 
+                          ${
+                            (user?.accountBalance || 0) >= totalAmount
+                              ? "text-[#15a349] border-[#15a349]"
+                              : "text-red-500 border-red-500"
+                          }
+                        `}
+                  >
+                    <div
+                      className={`h-full w-2 rounded-l-3xl
+                        ${
+                          (user?.accountBalance || 0) >= totalAmount
+                            ? "bg-[#15a349]"
+                            : "bg-red-500"
+                        }
+                      `}
+                    ></div>
+                    {(user?.accountBalance || 0) < totalAmount ? (
+                      <div className="flex items-center gap-2">
+                        <BiErrorCircle className="text-xl text-red-500" />
+                        <p>
+                          You don't have sufficient balance in your wallet to
+                          rent this item.{" "}
+                          <NavLink
+                            to="/dashboard/wallet"
+                            className="text-blue-600 text-lg font-bold"
+                          >
+                            Add Money
+                          </NavLink>
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2 py-2">
+                        <LuCheck className="text-xl text-[#15a349]" />
+                        <div className="flex flex-col gap-1">
+                          <p>
+                            You have sufficient balance in your wallet to rent
+                            this item.
+                          </p>
+                          <p className="font-bold">
+                            ( Remaining Balance : ₹
+                            {(user?.accountBalance || 0) - totalAmount})
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </div>

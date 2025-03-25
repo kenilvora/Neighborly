@@ -7,6 +7,7 @@ import Loader from "../../common/Loader";
 import { RootState } from "../../../reducer/store";
 import { useSelector } from "react-redux";
 import { DashboardData } from "../../../services/operations/userAPI";
+import { DateFormatter } from "../../../utils/DateFormatter";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState<DashboardData>(
@@ -92,10 +93,10 @@ const Dashboard = () => {
             <div className="w-full overflow-x-auto">
               <div className="flex flex-col min-w-max w-full divide-y divide-neutral-300">
                 <div className="flex w-full px-5 py-3 font-bold">
-                  <span className="w-[30%] min-w-[140px]">Activity</span>
-                  <span className="w-[35%] min-w-[200px]">Item</span>
+                  <span className="w-[20%] min-w-[140px]">Activity</span>
+                  <span className="w-[40%] min-w-[200px]">Item</span>
                   <span className="w-[20%] min-w-[140px]">Status</span>
-                  <span className="w-[15%] min-w-[100px]">Date</span>
+                  <span className="w-[20%] min-w-[100px]">Date</span>
                 </div>
                 <div className="flex flex-col w-full divide-y divide-neutral-300">
                   {!dashboardData.recentActivities ||
@@ -108,17 +109,17 @@ const Dashboard = () => {
                   ) : (
                     dashboardData.recentActivities.map((activity) => (
                       <div key={activity._id} className="flex w-full px-5 py-3">
-                        <span className="w-[30%] min-w-[140px]">
+                        <span className="w-[20%] min-w-[140px]">
                           {activity.type}
                         </span>
-                        <span className="w-[35%] min-w-[200px]">
+                        <span className="w-[40%] min-w-[200px]">
                           {activity.itemID.name}
                         </span>
                         <span className="w-[20%] min-w-[140px]">
                           {activity.status}
                         </span>
-                        <span className="w-[15%] min-w-[100px]">
-                          {new Date(activity.createdAt).toLocaleDateString()}
+                        <span className="w-[20%] min-w-[100px]">
+                          {DateFormatter(new Date(activity.createdAt), true)}
                         </span>
                       </div>
                     ))

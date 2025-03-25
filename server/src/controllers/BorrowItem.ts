@@ -8,6 +8,7 @@ import BorrowItem from "../models/BorrowItem";
 import ItemStat from "../models/ItemStat";
 import { borrowItemSchema, IBorrowedItemData } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
+import Notification from "../models/Notification";
 
 export const borrowItem = async (
   req: AuthRequest,
@@ -243,6 +244,39 @@ export const borrowItem = async (
       borrower.accountBalance -= totalAmount + deliveryCharges;
 
       lender.accountBalance += totalAmount + deliveryCharges;
+
+      const transaction = await Transaction.create(
+        [
+          {
+            payerId: id,
+            payeeId: item.lenderId,
+            borrowItemId: itemId,
+            transactionType: "Borrow Fee",
+            amount: totalAmount + deliveryCharges,
+            paymentId: `Wallet-${new Date().getTime()}`,
+            status: "Completed",
+          },
+        ],
+        { session }
+      );
+
+      const notification = await Notification.create(
+        [
+          {
+            message: `Payment Received Of ₹${
+              totalAmount + deliveryCharges
+            } for borrowing ${item.name}`,
+            recipient: item.lenderId,
+            isRead: false,
+            type: "Transaction",
+          },
+        ],
+        { session }
+      );
+
+      borrower.transactions?.push(transaction[0]._id);
+
+      lender.notifications?.push(notification[0]._id);
 
       await lender.save({ session });
 
@@ -578,10 +612,10 @@ export const getAllBorrowedItems = async (
 ): Promise<void> => {
   try {
     const id = req.user?.id;
-    const type = req.query.type || "CB";
+    const type = req.query.type || "";
     const paymentStatus = req.query.paymentStatus || "";
 
-    if (!id || !type || (type !== "CB" && type !== "PB")) {
+    if (!id || (type !== "CB" && type !== "PB" && type !== "")) {
       res.status(401).json({
         success: false,
         message: "Invalid data",
