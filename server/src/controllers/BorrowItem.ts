@@ -629,10 +629,16 @@ export const getAllBorrowedItems = async (
 ): Promise<void> => {
   try {
     const id = req.user?.id;
-    const type = req.query.type || "";
-    const paymentStatus = req.query.paymentStatus || "";
+    let type = req.query.type || "";
+    let paymentStatus = req.query.paymentStatus || "";
 
-    if (!id || (type !== "CB" && type !== "PB" && type !== "")) {
+    if (
+      !id ||
+      (type !== "CB" && type !== "PB" && type !== "") ||
+      (paymentStatus !== "Paid" &&
+        paymentStatus !== "Pending" &&
+        paymentStatus !== "")
+    ) {
       res.status(401).json({
         success: false,
         message: "Invalid data",
@@ -640,10 +646,23 @@ export const getAllBorrowedItems = async (
       return;
     }
 
+    type =
+      type === "CB"
+        ? "Currently Borrowed"
+        : type === "PB"
+        ? "Previously Borrowed"
+        : "";
+
     const borrowedItems = (await BorrowItem.find({
       borrower: id,
-      type: type === "CB" ? "Currently Borrowed" : "Previously Borrowed",
-      paymentStatus: paymentStatus ? paymentStatus : { $ne: "" },
+      type: {
+        $regex: type,
+        $options: "i",
+      },
+      paymentStatus: {
+        $regex: paymentStatus,
+        $options: "i",
+      },
     })
       .select("-borrower")
       .populate({
