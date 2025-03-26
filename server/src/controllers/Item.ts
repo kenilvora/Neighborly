@@ -834,8 +834,10 @@ export const updateItem = async (
     }
 
     if (
+      isAvailable &&
+      availableFrom &&
       new Date(availableFrom).toISOString().slice(0, 10) <
-      new Date().toISOString().slice(0, 10)
+        new Date().toISOString().slice(0, 10)
     ) {
       res.status(400).json({
         success: false,
@@ -878,11 +880,27 @@ export const updateItem = async (
         }
       });
 
+      if (
+        deleteImages.length === item.images.length &&
+        (!addImages || (Array.isArray(addImages) && addImages.length === 0))
+      ) {
+        res.status(400).json({
+          success: false,
+          message: "At least one image should be present",
+        });
+        return;
+      }
+
       const deletePromise = deleteImages.map((image) => {
         const publicId = image.split("/").slice(7).join("/").split(".")[0];
-        return cloudinary.uploader.destroy(publicId as string, {
-          invalidate: true,
-        });
+        if (publicId) {
+          return cloudinary.uploader.destroy(publicId as string, {
+            invalidate: true,
+          });
+        } else {
+          item.images = item.images.filter((img) => img !== image);
+          return Promise.resolve();
+        }
       });
 
       await Promise.all(deletePromise);

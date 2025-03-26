@@ -201,8 +201,8 @@ const UpdateItem = () => {
         formData.append("images", addImages);
       }
 
-      console.log("Delete Images", deleteImages);
-      console.log("Add Images", addImages);
+      console.log(deleteImages);
+      console.log(addImages);
 
       const response = await updateItem(formData, itemData?._id.toString()!);
 
@@ -212,6 +212,8 @@ const UpdateItem = () => {
     } catch (error) {
       toast.error((error as any).response.data.message);
     } finally {
+      setDeleteImages([]);
+      setAddImages([]);
       setLoading(false);
     }
   };

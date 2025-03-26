@@ -99,13 +99,13 @@ const DropZone = ({
         <div className="flex items-center mt-2 gap-10 flex-wrap">
           {previewImages.map((img, i: number) => (
             <div
-              className="flex items-center justify-center hover:bg-neutral-100 hover:scale-110 cursor-pointer gap-1 min-w-[160px] relative w-1/6 p-3 rounded-md aspect-square transition-all duration-300 ease-in-out"
+              className="flex items-center justify-center hover:bg-neutral-100 hover:scale-110 cursor-pointer overflow-hidden gap-1 min-w-[160px] relative w-1/6 p-3 rounded-md aspect-square transition-all duration-300 ease-in-out"
               key={i}
             >
               <img
                 src={img}
                 alt={`Preview Image ${i + 1}`}
-                className="object-cover rounded-md"
+                className="w-full h-full object-contain"
               />
               <RxCross2
                 className="hover:cursor-pointer absolute top-0 right-0 text-2xl text-neutral-900 font-extrabold"
