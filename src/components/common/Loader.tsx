@@ -1,8 +1,10 @@
-const Loader = () => {
+const Loader = ({ height = "h-[calc(100vh-75px)]" }: { height?: string }) => {
   return (
     <div
       role="status"
-      className="flex items-center justify-center w-full h-[calc(100vh-75px)] overflow-hidden"
+      className={`flex items-center justify-center w-full overflow-hidden
+                ${height}
+        `}
     >
       <svg
         aria-hidden="true"

@@ -11,7 +11,11 @@ import { IoLogOutOutline, IoNotifications } from "react-icons/io5";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { logOut } from "../../services/operations/userAPI";
 
-const Navbar = () => {
+const Navbar = ({
+  setIsNotificationOpen,
+}: {
+  setIsNotificationOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const { token, user } = useSelector((state: RootState) => state.user);
   const { searchQuery } = useSelector((state: RootState) => state.item);
 
@@ -190,13 +194,16 @@ const Navbar = () => {
                     <LuLayoutDashboard className="text-xl" />
                     Dashboard
                   </NavLink>
-                  <NavLink
-                    to={"/notifications"}
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsNotificationOpen(true);
+                    }}
                     className="text-neutral-800 font-medium px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
                   >
                     <IoNotifications className="text-xl" />
                     Notifications
-                  </NavLink>
+                  </button>
                   <button
                     className="text-neutral-800 font-medium cursor-pointer px-2 rounded-md py-2 hover:bg-neutral-200 flex gap-2 items-center w-full"
                     onClick={() => {

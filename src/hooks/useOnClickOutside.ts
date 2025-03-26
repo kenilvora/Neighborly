@@ -6,11 +6,12 @@ export default function useOnClickOutside(
 ) {
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        handler(event);
-      } else {
-        return;
+      
+      if (!ref.current || ref.current.contains(event.target as Node)) {
+        return; // If clicking inside, do nothing
       }
+
+      handler(event); // Trigger the handler for clicks outside
     };
 
     document.addEventListener("mousedown", listener);

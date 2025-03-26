@@ -1234,3 +1234,40 @@ export const getDashboardData = async (
     });
   }
 };
+
+export const getAllNotifications = async (req: AuthRequest, res: Response) => {
+  try {
+    const id = req.user?.id;
+
+    if (!id) {
+      res.status(401).json({
+        success: false,
+        message: "Unauthorized Access",
+      });
+      return;
+    }
+
+    const notifications = await User.findById(id)
+      .select("notifications")
+      .populate({
+        path: "notifications",
+        select: "-recipient",
+        options: {
+          sort: {
+            createdAt: -1,
+          },
+        },
+      });
+
+    res.status(200).json({
+      success: true,
+      notifications: notifications?.notifications,
+    });
+  } catch (error) {
+    console.log("Error : ", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

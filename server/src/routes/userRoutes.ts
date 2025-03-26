@@ -3,6 +3,7 @@ import { auth } from "../middlewares/Auth";
 import {
   changePassword,
   changeTwoFactorAuth,
+  getAllNotifications,
   getDashboardData,
   getMe,
   getStatisticalData,
@@ -60,5 +61,8 @@ router.get("/getStatisticalData", auth, getStatisticalData);
 
 // Get Dashboard Data Route
 router.get("/getDashboardData", auth, getDashboardData);
+
+// Get All Notifications Route
+router.get("/notifications", auth, getAllNotifications);
 
 export default router;

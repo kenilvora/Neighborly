@@ -265,7 +265,9 @@ export const borrowItem = async (
           {
             message: `Payment Received Of ₹${
               totalAmount + deliveryCharges
-            } for borrowing ${item.name}`,
+            } to your wallet for borrowing ${item.name} from ${
+              borrower.firstName
+            } ${borrower.lastName}`,
             recipient: item.lenderId,
             isRead: false,
             type: "Transaction",
@@ -274,7 +276,22 @@ export const borrowItem = async (
         { session }
       );
 
+      const notification2 = await Notification.create(
+        [
+          {
+            message: `Payment Deducted Of ₹${
+              totalAmount + deliveryCharges
+            } from your wallet for borrowing ${item.name}`,
+            recipient: id,
+            isRead: false,
+            type: "Transaction",
+          },
+        ],
+        { session }
+      );
+
       borrower.transactions?.push(transaction[0]._id);
+      borrower.notifications?.push(notification2[0]._id);
 
       lender.notifications?.push(notification[0]._id);
 

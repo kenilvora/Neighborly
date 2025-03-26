@@ -190,7 +190,6 @@ const ViewAllItems = () => {
 
   // Fetching items on page changes
   useEffect(() => {
-    console.log("Fetching items on page change");
     getItems();
   }, [page, hasMore]);
 
