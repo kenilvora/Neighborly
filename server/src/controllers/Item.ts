@@ -17,6 +17,7 @@ import {
 } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
 import { v2 as cloudinary } from "cloudinary";
+import BorrowItem from "../models/BorrowItem";
 
 export const addItem = async (
   req: AuthRequest,
@@ -393,21 +394,34 @@ export const getItemsOfALender = async (
         },
       })) as unknown as IAllItems;
 
-    if (includeBorrowers) {
-      items.lendItems.forEach((item) => {
-        item.lenderId = undefined;
-      });
-    }
-
     let updatedItems: IItemWithAvgRating[] = [];
 
     if (items?.lendItems && items.lendItems.length > 0) {
-      updatedItems = items.lendItems.map((item) => {
-        return {
-          item: item,
-          avgRating: getAvgRating(item.ratingAndReviews),
-        };
-      }) as IItemWithAvgRating[];
+      updatedItems = (await Promise.all(
+        items.lendItems.map(async (item) => {
+          let paymentStatus = "Pending";
+          let paymentMode = "Cash";
+
+          if (item.currentBorrowerId) {
+            // Await inside the map function
+            const borrowItem = await BorrowItem.findOne({
+              item: item._id,
+              borrower: item.currentBorrowerId,
+              isReturned: false,
+            }).sort({ createdAt: -1 });
+
+            paymentMode = borrowItem?.paymentMode || paymentMode;
+            paymentStatus = borrowItem?.paymentStatus || paymentStatus;
+          }
+
+          return {
+            item: item,
+            avgRating: getAvgRating(item.ratingAndReviews),
+            paymentStatus: paymentStatus,
+            paymentMode: paymentMode,
+          };
+        })
+      )) as IItemWithAvgRating[];
     }
 
     if (updatedItems && updatedItems.length === 0) {

@@ -451,11 +451,21 @@ export const returnItem = async (
       });
     }
 
+    const borrower = await User.findById(item.currentBorrowerId);
+
+    if (!borrower) {
+      res.status(404).json({
+        success: false,
+        message: "Borrower not found",
+      });
+      return;
+    }
+
     const borrowItem = await BorrowItem.findOne({
       item: itemId,
       borrower: item.currentBorrowerId,
       lender: id,
-    });
+    }).sort({ createdAt: -1 });
 
     if (!borrowItem) {
       res.status(404).json({
@@ -492,15 +502,15 @@ export const returnItem = async (
     await borrowItem.save();
 
     const recentActivity = await RecentActivity.create({
-      userId: id,
+      userId: borrower._id,
       itemID: itemId,
       type: "Returned",
       status: "Success",
     });
 
-    user.recentActivities?.push(recentActivity._id);
+    borrower.recentActivities?.push(recentActivity._id);
 
-    await user.save();
+    await borrower.save();
 
     res.status(200).json({
       success: true,
@@ -562,7 +572,7 @@ export const paymentReceived = async (
       item: itemId,
       borrower: item.currentBorrowerId,
       lender: id,
-    });
+    }).sort({ createdAt: -1 });
 
     if (!borrowItem) {
       res.status(404).json({

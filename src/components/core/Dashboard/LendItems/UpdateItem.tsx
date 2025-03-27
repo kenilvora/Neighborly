@@ -1,22 +1,25 @@
 import { ILendItem } from "@kenil_vora/neighborly";
 import { useEffect, useState } from "react";
-import { getItemById, updateItem } from "../services/operations/itemAPI";
+import {
+  getItemById,
+  updateItem,
+} from "../../../../services/operations/itemAPI";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { RootState } from "../reducer/store";
+import { RootState } from "../../../../reducer/store";
 import toast from "react-hot-toast";
-import Loader from "../components/common/Loader";
+import Loader from "../../../common/Loader";
 import { useForm } from "react-hook-form";
-import CustomInput from "../components/common/CustomInput";
+import CustomInput from "../../../common/CustomInput";
 import { FaBoxOpen, FaHashtag } from "react-icons/fa6";
 import { HiOutlineCurrencyRupee } from "react-icons/hi";
 import { RxCross2 } from "react-icons/rx";
 import { LuRadius } from "react-icons/lu";
 import dayjs, { Dayjs } from "dayjs";
-import { getAllCategories } from "../services/operations/categoryAPI";
-import CustomDropdown from "../components/common/CustomDropdown";
-import DatePickerComponent from "../components/common/DatePickerComponent";
-import DropZone from "../components/common/DropZone";
+import { getAllCategories } from "../../../../services/operations/categoryAPI";
+import CustomDropdown from "../../../common/CustomDropdown";
+import DatePickerComponent from "../../../common/DatePickerComponent";
+import DropZone from "../../../common/DropZone";
 
 const UpdateItem = () => {
   const [itemData, setItemData] = useState<ILendItem | null>(null);

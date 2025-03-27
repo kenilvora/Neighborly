@@ -9,18 +9,18 @@ const ViewLendItems = () => {
 
   const [items, setItems] = useState<IItemWithAvgRating[]>([]);
 
-  useEffect(() => {
-    const getAllItems = async () => {
-      try {
-        const items = await getItemsOfALender();
-        setItems(items);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const getAllItems = async () => {
+    try {
+      const items = await getItemsOfALender();
+      setItems(items);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     getAllItems();
   }, []);
 
@@ -37,6 +37,10 @@ const ViewLendItems = () => {
                   key={i}
                   item={item.item}
                   avgRating={item.avgRating}
+                  paymentMode={item.paymentMode!}
+                  paymentStatus={item.paymentStatus!}
+                  setLoading={setLoading}
+                  getItems={getAllItems}
                 />
               );
             })}

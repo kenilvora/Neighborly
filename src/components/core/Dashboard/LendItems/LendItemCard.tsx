@@ -6,14 +6,69 @@ import { TiStarFullOutline } from "react-icons/ti";
 import { LuTruck } from "react-icons/lu";
 import { GrLocation } from "react-icons/gr";
 import { NavLink } from "react-router-dom";
+import { apiConnector } from "../../../../services/apiConnector";
+import { itemEndpoints } from "../../../../services/apis";
+import toast from "react-hot-toast";
 
 const LendItemCard = ({
   item,
   avgRating,
+  paymentMode,
+  paymentStatus,
+  setLoading,
+  getItems,
 }: {
   item: ILendItem;
   avgRating: number;
+  paymentMode: "Cash" | "Online" | "Wallet";
+  paymentStatus: "Pending" | "Paid";
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  getItems: () => Promise<void>;
 }) => {
+  const handlePaymentReceived = async () => {
+    try {
+      setLoading(true);
+
+      const res = await apiConnector(
+        "PUT",
+        `${itemEndpoints.PAYMENT_RECEIVED}/${item._id}`
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success("Payment Marked as Received");
+      getItems();
+    } catch (error) {
+      toast.error("Error in marking payment as received");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleItemReceivedBack = async () => {
+    try {
+      setLoading(true);
+
+      const res = await apiConnector(
+        "PUT",
+        `${itemEndpoints.RETURN_ITEM}/${item._id}`
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success("Item Marked as Received Back");
+      getItems();
+    } catch (error) {
+      toast.error("Error in marking item as received back");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white shadow-lg flex flex-col rounded-xl overflow-hidden h-fit">
       <div className="relative">
@@ -151,13 +206,43 @@ const LendItemCard = ({
           </div>
         )}
       </div>
-      <div className="px-5 pb-6 flex">
-        <NavLink
-          to={`/dashboard/myItems/update/${item._id}`}
-          className="bg-blue-600 text-white w-full text-center py-2 font-semibold rounded-lg"
-        >
-          Update Item
-        </NavLink>
+      <div className="flex flex-col gap-4 pb-6">
+        <div className="px-5 flex">
+          <NavLink
+            to={`/dashboard/myItems/update/${item._id}`}
+            className="bg-blue-600 text-white w-full text-center py-2 font-semibold rounded-lg"
+          >
+            Update Item
+          </NavLink>
+        </div>
+        {item.currentBorrowerId && (
+          <>
+            {paymentMode === "Cash" && paymentStatus === "Pending" && (
+              <div className="px-5 flex">
+                <button
+                  className="bg-blue-600 text-white w-full text-center py-2 font-semibold rounded-lg"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.preventDefault();
+                    handlePaymentReceived();
+                  }}
+                >
+                  Payment Received
+                </button>
+              </div>
+            )}
+            <div className="px-5 flex">
+              <button
+                className="bg-blue-600 text-white w-full text-center py-2 font-semibold rounded-lg"
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.preventDefault();
+                  handleItemReceivedBack();
+                }}
+              >
+                Item Received Back
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

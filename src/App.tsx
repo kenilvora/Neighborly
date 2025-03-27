@@ -26,7 +26,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import PublicRoute from "./components/common/PublicRoute";
 import Item from "./pages/Item";
 import RentItem from "./pages/RentItem";
-import UpdateItem from "./pages/UpdateItem";
+import UpdateItem from "./components/core/Dashboard/LendItems/UpdateItem";
 import useOnClickOutside from "./hooks/useOnClickOutside";
 import { apiConnector } from "./services/apiConnector";
 import { userEndpoints } from "./services/apis";

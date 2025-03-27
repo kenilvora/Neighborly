@@ -238,11 +238,6 @@ const Item = () => {
                   e.preventDefault();
                   e.stopPropagation();
 
-                  if (!item.item.isAvailable) {
-                    toast.error("Item is not available for rent");
-                    return;
-                  }
-
                   if (user && item.item.lenderId?._id === user._id) {
                     toast.error("You can't rent your own item");
                     return;
@@ -250,6 +245,7 @@ const Item = () => {
 
                   navigate(`/rentItem/${item.item._id}`);
                 }}
+                disabled={!item.item.isAvailable}
               >
                 Rent Now
               </button>
