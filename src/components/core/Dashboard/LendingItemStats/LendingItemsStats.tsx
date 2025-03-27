@@ -136,7 +136,7 @@ const LendingItemsStats = () => {
         <div className="flex flex-col gap-5 mt-5">
           <div className="flex flex-col gap-3 py-4 px-6 rounded-xl border-2 border-neutral-300 shadow-xl">
             <div className="flex justify-between items-center gap-4">
-              <h1 className="text-2xl font-bold">Category Wise Stats</h1>
+              <h1 className="text-2xl font-bold max-[700px]:text-lg max-[500px]:text-sm">Category Wise Stats</h1>
 
               <div className="min-w-[200px]">
                 <CustomDropdown
@@ -153,7 +153,7 @@ const LendingItemsStats = () => {
 
           <div className="flex flex-col gap-3 py-4 px-6 rounded-xl border-2 border-neutral-300 shadow-xl">
             <div className="flex justify-between items-center gap-4">
-              <h1 className="text-2xl font-bold">Item Wise Stats</h1>
+              <h1 className="text-2xl font-bold max-[700px]:text-lg max-[500px]:text-sm">Item Wise Stats</h1>
               <div className="min-w-[200px]">
                 <CustomDropdown
                   data={barChartOptions}

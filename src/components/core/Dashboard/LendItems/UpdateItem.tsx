@@ -232,9 +232,7 @@ const UpdateItem = () => {
               <h1>Item not found</h1>
             </div>
           ) : (
-            <div className="flex flex-col gap-10 min-h-[calc(100vh-8rem)] w-full">
-              <div className="text-3xl font-semibold">Update Rental Item</div>
-
+            <div className="flex flex-col gap-10 min-h-[calc(100vh-8rem)] w-full mt-10">
               <div className="flex flex-col gap-4 rounded-lg border border-neutral-300 p-6 shadow-lg">
                 <h2 className="text-2xl font-semibold">Basic Information</h2>
                 <p className="text-neutral-500">
@@ -274,7 +272,7 @@ const UpdateItem = () => {
                     </div>
                   </div>
 
-                  <div className="w-full flex gap-5 justify-between items-center">
+                  <div className="w-full flex gap-5 justify-between items-center max-[700px]:flex-col">
                     <CustomInput
                       type="number"
                       label={true}

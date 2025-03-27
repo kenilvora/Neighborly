@@ -101,7 +101,7 @@ const BorrowItemCard = ({
       <div className="text-neutral-600 line-clamp-2">
         {data.item.description}
       </div>
-      <div className="flex justify-between items-center gap-4">
+      <div className="flex justify-between items-center gap-4 max-[450px]:flex-col max-[450px]:items-start max-[450px]:gap-2">
         <div className="font-semibold text-lg">₹{data.item.price}.00 / Day</div>
         <div className="text-neutral-600">
           Deposit : ₹{data.item.depositAmount}.00

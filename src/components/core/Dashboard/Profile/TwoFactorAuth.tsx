@@ -20,10 +20,10 @@ const TwoFactorAuth = () => {
       className="flex flex-col gap-3 px-7 py-5 rounded-lg shadow-md border 
                     border-neutral-300"
     >
-      <div className="text-2xl font-semibold">Two Factor Authentication</div>
+      <div className="text-2xl font-semibold max-[500px]:text-xl">Two Factor Authentication</div>
 
       <form className="flex items-center gap-3 w-full">
-        <div className="container">
+        <div className="container max-[500px]:mt-1">
           <input
             type="checkbox"
             className="checkbox"
@@ -46,7 +46,7 @@ const TwoFactorAuth = () => {
           </label>
         </div>
         <label htmlFor="twoFactorAuth">
-          <span className="text-xl max-[450px]:text-base font-semibold">
+          <span className="text-xl max-[450px]:text-sm font-semibold">
             {twoFactorAuth ? "Disable" : "Enable"} Two Factor Authentication
           </span>
         </label>

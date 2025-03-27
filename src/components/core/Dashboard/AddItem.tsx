@@ -215,7 +215,7 @@ const AddItem = () => {
               )}
             </div>
 
-            <div className="flex gap-4 justify-between items-center w-full">
+            <div className="flex gap-4 justify-between items-center w-full max-[700px]:flex-col">
               <CustomInput
                 icon={HiOutlineCurrencyRupee}
                 id="price"

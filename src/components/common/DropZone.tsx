@@ -26,10 +26,9 @@ const DropZone = ({
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (
-        !defaultPreviewImages &&
         acceptedFiles.length + previewImages.length > 5
       ) {
-        toast.error("You can only upload 5 images at a time");
+        toast.error("You can only upload 5 images per item");
         return;
       }
 
@@ -96,7 +95,7 @@ const DropZone = ({
       </div>
 
       {previewImages && previewImages.length > 0 && (
-        <div className="flex items-center mt-2 gap-10 flex-wrap">
+        <div className="flex items-center mt-2 gap-10 flex-wrap justify-between">
           {previewImages.map((img, i: number) => (
             <div
               className="flex items-center justify-center hover:bg-neutral-100 hover:scale-110 cursor-pointer overflow-hidden gap-1 min-w-[160px] relative w-1/6 p-3 rounded-md aspect-square transition-all duration-300 ease-in-out"

@@ -115,18 +115,18 @@ const RentItem = () => {
       ) : (
         <div className="bg-neutral-100 w-full min-h-[calc(100vh-74.8px)] py-10">
           <div
-            className="flex justify-between gap-10 w-[94%] max-w-[1480px] mx-auto h-auto"
+            className="flex justify-between gap-10 w-[89%] max-w-[1480px] mx-auto h-auto max-[1100px]:flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-[50%] p-7 rounded-lg shadow-lg bg-neutral-50 flex flex-col gap-5">
+            <div className="w-[50%] p-7 max-[700px]:p-4 rounded-lg shadow-lg bg-neutral-50 flex flex-col gap-5 max-[1100px]:w-full">
               <h1 className="text-3xl font-semibold">Rent {item.item.name}</h1>
 
               <p className="text-lg text-neutral-700">
                 {item.item.description}
               </p>
 
-              <div className="flex gap-4 bg-sky-100 rounded-lg p-5">
-                <div className="w-[150px] h-[150px] rounded-lg overflow-hidden shadow-lg bg-white">
+              <div className="flex gap-4 bg-sky-100 rounded-lg p-5 max-[700px]:flex-col">
+                <div className="w-[150px] aspect-square max-[700px]:w-full rounded-lg overflow-hidden shadow-lg bg-gray-100 p-3">
                   <img
                     src={item.item.images[0]}
                     alt={item.item.name}
@@ -135,19 +135,19 @@ const RentItem = () => {
                   />
                 </div>
 
-                <div className="flex flex-col">
-                  <div className="text-xl font-semibold">{item.item.name}</div>
+                <div className="flex flex-col max-[700px]:gap-1">
+                  <div className="text-xl font-semibold max-[700px]:text-3xl max-[550px]:text-2xl">{item.item.name}</div>
 
-                  <div className="text-lg text-neutral-700 capitalize">
+                  <div className="text-lg text-neutral-700 capitalize max-[700px]:text-xl max-[550px]:text-lg">
                     {item.item.category.name}
                   </div>
 
-                  <div className="text-lg">
+                  <div className="text-lg max-[700px]:text-xl max-[550px]:text-lg">
                     <span className="font-semibold">₹{item.item.price}</span>{" "}
                     <span className="text-neutral-700">/ Day</span>
                   </div>
 
-                  <div className="text-lg">
+                  <div className="text-lg max-[700px]:text-xl max-[550px]:text-lg">
                     Deposit Amount :{" "}
                     <span className="font-semibold">
                       ₹{item.item.depositAmount}
@@ -164,7 +164,7 @@ const RentItem = () => {
                             ? "text-[#15a349] border-[#15a349]"
                             : "text-red-500 border-red-500"
                         }
-                        px-3 py-1 rounded-full font-semibold w-fit mt-1 border
+                        px-3 py-1 rounded-full font-semibold w-fit mt-1 border max-[450px]:text-sm
                     `}
                   >
                     {item.item.isAvailable
@@ -178,7 +178,7 @@ const RentItem = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center gap-5">
+              <div className="flex justify-between items-center gap-5 max-[550px]:flex-col max-[550px]:items-start">
                 <div className="flex flex-col gap-2 justify-center">
                   <label className="text-lg font-semibold" htmlFor="startDate">
                     Start Date
@@ -212,111 +212,79 @@ const RentItem = () => {
                   Payment Method :{" "}
                 </label>
                 <div className="flex items-center gap-4">
-                  <div
-                    className="flex items-center gap-2 w-fit px-3 py-2 border border-gray-300 rounded-lg 
-                              hover:bg-gray-100 cursor-pointer"
+                  <button
+                    className={`flex items-center gap-2 w-fit px-3 py-2 rounded-lg 
+                              hover:bg-gray-100 cursor-pointer hover:border hover:border-gray-300
+                              ${
+                                paymentMethod === "Cash"
+                                  ? "bg-sky-200 text-blue-600"
+                                  : "text-neutral-500 border border-gray-300"
+                              }
+                              `}
+                    onClick={() => setPaymentMethod("Cash")}
                   >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      id="cash"
-                      value={"Cash"}
-                      className="cursor-pointer"
-                      onChange={() => setPaymentMethod("Cash")}
-                    />
-                    <label htmlFor="cash" className="cursor-pointer">
-                      Cash
-                    </label>
-                  </div>
-                  <div
-                    className="flex items-center gap-2 w-fit px-3 py-2 border border-gray-300 rounded-lg 
-                              hover:bg-gray-100 cursor-pointer"
+                    Cash
+                  </button>
+                  <button
+                    className={`flex items-center gap-2 w-fit px-3 py-2 rounded-lg 
+                              hover:bg-gray-100 cursor-pointer hover:border hover:border-gray-300
+                              ${
+                                paymentMethod === "Wallet"
+                                  ? "bg-sky-200 text-blue-600"
+                                  : "text-neutral-500 border border-gray-300"
+                              }
+                              `}
+                    onClick={() => setPaymentMethod("Wallet")}
                   >
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      id="wallet"
-                      value={"Wallet"}
-                      className="cursor-pointer"
-                      onChange={() => setPaymentMethod("Wallet")}
-                    />
-                    <label htmlFor="wallet" className="cursor-pointer">
-                      Wallet
-                    </label>
-                  </div>
+                    Wallet
+                  </button>
                 </div>
               </div>
 
               <div className="flex flex-col justify-center gap-2">
                 <label className="text-lg font-semibold">Delivery Type :</label>
-                {item.item.deliveryType === "Both (Pickup & Delivery)" ? (
-                  <div className="flex items-center w-full gap-4">
-                    <div
+
+                <div className="flex items-center gap-5 max-[450px]:flex-col max-[450px]:items-start max-[450px]:gap-3">
+                  {(item.item.deliveryType === "Pickup" ||
+                    item.item.deliveryType === "Both (Pickup & Delivery)") && (
+                    <button
                       className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
-                                hover:bg-neutral-300 hover:text-neutral-600 font-medium
+                                hover:bg-neutral-100 font-medium hover:border hover:border-gray-300
                       ${
                         deliveryType === "Pickup"
                           ? "text-blue-600 bg-sky-200"
-                          : ""
+                          : "text-neutral-500 border border-gray-300"
                       }
                     `}
                       onClick={() => setDeliveryType("Pickup")}
                     >
                       <LuUser />
                       <span>Pickup</span>
-                    </div>
-                    <div
+                    </button>
+                  )}
+
+                  {(item.item.deliveryType === "Delivery" ||
+                    item.item.deliveryType === "Both (Pickup & Delivery)") && (
+                    <button
                       className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
-                                hover:bg-neutral-300 hover:text-neutral-600 font-medium
-                      ${
-                        deliveryType === "Delivery"
-                          ? "text-blue-600 bg-sky-200"
-                          : ""
-                      }
+                                hover:bg-neutral-100 font-medium hover:border hover:border-gray-300
+                                ${
+                                  deliveryType === "Delivery"
+                                    ? "text-blue-600 bg-sky-200"
+                                    : "text-neutral-500 border border-gray-300"
+                                }
                     `}
                       onClick={() => setDeliveryType("Delivery")}
                     >
                       <LuTruck />
                       <span>Delivery (+ ₹{item.item.deliveryCharges})</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    {item.item.deliveryType === "Pickup" ? (
-                      <div
-                        className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
-                                hover:bg-neutral-300 hover:text-neutral-600 font-medium
-                      ${
-                        deliveryType === "Pickup"
-                          ? "text-blue-600 bg-sky-200"
-                          : ""
-                      }
-                    `}
-                      >
-                        <LuUser />
-                        <span>Pickup</span>
-                      </div>
-                    ) : (
-                      <div
-                        className={`flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg w-fit 
-                                hover:bg-neutral-300 hover:text-neutral-600 font-medium
-                      ${
-                        deliveryType === "Delivery"
-                          ? "text-blue-600 bg-sky-200"
-                          : ""
-                      }
-                    `}
-                      >
-                        <LuTruck />
-                        <span>Delivery (+ ₹{item.item.deliveryCharges})</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="w-[50%] flex flex-col gap-5 justify-between">
+            <div className="w-[50%] flex flex-col gap-5 justify-between max-[1100px]:w-full">
               <div className="w-full p-7 rounded-lg shadow-lg bg-neutral-50 flex flex-col gap-5 h-fit">
                 <div>
                   <h2 className="text-2xl font-semibold">Rental Summary</h2>
@@ -467,7 +435,7 @@ const RentItem = () => {
                           rent this item.{" "}
                           <NavLink
                             to="/dashboard/wallet"
-                            className="text-blue-600 text-lg font-bold"
+                            className="text-blue-600 text-lg font-bold underline"
                           >
                             Add Money
                           </NavLink>

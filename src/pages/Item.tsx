@@ -56,10 +56,10 @@ const Item = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="w-[94%] max-w-[1480px] mx-auto mt-10 h-auto">
-          <div className="flex gap-16">
-            <div className="flex flex-col justify-center w-[35%]">
-              <div className="w-full h-[500px] rounded-xl overflow-hidden bg-gray-200 p-3 shadow-lg">
+        <div className="w-[89%] max-w-[1480px] mx-auto mt-10 h-auto">
+          <div className="flex gap-16 max-[1130px]:flex-col max-[1300px]:gap-10">
+            <div className="flex flex-col justify-center w-[35%] min-w-[540px] max-[1130px]:w-full max-[600px]:min-w-[90%]">
+              <div className="w-full aspect-square max-h-[500px] min-h-[300px] rounded-xl overflow-hidden bg-gray-200 p-3 shadow-lg">
                 <img
                   src={item.item.images[currImage]}
                   alt={item.item.name}
@@ -69,12 +69,12 @@ const Item = () => {
               </div>
 
               <div
-                className={`mt-5 flex gap-5 items-center overflow-x-auto pb-3`}
+                className={`mt-5 flex gap-5 items-center overflow-x-auto pb-5`}
               >
                 {item.item.images.map((image, index) => (
                   <div
                     key={index}
-                    className={`overflow-hidden h-[120px] w-[120px] rounded-md p-2 bg-gray-200 cursor-pointer 
+                    className={`overflow-hidden flex items-center justify-center aspect-square min-w-[120px] max-[600px]:min-w-[100px] max-w-[120px] rounded-md p-2 bg-gray-200 cursor-pointer
                             ${
                               currImage === index
                                 ? "border-2 border-blue-600"
@@ -95,7 +95,7 @@ const Item = () => {
               </div>
             </div>
 
-            <div className="flex flex-col w-[64%]">
+            <div className="flex flex-col w-[64%] max-[1130px]:w-full">
               <h1 className="text-4xl font-semibold">{item.item.name}</h1>
               <div className="flex items-center gap-2 mt-2">
                 {item.item.tags.map((tag, index) => (
@@ -124,7 +124,7 @@ const Item = () => {
               >
                 {item.item.condition}
               </div>
-              <div className="flex items-center mt-4 justify-between">
+              <div className="flex items-center mt-4 justify-between max-[1300px]:flex-col max-[1300px]:items-start max-[1300px]:gap-2">
                 <div className="text-xl font-semibold">
                   ₹{item.item.price} / Day
                 </div>
@@ -154,7 +154,10 @@ const Item = () => {
                     `}
                     >
                       <LuTruck />
-                      <span>Delivery (+ ₹{item.item.deliveryCharges})</span>
+                      <div className="flex items-center gap-2 max-[370px]:flex-col max-[370px]:gap-0 max-[370px]:items-start">
+                        <span>Delivery</span>
+                        <span>(+ ₹{item.item.deliveryCharges})</span>
+                      </div>
                     </div>
                   </div>
                 ) : item.item.deliveryType === "Pickup" ? (

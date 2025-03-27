@@ -23,11 +23,17 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
     <div
       className={`bg-white px-3 max-[600px]:px-2 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
                 ${
-                  isSidebarOpen ? "min-w-[260px]" : "min-w-[60px]"
-                } transition-all duration-[800ms] ease-in-out
+                  isSidebarOpen
+                    ? "min-w-[260px]"
+                    : "min-w-[60px] max-[800px]:min-w-0 max-[800px]:max-w-0 max-[800px]:px-0 max-[600px]:px-0"
+                } transition-all duration-[800ms] ease-in-out max-[800px]:absolute h-full z-[100]
         `}
     >
-      <div className="text-xl font-bold flex items-center pl-0.5 w-full relative">
+      <div
+        className={`text-xl font-bold flex items-center pl-0.5 w-full relative transition-all duration-[800ms] ease-in-out
+        ${!isSidebarOpen ? "max-[800px]:w-0" : ""}
+        `}
+      >
         <div
           className={` transition-all duration-[800ms] ease-in-out absolute
             ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}
@@ -38,13 +44,23 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         </div>
         <div
           className={`text-black hover:cursor-pointer hover:bg-neutral-200 rounded-sm p-1.5 relative transition-all duration-[800ms] 
-            ease-in-out ml-auto`}
+            ease-in-out ml-auto 
+              ${!isSidebarOpen ? "max-[800px]:p-0" : ""}
+            `}
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           {isSidebarOpen ? (
-            <LuChevronLeft size={24} />
+            <LuChevronLeft
+              className={`w-6 h-6 transition-all duration-[800ms] ease-in-out
+                ${!isSidebarOpen ? "max-[800px]:w-0" : ""}
+              `}
+            />
           ) : (
-            <LuChevronRight size={24} />
+            <LuChevronRight
+              className={`w-6 h-6 transition-all duration-[800ms] ease-in-out
+              ${!isSidebarOpen ? "max-[800px]:w-0" : ""}
+            `}
+            />
           )}
         </div>
       </div>
@@ -56,11 +72,20 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
             key={link.id}
             title={link.name}
             className={`flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
-                      px-2 py-2 rounded-lg min-w-[40px]
-                        ${currentPage?.id === link.id ? "bg-neutral-200" : ""}
+                      px-2 py-2 rounded-lg min-w-[40px] transition-all duration-[800ms] ease-in-out
+                      ${
+                        !isSidebarOpen
+                          ? "max-[800px]:min-w-0 max-[800px]:max-w-0 max-[800px]:px-0"
+                          : ""
+                      }
+                      ${currentPage?.id === link.id ? "bg-neutral-200" : ""}
                       `}
           >
-            <link.icon size={24} />
+            <link.icon
+              className={`w-6 h-6 transition-all duration-[800ms] ease-in-out
+                ${!isSidebarOpen ? "max-[800px]:w-0" : ""}
+              `}
+            />
             <span
               className={`absolute left-10 whitespace-nowrap overflow-hidden transition-all duration-[800ms] ease-in-out
                           ${
@@ -76,13 +101,19 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
         ))}
         <button
           title={"Logout"}
-          className="flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
-                    px-2 py-2 rounded-lg"
+          className={`flex items-center relative gap-4 text-neutral-600 hover:text-neutral-900 hover:cursor-pointer hover:bg-neutral-200 
+                    px-2 py-2 rounded-lg transition-all duration-[800ms] ease-in-out min-w-[40px]
+                      ${!isSidebarOpen ? "max-[800px]:px-0 max-[800px]:min-w-0 max-[800px]:max-w-0" : ""}
+                    `}
           onClick={() => {
             dispatch(logOut(navigate) as any);
           }}
         >
-          <LuLogOut size={24} />
+          <LuLogOut
+            className={`w-6 h-6 transition-all duration-[800ms] ease-in-out
+                ${!isSidebarOpen ? "max-[800px]:w-0" : ""}
+              `}
+          />
           <span
             className={`absolute left-10 whitespace-nowrap overflow-hidden transition-all duration-[800ms] ease-in-out
                           ${

@@ -94,9 +94,9 @@ const Dashboard = () => {
               <div className="flex flex-col min-w-max w-full divide-y divide-neutral-300">
                 <div className="flex w-full px-5 py-3 font-bold">
                   <span className="w-[20%] min-w-[140px]">Activity</span>
-                  <span className="w-[40%] min-w-[200px]">Item</span>
+                  <span className="w-[35%] min-w-[200px]">Item</span>
                   <span className="w-[20%] min-w-[140px]">Status</span>
-                  <span className="w-[20%] min-w-[100px]">Date</span>
+                  <span className="w-[25%] min-w-[100px]">Date</span>
                 </div>
                 <div className="flex flex-col w-full divide-y divide-neutral-300">
                   {!dashboardData.recentActivities ||
@@ -112,13 +112,13 @@ const Dashboard = () => {
                         <span className="w-[20%] min-w-[140px]">
                           {activity.type}
                         </span>
-                        <span className="w-[40%] min-w-[200px]">
+                        <span className="w-[35%] min-w-[200px]">
                           {activity.itemID.name}
                         </span>
                         <span className="w-[20%] min-w-[140px]">
                           {activity.status}
                         </span>
-                        <span className="w-[20%] min-w-[100px]">
+                        <span className="w-[25%] min-w-[100px]">
                           {DateFormatter(new Date(activity.createdAt), true)}
                         </span>
                       </div>

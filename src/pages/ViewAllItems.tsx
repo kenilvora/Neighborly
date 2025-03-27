@@ -389,10 +389,10 @@ const ViewAllItems = () => {
         />
       </Helmet>
       <div
-        className="w-[94%] relative max-w-[1480px] mx-auto my-8 flex gap-9 max-[670px]:flex-col 
+        className="w-[89%] relative max-w-[1480px] mx-auto my-8 flex gap-9 max-[670px]:flex-col 
         "
       >
-        <div className="min-[1200px]:w-[30%] min-[670px]:w-[40%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1200px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
+        <div className="min-[1130px]:w-[40%] min-[670px]:w-[70%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1130px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
           <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
             <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
@@ -568,7 +568,7 @@ const ViewAllItems = () => {
           <div className="w-full">
             {allItems.length > 0 && (
               <div
-                className={`w-full grid grid-cols-1 gap-5 min-[1200px]:grid-cols-2 min-[1515px]:grid-cols-3`}
+                className={`w-full grid grid-cols-1 gap-5 min-[1130px]:grid-cols-2 min-[1515px]:grid-cols-3`}
               >
                 {allItems.map((item, i) => (
                   <ItemCard key={i} {...item} />

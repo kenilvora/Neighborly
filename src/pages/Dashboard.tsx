@@ -6,6 +6,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { SidebarLink } from "../data/SidebarLink";
 import { Helmet } from "react-helmet-async";
+import { IoIosMenu } from "react-icons/io";
 
 const Dashboard = () => {
   const userLoading = useSelector((state: RootState) => state.user.isLoading);
@@ -72,7 +73,18 @@ const Dashboard = () => {
                 } transition-all duration-300 ease-in-out mx-auto
               `}
               >
-                <h1 className="text-3xl font-semibold">{currentPage?.name}</h1>
+                <div className="flex items-center gap-5">
+                  <IoIosMenu
+                    className={`text-neutral-700 w-10 h-10 hover:cursor-pointer hover:bg-neutral-200 rounded-lg p-1 
+                     border-2 ${
+                       isSidebarOpen ? "hidden" : "hidden max-[800px]:block"
+                     }`}
+                    onClick={() => setIsSidebarOpen(true)}
+                  />
+                  <h1 className="text-3xl font-semibold max-[500px]:text-2xl">
+                    {currentPage?.name}
+                  </h1>
+                </div>
 
                 <Outlet />
               </div>
