@@ -28,6 +28,7 @@ export const itemEndpoints = {
   BORROW_ITEM: `${BACKEND_URL}/item/borrowItem`,
   RETURN_ITEM: `${BACKEND_URL}/item/returnItem`,
   PAYMENT_RECEIVED: `${BACKEND_URL}/item/paymentReceived`,
+  ITEM_DELIVERED: `${BACKEND_URL}/item/itemDelivered`,
   GET_ALL_BORROWED_ITEMS: `${BACKEND_URL}/item/getAllBorrowedItems`,
 };
 

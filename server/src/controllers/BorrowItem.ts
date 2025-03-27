@@ -711,3 +711,98 @@ export const getAllBorrowedItems = async (
     });
   }
 };
+
+export const itemDelivered = async (
+  req: AuthRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const id = req.user?.id;
+    const itemId = req.params.itemId;
+
+    if (!id || !itemId || !mongoose.Types.ObjectId.isValid(itemId)) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid data",
+      });
+      return;
+    }
+
+    const item = await Item.findById(itemId);
+
+    if (!item) {
+      res.status(404).json({
+        success: false,
+        message: "Item not found",
+      });
+      return;
+    }
+
+    if (item.isAvailable) {
+      res.status(400).json({
+        success: false,
+        message: "Item is not borrowed by anyone",
+      });
+      return;
+    }
+
+    if (item.currentBorrowerId?.toString() !== id.toString()) {
+      res.status(400).json({
+        success: false,
+        message: "You are not the borrower of this item",
+      });
+      return;
+    }
+
+    const borrowItem = await BorrowItem.findOne({
+      item: itemId,
+      borrower: id,
+      lender: item.lenderId,
+    }).sort({ createdAt: -1 });
+
+    if (!borrowItem) {
+      res.status(404).json({
+        success: false,
+        message: "Borrow item not found",
+      });
+      return;
+    }
+
+    if (borrowItem.isReturned) {
+      res.status(400).json({
+        success: false,
+        message: "Item is already returned",
+      });
+    }
+
+    if (borrowItem.paymentStatus === "Pending") {
+      res.status(400).json({
+        success: false,
+        message: "Payment is pending",
+      });
+      return;
+    }
+
+    if (borrowItem.deliveryType === "Pickup") {
+      res.status(400).json({
+        success: false,
+        message: "Delivery is not available for this item",
+      });
+      return;
+    }
+
+    borrowItem.deliveryStatus = "Delivered";
+
+    await borrowItem.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Item delivery received successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

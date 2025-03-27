@@ -29,7 +29,7 @@ const ViewLendItems = () => {
       {loading ? (
         <Loader />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
           {items &&
             items.map((item, i) => {
               return (
@@ -41,6 +41,8 @@ const ViewLendItems = () => {
                   paymentStatus={item.paymentStatus!}
                   setLoading={setLoading}
                   getItems={getAllItems}
+                  deliveryType={item.deliveryType!}
+                  deliveryStatus={item.deliveryStatus!}
                 />
               );
             })}

@@ -11,7 +11,7 @@ interface IBorrowItem extends mongoose.Document {
   paymentStatus: "Pending" | "Paid";
   deliveryType: "Pickup" | "Delivery";
   deliveryCharges?: number;
-  deliveryStatus?: "Pending" | "Accepted" | "Rejected";
+  deliveryStatus?: "Pending" | "Delivered" | "Rejected";
   transactionId?: mongoose.Types.ObjectId;
   isReturned: boolean;
   type?: "Currently Borrowed" | "Previously Borrowed";
@@ -68,7 +68,7 @@ const borrowItemSchema = new mongoose.Schema(
     },
     deliveryStatus: {
       type: String,
-      enum: ["Pending", "Accepted", "Rejected"],
+      enum: ["Pending", "Delivered", "Rejected"],
       required: function (this: IBorrowItem) {
         return this.deliveryType === "Delivery";
       },

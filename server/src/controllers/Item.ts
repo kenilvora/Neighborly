@@ -320,17 +320,10 @@ export const getItemsOfALender = async (
   res: Response
 ): Promise<void> => {
   try {
-    let includeBorrowers = false;
-    let id;
+    let includeBorrowers = true;
+    let id = req.user?.id;
 
-    if (req.query && req.query.userId) {
-      id = req.query.userId;
-    } else {
-      id = req.user?.id;
-      includeBorrowers = true;
-    }
-
-    if (!id || !mongoose.Types.ObjectId.isValid(id as string)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id.toString())) {
       res.status(400).json({
         success: false,
         message: "Invalid data",
@@ -349,7 +342,7 @@ export const getItemsOfALender = async (
     }
 
     const page = parseInt(req.query.page as string);
-    const limit = parseInt(req.query.limit as string) || 15;
+    const limit = 15;
 
     const populateFields: any[] = [
       {
@@ -401,6 +394,8 @@ export const getItemsOfALender = async (
         items.lendItems.map(async (item) => {
           let paymentStatus = "Pending";
           let paymentMode = "Cash";
+          let deliveryStatus = "Pending";
+          let deliveryType = "Pickup";
 
           if (item.currentBorrowerId) {
             // Await inside the map function
@@ -412,6 +407,8 @@ export const getItemsOfALender = async (
 
             paymentMode = borrowItem?.paymentMode || paymentMode;
             paymentStatus = borrowItem?.paymentStatus || paymentStatus;
+            deliveryStatus = borrowItem?.deliveryStatus || deliveryStatus;
+            deliveryType = borrowItem?.deliveryType || deliveryType;
           }
 
           return {
@@ -419,6 +416,8 @@ export const getItemsOfALender = async (
             avgRating: getAvgRating(item.ratingAndReviews),
             paymentStatus: paymentStatus,
             paymentMode: paymentMode,
+            deliveryStatus: deliveryStatus,
+            deliveryType: deliveryType,
           };
         })
       )) as IItemWithAvgRating[];

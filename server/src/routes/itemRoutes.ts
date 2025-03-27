@@ -11,6 +11,7 @@ import {
 import {
   borrowItem,
   getAllBorrowedItems,
+  itemDelivered,
   paymentReceived,
   returnItem,
 } from "../controllers/BorrowItem";
@@ -43,6 +44,9 @@ router.put("/returnItem/:itemId", auth, isUser, returnItem);
 
 // Payment Received Route
 router.put("/paymentReceived/:itemId", auth, isUser, paymentReceived);
+
+// Mark Item Delivered Successfully Route
+router.put("/itemDelivered/:itemId", auth, isUser, itemDelivered);
 
 // Get All Borrowed Items Route
 router.get("/getAllBorrowedItems", auth, isUser, getAllBorrowedItems);

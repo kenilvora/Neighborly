@@ -7,8 +7,19 @@ import { GrLocation } from "react-icons/gr";
 import { useState } from "react";
 import { DateFormatter } from "../../../../utils/DateFormatter";
 import { FaRegCalendarAlt } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { itemEndpoints } from "../../../../services/apis";
+import { apiConnector } from "../../../../services/apiConnector";
 
-const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
+const BorrowItemCard = ({
+  data,
+  setLoading,
+  fetchBorrowedItems,
+}: {
+  data: IBorrowedItemData;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  fetchBorrowedItems: () => Promise<void>;
+}) => {
   const [showMore, setShowMore] = useState(false);
 
   const totalDays =
@@ -18,6 +29,28 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
       ) /
         (1000 * 60 * 60 * 24)
     ) + 1;
+
+  const handleItemDelivered = async () => {
+    try {
+      setLoading(true);
+
+      const res = await apiConnector(
+        "PUT",
+        `${itemEndpoints.ITEM_DELIVERED}/${data.item._id}`
+      );
+
+      if (!res.data.success) {
+        throw new Error(res.data.message);
+      }
+
+      toast.success("Item Marked as Delivered");
+      fetchBorrowedItems();
+    } catch (error) {
+      toast.error("Error in marking item as delivered");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-neutral-100 shadow-md rounded-xl px-6 py-4 border-2 border-neutral-300 flex flex-col gap-2 h-fit">
@@ -106,6 +139,18 @@ const BorrowItemCard = ({ data }: { data: IBorrowedItemData }) => {
           <div className="text-neutral-600">{data.lender.email}</div>
         </div>
       </div>
+      {data.deliveryType === "Delivery" &&
+        data.deliveryStatus === "Pending" && (
+          <button
+            className="bg-blue-600 text-white rounded-lg py-3 font-semibold cursor-pointer my-2 text-lg"
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+              e.preventDefault();
+              handleItemDelivered();
+            }}
+          >
+            Item Delivered from {data.lender.firstName} {data.lender.lastName}
+          </button>
+        )}
       <button
         onClick={() => setShowMore(!showMore)}
         className="border-2 border-neutral-300 rounded-lg cursor-pointer py-2 text-neutral-600 font-semibold"

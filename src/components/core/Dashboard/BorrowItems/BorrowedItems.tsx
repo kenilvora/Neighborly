@@ -9,21 +9,21 @@ const BorrowedItems = () => {
 
   const [loading, setLoading] = useState(true);
 
+  const fetchBorrowedItems = async () => {
+    try {
+      setLoading(true);
+
+      const res = await getAllBorrowedItems();
+
+      setBorrowedItems(res);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchBorrowedItems = async () => {
-      try {
-        setLoading(true);
-
-        const res = await getAllBorrowedItems();
-
-        setBorrowedItems(res);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBorrowedItems();
   }, []);
 
@@ -40,7 +40,12 @@ const BorrowedItems = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
               {borrowedItems.map((item, index) => (
-                <BorrowItemCard key={index} data={item} />
+                <BorrowItemCard
+                  key={index}
+                  data={item}
+                  setLoading={setLoading}
+                  fetchBorrowedItems={fetchBorrowedItems}
+                />
               ))}
             </div>
           )}

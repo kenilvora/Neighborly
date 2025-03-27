@@ -17,6 +17,8 @@ const LendItemCard = ({
   paymentStatus,
   setLoading,
   getItems,
+  deliveryType,
+  deliveryStatus,
 }: {
   item: ILendItem;
   avgRating: number;
@@ -24,6 +26,8 @@ const LendItemCard = ({
   paymentStatus: "Pending" | "Paid";
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   getItems: () => Promise<void>;
+  deliveryType: "Pickup" | "Delivery";
+  deliveryStatus: "Pending" | "Delivered" | "Rejected";
 }) => {
   const handlePaymentReceived = async () => {
     try {
@@ -186,7 +190,31 @@ const LendItemCard = ({
 
         {item.currentBorrowerId && (
           <div className="flex flex-col gap-2 px-5 pt-2">
-            <div className="text-lg font-semibold">Current Borrower</div>
+            <div className="flex items-center gap-3 justify-between">
+              <div className="text-lg font-semibold">Current Borrower</div>
+
+              {deliveryType === "Delivery" && (
+                <div
+                  className={`text-white text-sm px-3 font-semibold py-1 rounded-full animate-pulse
+                  ${
+                    deliveryStatus === "Pending"
+                      ? "bg-red-500"
+                      : deliveryStatus === "Delivered"
+                      ? "bg-green-600"
+                      : "bg-yellow-600"
+                  }
+                `}
+                >
+                  {
+                    {
+                      Pending: "Delivery Pending",
+                      Delivered: "Item Delivered",
+                      Rejected: "Delivery Rejected",
+                    }[deliveryStatus]
+                  }
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               <img
                 src={item.currentBorrowerId.profileImage}
