@@ -21,11 +21,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
 
   return (
     <div
-      className={`bg-white px-3 max-[600px]:px-2 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
+      className={`bg-white px-3 py-3 border-r border-neutral-200 flex flex-col gap-5 overflow-y-auto overflow-x-hidden
                 ${
                   isSidebarOpen
                     ? "min-w-[260px]"
-                    : "min-w-[60px] max-[800px]:min-w-0 max-[800px]:max-w-0 max-[800px]:px-0 max-[600px]:px-0"
+                    : "min-w-[60px] max-[800px]:min-w-0 max-[800px]:max-w-0 max-[800px]:px-0"
                 } transition-all duration-[800ms] ease-in-out max-[800px]:absolute h-full z-[100]
         `}
     >

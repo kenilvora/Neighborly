@@ -28,6 +28,10 @@ export interface RecentActivity {
     description: string;
     price: number;
   };
+  lenderId: {
+    firstName: string;
+    lastName: string;
+  }
   type: string;
   status: string;
   createdAt: Date;

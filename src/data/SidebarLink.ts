@@ -5,7 +5,7 @@ import {
   LuCirclePlus,
   LuCreditCard,
   LuLayoutDashboard,
-  LuShieldAlert,
+  // LuShieldAlert,
   LuStar,
   LuUserCog,
   LuWallet,
@@ -48,12 +48,12 @@ export const SidebarLink = [
     path: "/dashboard/transactions",
     icon: LuCreditCard,
   },
-  {
-    id: 7,
-    name: "Disputes & Resolutions",
-    path: "/dashboard/disputes",
-    icon: LuShieldAlert,
-  },
+  // {
+  //   id: 7,
+  //   name: "Disputes & Resolutions",
+  //   path: "/dashboard/disputes",
+  //   icon: LuShieldAlert,
+  // },
   {
     id: 8,
     name: "Add New Item",

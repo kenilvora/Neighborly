@@ -94,7 +94,7 @@ const Dashboard = () => {
               <div className="flex flex-col min-w-max w-full divide-y divide-neutral-300">
                 <div className="flex w-full px-5 py-3 font-bold">
                   <span className="w-[20%] min-w-[140px]">Activity</span>
-                  <span className="w-[35%] min-w-[200px]">Item</span>
+                  <span className="w-[35%] min-w-[200px]">Item / User</span>
                   <span className="w-[20%] min-w-[140px]">Status</span>
                   <span className="w-[25%] min-w-[100px]">Date</span>
                 </div>
@@ -113,7 +113,9 @@ const Dashboard = () => {
                           {activity.type}
                         </span>
                         <span className="w-[35%] min-w-[200px]">
-                          {activity.itemID.name}
+                          {activity.itemID?.name ||
+                            activity.lenderId.firstName + " " +
+                              activity.lenderId.lastName}
                         </span>
                         <span className="w-[20%] min-w-[140px]">
                           {activity.status}

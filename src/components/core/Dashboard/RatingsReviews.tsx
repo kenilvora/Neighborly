@@ -32,7 +32,7 @@ const RatingsReviews = () => {
 
   const [userReviews, setUserReviews] =
     useState<IRatingsAndReviewsOfUserInDetail>(
-      {} as IRatingsAndReviewsOfUserInDetail
+      null as unknown as IRatingsAndReviewsOfUserInDetail
     );
 
   const [itemReviews, setItemReviews] = useState<
@@ -58,7 +58,12 @@ const RatingsReviews = () => {
       try {
         setLoading(true);
         if (filter.option === "User") {
-          if (!userReviews) {
+          if (
+            !userReviews ||
+            userReviews === null ||
+            userReviews === undefined
+          ) {
+            console.log("Fetching user reviews");
             const res = await getRatingAndReviewsOfUser();
             setUserReviews(res);
           }
@@ -126,8 +131,9 @@ const RatingsReviews = () => {
           </div>
           {filter.option === "User" ? (
             <div className="flex flex-col gap-5">
-              {!userReviews.userReviews ||
-              userReviews.userReviews.length === 0 ? (
+              {!userReviews ||
+              !userReviews.ratingAndReviews ||
+              userReviews.ratingAndReviews.length === 0 ? (
                 <div className="flex items-center justify-center">
                   <h1 className="text-lg font-semibold">No Reviews Found</h1>
                 </div>
@@ -153,7 +159,7 @@ const RatingsReviews = () => {
                     // you can add more breakpoints here
                   }}
                 >
-                  {userReviews.userReviews.map((review, index) => (
+                  {userReviews.ratingAndReviews.map((review, index) => (
                     <SwiperSlide key={index}>
                       <RatingReviewCard
                         email={review.reviewer.email}

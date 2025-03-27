@@ -3,7 +3,7 @@ import { RootState } from "../reducer/store";
 import Loader from "../components/common/Loader";
 import Sidebar from "../components/core/Dashboard/Sidebar";
 import { Outlet, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SidebarLink } from "../data/SidebarLink";
 import { Helmet } from "react-helmet-async";
 import { IoIosMenu } from "react-icons/io";
@@ -14,7 +14,7 @@ const Dashboard = () => {
 
   const { otpType } = useSelector((state: RootState) => state.user);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const location = useLocation();
 
@@ -31,6 +31,12 @@ const Dashboard = () => {
   } else {
     currentPage = SidebarLink.find((link) => link.path === location.pathname);
   }
+
+  useEffect(() => {
+    if (window.innerWidth > 800) {
+      setIsSidebarOpen(true);
+    }
+  }, [window.window.innerWidth]);
 
   return (
     <>

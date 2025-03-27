@@ -10,6 +10,7 @@ import {
   IRatingsAndReviewsOfUserInDetail,
 } from "@kenil_vora/neighborly";
 import RecentActivity from "../models/RecentActivity";
+import Notification from "../models/Notification";
 
 export const createRatingAndReview = async (
   req: AuthRequest,
@@ -28,12 +29,22 @@ export const createRatingAndReview = async (
       return;
     }
 
-    const { rating, review, toWhom, type } = parsedData.data;
+    const { review, toWhom, type } = parsedData.data;
+
+    const rating = parseFloat(req.body.rating);
 
     if (!mongoose.Types.ObjectId.isValid(toWhom.toString())) {
       res.status(400).json({
         success: false,
         message: "Invalid toWhom",
+      });
+      return;
+    }
+
+    if (!rating || rating < 0 || rating > 5) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid rating",
       });
       return;
     }
@@ -103,7 +114,7 @@ export const createRatingAndReview = async (
     if (existingReview) {
       res.status(400).json({
         success: false,
-        message: "You have already reviewed this",
+        message: "You have already reviewed this user/item",
       });
       return;
     }
@@ -119,7 +130,8 @@ export const createRatingAndReview = async (
     const recentActivity1 = await RecentActivity.create({
       userId: id,
       itemID: toWhomItem ? toWhomItem._id : null,
-      type: "Review Created",
+      lenderId: toWhomUser ? toWhomUser._id : null,
+      type: `Review Created For ${type === "User" ? "Lender" : "Item"}`,
       status: `${rating}⭐`,
     });
 
@@ -127,21 +139,23 @@ export const createRatingAndReview = async (
 
     await user.save();
 
-    const recentActivity2 = await RecentActivity.create({
-      userId: toWhom,
-      itemID: toWhomItem ? toWhomItem._id : null,
-      type: "Review Given To Me",
-      status: `${rating}⭐`,
+    const notification = await Notification.create({
+      message: `${user.firstName} ${user.lastName} has reviewed ${
+        type === "User" ? "you" : "your Item " + toWhomItem?.name
+      } with ${rating}⭐`,
+      recipient: type === "User" ? toWhom : toWhomItem?.lenderId,
+      isRead: false,
+      type: "System",
     });
 
     if (type === "User") {
       toWhomUser?.ratingAndReviews.push(newRatingAndReview._id);
-      toWhomUser?.recentActivities?.push(recentActivity2._id);
+      toWhomUser?.notifications.push(notification._id);
       await toWhomUser?.save();
     } else {
       toWhomItem?.ratingAndReviews.push(newRatingAndReview._id);
       const toWhomUser = await User.findById(toWhomItem?.lenderId);
-      toWhomUser?.recentActivities?.push(recentActivity2._id);
+      toWhomUser?.notifications.push(notification._id);
       await toWhomUser?.save();
       await toWhomItem?.save();
     }
@@ -151,6 +165,7 @@ export const createRatingAndReview = async (
       message: "Review created successfully",
     });
   } catch (error) {
+    console.log("Error : ", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -222,6 +237,9 @@ export const getRatingAndReviewsOfAUser = async (
       },
       {
         $group: {
+          _id: {
+            userId: "$_id",
+          },
           fistName: { $first: "$firstName" },
           lastName: { $first: "$lastName" },
           ratingAndReviews: {

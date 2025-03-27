@@ -1210,6 +1210,10 @@ export const getDashboardData = async (
         path: "itemID",
         select: "name description price",
       })
+      .populate({
+        path: "lenderId",
+        select: "firstName lastName",
+      })
       .sort({
         createdAt: -1,
       });

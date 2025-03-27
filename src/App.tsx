@@ -18,7 +18,6 @@ import BorrowedItems from "./components/core/Dashboard/BorrowItems/BorrowedItems
 import LendingItemsStats from "./components/core/Dashboard/LendingItemStats/LendingItemsStats";
 import Transactions from "./components/core/Dashboard/Transactions";
 import AddItem from "./components/core/Dashboard/AddItem";
-import Disputes from "./components/core/Dashboard/Disputes";
 import Wallet from "./components/core/Dashboard/Wallet";
 import ViewLendItems from "./components/core/Dashboard/LendItems/ViewLendItems";
 import ForgotPasswordToken from "./pages/ForgotPasswordToken";
@@ -213,8 +212,6 @@ function App() {
             />
 
             <Route path="/dashboard/transactions" element={<Transactions />} />
-
-            <Route path="/dashboard/disputes" element={<Disputes />} />
 
             <Route path="/dashboard/addItem" element={<AddItem />} />
 
