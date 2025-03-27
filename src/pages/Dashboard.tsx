@@ -17,9 +17,19 @@ const Dashboard = () => {
 
   const location = useLocation();
 
-  const currentPage = SidebarLink.find(
-    (link) => link.path === location.pathname
-  );
+  let currentPage;
+
+  if (
+    location.pathname.split("/")[3] &&
+    location.pathname.split("/")[3] === "update"
+  ) {
+    currentPage = {
+      id: "update",
+      name: "Update Item",
+    };
+  } else {
+    currentPage = SidebarLink.find((link) => link.path === location.pathname);
+  }
 
   return (
     <>
