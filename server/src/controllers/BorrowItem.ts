@@ -501,6 +501,31 @@ export const returnItem = async (
 
     await borrowItem.save();
 
+    user.accountBalance -= item.depositAmount;
+    borrower.accountBalance += item.depositAmount;
+
+    const transaction = await Transaction.create({
+      payerId: user._id,
+      payeeId: borrower._id,
+      borrowItemId: item._id,
+      transactionType: "Refund",
+      amount: item.depositAmount,
+      paymentId: `Refund-${Date.now() * (Math.random() + 1)}`,
+      status: "Completed",
+    });
+
+    user.transactions?.push(transaction._id);
+
+    const notification = await Notification.create({
+      message: `
+        Refund of ₹${item.depositAmount} for ${item.name} has been received from ${user.firstName} ${user.lastName}`,
+      recipient: borrower._id,
+      isRead: false,
+      type: "Transaction",
+    });
+
+    borrower.notifications?.push(notification._id);
+
     const recentActivity = await RecentActivity.create({
       userId: borrower._id,
       itemID: itemId,
@@ -510,6 +535,7 @@ export const returnItem = async (
 
     borrower.recentActivities?.push(recentActivity._id);
 
+    await user.save();
     await borrower.save();
 
     res.status(200).json({

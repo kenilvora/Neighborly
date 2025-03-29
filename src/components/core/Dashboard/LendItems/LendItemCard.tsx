@@ -5,10 +5,12 @@ import "swiper/swiper-bundle.css";
 import { TiStarFullOutline } from "react-icons/ti";
 import { LuTruck } from "react-icons/lu";
 import { GrLocation } from "react-icons/gr";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { apiConnector } from "../../../../services/apiConnector";
 import { itemEndpoints } from "../../../../services/apis";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../reducer/store";
 
 const LendItemCard = ({
   item,
@@ -29,6 +31,10 @@ const LendItemCard = ({
   deliveryType: "Pickup" | "Delivery";
   deliveryStatus: "Pending" | "Delivered" | "Rejected";
 }) => {
+  const { user } = useSelector((state: RootState) => state.user);
+
+  const navigate = useNavigate();
+
   const handlePaymentReceived = async () => {
     try {
       setLoading(true);
@@ -55,6 +61,14 @@ const LendItemCard = ({
     try {
       setLoading(true);
 
+      if ((user?.accountBalance ?? 0) < item.depositAmount) {
+        toast.error("Insufficient balance to refund deposit amount");
+        toast.error("Please add money to your wallet first");
+        navigate("/dashboard/wallet");
+        setLoading(false);
+        return;
+      }
+
       const res = await apiConnector(
         "PUT",
         `${itemEndpoints.RETURN_ITEM}/${item._id}`
@@ -65,6 +79,9 @@ const LendItemCard = ({
       }
 
       toast.success("Item Marked as Received Back");
+      toast.success(
+        `Deposit Amount of ₹${item.depositAmount} Refunded from Wallet to ${item.currentBorrowerId?.firstName} ${item.currentBorrowerId?.lastName}`
+      );
       getItems();
     } catch (error) {
       toast.error("Error in marking item as received back");
