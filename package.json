@@ -15,9 +15,9 @@
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@kenil_vora/neighborly": "^1.4.2",
-    "@mui/material": "^7.0.0",
+    "@mui/material": "^7.3.4",
     "@mui/x-date-pickers": "^7.28.0",
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.9",

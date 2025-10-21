@@ -63,7 +63,6 @@ const RatingsReviews = () => {
             userReviews === null ||
             userReviews === undefined
           ) {
-            console.log("Fetching user reviews");
             const res = await getRatingAndReviewsOfUser();
             setUserReviews(res);
           }

@@ -551,8 +551,39 @@ export const getAllItems = async (
 ): Promise<void> => {
   try {
     const filter = (req.query.filter as string) || "";
-    const filterPrice = parseInt(req.query.filterPrice as string) || 0;
-    const filterDeposit = parseInt(req.query.filterDeposit as string) || 0;
+
+    let filterPriceLow = 0;
+    let filterPriceHigh = 0;
+    if (req.query.filterPrice) {
+      let filterPriceArr: string[] = [];
+      if (Array.isArray(req.query.filterPrice)) {
+        filterPriceArr = req.query.filterPrice as string[];
+      } else if (typeof req.query.filterPrice === "string") {
+        filterPriceArr = req.query.filterPrice.split(",");
+      }
+      filterPriceLow = filterPriceArr[0] ? parseInt(filterPriceArr[0]) || 0 : 0;
+      filterPriceHigh = filterPriceArr[1]
+        ? parseInt(filterPriceArr[1]) || 0
+        : 0;
+    }
+
+    let filterDepositLow = 0;
+    let filterDepositHigh = 0;
+    if (req.query.filterDeposit) {
+      let filterDepositArr: string[] = [];
+      if (Array.isArray(req.query.filterDeposit)) {
+        filterDepositArr = req.query.filterDeposit as string[];
+      } else if (typeof req.query.filterDeposit === "string") {
+        filterDepositArr = req.query.filterDeposit.split(",");
+      }
+      filterDepositLow = filterDepositArr[0]
+        ? parseInt(filterDepositArr[0]) || 0
+        : 0;
+      filterDepositHigh = filterDepositArr[1]
+        ? parseInt(filterDepositArr[1]) || 0
+        : 0;
+    }
+
     const filterCondition = (req.query.filterCondition as string) || "";
     const filterCategory = (req.query.filterCategory as string) || "";
     const filterDeliveryType = (req.query.filterDeliveryType as string) || "";
@@ -605,12 +636,24 @@ export const getAllItems = async (
       ];
     }
 
-    if (filterPrice > 0) {
-      query.price = { $gte: filterPrice };
+    if (filterPriceLow > 0 || filterPriceHigh > 0) {
+      query.price = {};
+      if (filterPriceLow > 0) {
+        query.price.$gte = filterPriceLow;
+      }
+      if (filterPriceHigh > 0) {
+        query.price.$lte = filterPriceHigh;
+      }
     }
 
-    if (filterDeposit > 0) {
-      query.depositAmount = { $gte: filterDeposit };
+    if (filterDepositLow > 0 || filterDepositHigh > 0) {
+      query.depositAmount = {};
+      if (filterDepositLow > 0) {
+        query.depositAmount.$gte = filterDepositLow;
+      }
+      if (filterDepositHigh > 0) {
+        query.depositAmount.$lte = filterDepositHigh;
+      }
     }
 
     if (filterCondition) {

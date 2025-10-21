@@ -12,6 +12,7 @@ import ItemCard from "../components/core/Items/ItemCard";
 import { setHasMore, setPage } from "../slices/itemSlice";
 import { IAllItem } from "@kenil_vora/neighborly";
 import { Helmet } from "react-helmet-async";
+import Slider from "@mui/material/Slider";
 
 const countryData = data as Country[];
 
@@ -49,8 +50,8 @@ const ViewAllItems = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [filters, setFilters] = useState({
-    price: 0,
-    deposit: 0,
+    price: [0, 50000],
+    deposit: [0, 50000],
     category: "",
     country: "",
     state: "",
@@ -83,6 +84,11 @@ const ViewAllItems = () => {
   const loader = useRef<HTMLDivElement | null>(null);
 
   const [allItems, setAllItems] = useState<IAllItem[]>([]);
+
+  useEffect(() => {
+    dispatch(setHasMore(true));
+    dispatch(setPage(1));
+  }, []);
 
   // Fetching states based on selected country
   useEffect(() => {
@@ -205,7 +211,6 @@ const ViewAllItems = () => {
       dispatch(setPage(1));
       dispatch(setHasMore(true));
       await new Promise((resolve) => setTimeout(resolve, 1));
-      console.log("Fetching items on filter change");
       getItems();
     }
 
@@ -341,8 +346,8 @@ const ViewAllItems = () => {
     e.stopPropagation();
 
     setFilters({
-      price: 0,
-      deposit: 0,
+      price: [0, 50000],
+      deposit: [0, 50000],
       category: "",
       country: "",
       state: "",
@@ -355,8 +360,8 @@ const ViewAllItems = () => {
     });
 
     setAppliedFilters({
-      price: 0,
-      deposit: 0,
+      price: [0, 50000],
+      deposit: [0, 50000],
       category: "",
       country: "",
       state: "",
@@ -389,48 +394,50 @@ const ViewAllItems = () => {
         />
       </Helmet>
       <div
-        className="w-[89%] relative max-w-[1480px] mx-auto my-8 flex gap-9 max-[670px]:flex-col 
+        className="w-[89%] relative max-w-[1480px] mx-auto my-8 mt-6 flex gap-9 max-[670px]:flex-col 
         "
       >
-        <div className="min-[1130px]:w-[40%] min-[670px]:w-[70%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1130px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-5">
-          <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-5">
+        <div className="min-[1130px]:w-[40%] min-[670px]:w-[70%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1130px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-2 min-[670px]:sticky min-[670px]:top-24">
+          <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-3">
             <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
             <div>
-              <h1 className="">Price Range: Above ₹ {price}</h1>
-              <input
-                type="range"
-                className="w-full"
-                min={0}
-                max={10000}
+              <h2 className="font-semibold">Price Range</h2>
+              <Slider
+                getAriaLabel={() => "Price Range"}
                 value={price}
-                onChange={(e) =>
+                onChange={(_event, newValue) => {
                   setFilters((prev) => ({
                     ...prev,
-                    price: parseInt(e.target.value),
-                  }))
-                }
+                    price: newValue as number[],
+                  }));
+                }}
+                valueLabelDisplay="auto"
+                getAriaValueText={(value) => `₹ ${value}`}
+                min={0}
+                max={50000}
               />
             </div>
 
             <div>
-              <h1 className="">Deposit Range: Above ₹ {deposit}</h1>
-              <input
-                type="range"
-                className="w-full"
-                min={0}
-                max={10000}
+              <h2 className="font-semibold">Deposit Range</h2>
+              <Slider
+                getAriaLabel={() => "Deposit Range"}
                 value={deposit}
-                onChange={(e) =>
+                onChange={(_event, newValue) => {
                   setFilters((prev) => ({
                     ...prev,
-                    deposit: parseInt(e.target.value),
-                  }))
-                }
+                    deposit: newValue as number[],
+                  }));
+                }}
+                valueLabelDisplay="auto"
+                getAriaValueText={(value) => `₹ ${value}`}
+                min={0}
+                max={50000}
               />
             </div>
           </div>
-          <div className="flex flex-wrap gap-4 w-full">
+          <div className="flex flex-wrap gap-2 w-full">
             <CustomDropdown
               data={categories}
               label="Category"
@@ -505,7 +512,15 @@ const ViewAllItems = () => {
               )}
             </div>
 
-            <div className="flex gap-2 items-center">
+            <button
+              className="flex gap-2 items-center"
+              onClick={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  isAvailable: !prev.isAvailable,
+                }))
+              }
+            >
               <div className="font-semibold text-lg">
                 Show only Available Items
               </div>
@@ -516,18 +531,18 @@ const ViewAllItems = () => {
                   className="checkbox"
                   id="checkbox"
                   checked={isAvailable}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      isAvailable: e.target.checked,
-                    }))
-                  }
+                  // onChange={(e) =>
+                  //   setFilters((prev) => ({
+                  //     ...prev,
+                  //     isAvailable: e.target.checked,
+                  //   }))
+                  // }
                 />
                 <label className="switch" htmlFor="checkbox">
                   <span className="isAvailable"></span>
                 </label>
               </div>
-            </div>
+            </button>
 
             <CustomDropdown
               data={sortingOptions}

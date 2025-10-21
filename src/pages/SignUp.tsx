@@ -175,9 +175,7 @@ const SignUp = () => {
     data.country = addressData.country;
     data.otp = 0;
     data.role = "User";
-
-    console.log("Data: ", data);
-
+    
     dispatch(setSignUpData(data));
     dispatch(setOtpType("signup"));
     dispatch(sendOtp(data.email, navigate, "signup") as any);

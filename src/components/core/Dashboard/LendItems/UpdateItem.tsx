@@ -204,9 +204,6 @@ const UpdateItem = () => {
         formData.append("images", addImages);
       }
 
-      console.log(deleteImages);
-      console.log(addImages);
-
       const response = await updateItem(formData, itemData?._id.toString()!);
 
       if (response) {

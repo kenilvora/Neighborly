@@ -13,7 +13,6 @@ const Transactions = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        console.log("Fetching Transactions");
         const transactions = await getAllTransactions();
         setTransactionData(transactions);
       } catch (error) {

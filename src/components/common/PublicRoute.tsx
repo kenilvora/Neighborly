@@ -40,7 +40,6 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
         }
       } catch (error) {
         setIsAuthenticated(false);
-        console.log(error);
       }
     };
 
