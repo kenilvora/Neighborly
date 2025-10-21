@@ -12,6 +12,12 @@ router.get("/getAll", auth, isUser, getAllTransactions);
 
 router.post("/addMoney", auth, isUser, addMoney);
 
-router.post("/verifyPayment", verifyPayment);
+router.post(
+  "/verifyPayment",
+  express.raw({
+    type: "application/json",
+  }),
+  verifyPayment
+);
 
 export default router;

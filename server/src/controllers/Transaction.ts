@@ -35,7 +35,7 @@ export const getAllTransactions = async (
             select: "name price depositAmount",
           },
         ],
-      })
+      });
 
     res.status(200).json({
       success: true,
@@ -134,9 +134,19 @@ export const verifyPayment = async (
   session.startTransaction();
   try {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!secret) {
+      throw new Error("Razorpay webhook secret not configured");
+    }
 
-    const shasum = crypto.createHmac("sha256", secret as string);
-    shasum.update(JSON.stringify(req.body));
+    const rawBody = (req as any).body;
+    const bodyStr =
+      rawBody instanceof Buffer
+        ? rawBody.toString("utf8")
+        : JSON.stringify(rawBody);
+
+    // Compute signature
+    const shasum = crypto.createHmac("sha256", secret);
+    shasum.update(bodyStr);
     const digest = shasum.digest("hex");
 
     const userId = req.body.payload.payment.entity.notes.user;

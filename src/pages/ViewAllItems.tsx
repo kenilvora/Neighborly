@@ -394,11 +394,11 @@ const ViewAllItems = () => {
         />
       </Helmet>
       <div
-        className="w-[89%] relative max-w-[1480px] mx-auto my-8 mt-6 flex gap-9 max-[670px]:flex-col 
+        className="w-[95%] relative max-w-[1480px] mx-auto my-8 mb-[15px] flex gap-9 max-[670px]:flex-col 
         "
       >
-        <div className="min-[1130px]:w-[40%] min-[670px]:w-[70%] max-[649px]:w-full min-[670px]:max-w-[570px] min-[1130px]:max-w-[400px] min-[1515px]:max-w-[290px] h-full flex flex-col gap-2 min-[670px]:sticky min-[670px]:top-24">
-          <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-3">
+        <div className="min-[1130px]:w-[40%] min-[670px]:w-[95%] max-[649px]:w-full min-[670px]:max-w-[500px] min-[1130px]:max-w-[400px] min-[1515px]:max-w-[320px] h-full flex flex-col gap-5 min-[670px]:overflow-y-auto min-[670px]:max-h-[calc(100vh-120px)] min-[670px]:sticky min-[670px]:top-[6.5rem] overflow-x-hidden">
+          <div className="h-fit p-5 shadow-xl border border-neutral-200 rounded-lg flex flex-col gap-4">
             <h1 className="text-2xl font-semibold">Advanced Filters</h1>
 
             <div>
@@ -437,7 +437,7 @@ const ViewAllItems = () => {
               />
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 w-full">
+          <div className="flex flex-wrap gap-4 w-full">
             <CustomDropdown
               data={categories}
               label="Category"
