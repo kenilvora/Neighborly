@@ -1,3 +1,3 @@
 User-agent: *
 Disallow:
-Sitemap: https://neighborly.kenilvora.tech/sitemap.xml
+Sitemap: https://neighborly.kenilvora.dev/sitemap.xml
